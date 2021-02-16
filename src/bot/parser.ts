@@ -17,7 +17,7 @@ export const Parser: {
   parse(message) {
     if (!this.accept(message)) return;
 
-    const args = this.split(message.content.slice(1));
+    const args = this.split(message.content);
     Dispatcher.submit(message, args[0], args.slice(1));
   },
   reparse(_, message) {

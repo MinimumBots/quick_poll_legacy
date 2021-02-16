@@ -10,21 +10,15 @@ export const Dispatcher: {
   readonly responders: Collection<string, Responder>;
   readonly sessions  : Collection<Snowflake, Session>;
 
-  addResponder(prefix: string, responder: Responder): Collection<string, Responder>;
-
   submit(request: Message, prefix: string, args: CommandArgs): void;
   accept(request: Message): boolean;
-  execute(request: Message, responder: Responder, args: CommandArgs): void;
+  respond(request: Message, responder: Responder, args: CommandArgs): void;
 
   dispatch(request: Message, response: Message): void;
   free(requestID: Snowflake): void;
 } = {
   responders: new Collection,
   sessions  : new Collection,
-
-  addResponder(prefix, responder) {
-    return this.responders.set(prefix, responder);
-  },
 
   submit(request, prefix, args) {
     if (!this.accept(request)) {
@@ -33,7 +27,7 @@ export const Dispatcher: {
     }
 
     const responder = this.responders.get(prefix);
-    if (responder) this.execute(request, responder, args);
+    if (responder) this.respond(request, responder, args);
   },
   accept(request) {
     const user  = request.author;
@@ -48,7 +42,7 @@ export const Dispatcher: {
     }
     else return !!UsersRateLimit.addition(user.id);
   },
-  execute(request, responder, args) {
+  respond(request, responder, args) {
     responder(request, args)
       .then(response => this.dispatch(request, response))
       .catch(console.error);

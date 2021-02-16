@@ -26,3 +26,7 @@ export const RATE_RESET_SCHEDULE = '0 * * * *';
 export const USER_RATE_LIMIT    = 30;
 export const BOT_RATE_LIMIT     = 20;
 export const WEBHOOK_RATE_LIMIT = 20;
+
+export const POLL_MAX_OPTIONS = 20;
+export const POLL_QUESTION_MAX = 200;
+export const POLL_OPTION_MAX   = 80;
