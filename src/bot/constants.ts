@@ -32,9 +32,8 @@ export const PRESENCE_UPDATE_INTERVAL = 60 * 1000;
 export const COMMAND_EDITABLE_TIME = 3 * 60 * 1000;
 
 export const RATE_RESET_SCHEDULE = '0 * * * *';
-export const USER_RATE_LIMIT    = 60;
-export const BOT_RATE_LIMIT     = 30;
-export const WEBHOOK_RATE_LIMIT = 30;
+export const USER_RATE_LIMIT = 60;
+export const BOT_RATE_LIMIT  = 30;
 
 export const POLL_MAX_OPTIONS = 20;
 export const POLL_QUESTION_MAX = 200;

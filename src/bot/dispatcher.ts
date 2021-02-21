@@ -1,10 +1,11 @@
 import { Collection, Message, Snowflake } from 'discord.js';
 
 import {
-  UsersRateLimit,
-  BotsRateLimit,
-  WebhooksRateLimit
-} from './ratelimits';
+  RATE_RESET_SCHEDULE,
+  USER_RATE_LIMIT,
+  BOT_RATE_LIMIT
+} from './constants';
+import RateLimits from './ratelimits';
 import Session from './session';
 import { removeMessageCache } from './utils';
 
@@ -13,6 +14,9 @@ export type Responder
 export type CommandArgs = string[];
 
 export const Dispatcher: {
+  readonly userRateLimits: RateLimits;
+  readonly botRateLimits : RateLimits;
+
   readonly responders: Collection<string, Responder>;
   readonly sessions  : Collection<Snowflake, Session>;
 
@@ -23,6 +27,9 @@ export const Dispatcher: {
   dispatch(request: Message, response: Message, session?: Session): void;
   free(requestID: Snowflake): void;
 } = {
+  userRateLimits: new RateLimits(USER_RATE_LIMIT, RATE_RESET_SCHEDULE),
+  botRateLimits : new RateLimits(BOT_RATE_LIMIT,  RATE_RESET_SCHEDULE),
+
   responders: new Collection,
   sessions  : new Collection,
 
@@ -39,18 +46,10 @@ export const Dispatcher: {
     const user  = request.author;
     const guild = request.guild;
 
-    if (user.bot) {
-      if (guild) {
-        if (request.webhookID)
-          return WebhooksRateLimit.addition(guild.id);
-        else
-          return BotsRateLimit.addition(user.id, guild.id);
-      }
-      else
-        return false;
-    }
+    if (user.bot)
+      return guild ? this.botRateLimits.addition(guild.id) : false;
     else
-      return UsersRateLimit.addition(user.id);
+      return this.userRateLimits.addition(user.id);
   },
   respond(request, responder, args) {
     const session = this.sessions.get(request.id);
