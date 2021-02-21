@@ -3,6 +3,7 @@ import { Message, PartialMessage } from 'discord.js';
 import { bot } from './bot';
 import { Dispatcher } from './dispatcher';
 import { COMMAND_PREFIX, COMMAND_EDITABLE_TIME } from './constants';
+import { removeMessageCache } from './utils';
 
 export const Parser: {
   quotePairs: { [quote: string]: string };
@@ -15,7 +16,10 @@ export const Parser: {
   quotePairs: { '"': '"', "'": "'", '”': '”', '“': '”', '„': '”', "‘": "’", "‚": "’" },
 
   parse(message) {
-    if (!this.accept(message)) return;
+    if (!this.accept(message)) {
+      removeMessageCache(message);
+      return;
+    }
 
     const args = this.split(message.content);
     Dispatcher.submit(message, args[0], args.slice(1));

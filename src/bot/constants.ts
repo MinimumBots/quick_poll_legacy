@@ -1,4 +1,8 @@
-import { Intents } from 'discord.js';
+import { Intents, DMChannel, NewsChannel, TextChannel } from 'discord.js';
+import { LocaleTypes } from './responses/locales';
+
+export const BOT_OWNER_IDS: string[]
+  = process.env['npm_package_config_botOwnerIDs']?.split(',') ?? [];
 
 export const COMMAND_PREFIX
   = process.env['npm_package_config_commandPrefix'] ?? '/';
@@ -19,13 +23,18 @@ export const BOT_INTENTS = 0
   | Intents.FLAGS.DIRECT_MESSAGES
   | Intents.FLAGS.DIRECT_MESSAGE_REACTIONS;
 
+export const DEFAULT_LOCALE: LocaleTypes = 'ja';
+
+export type USABLE_CHANNEL_TYPES = DMChannel | TextChannel | NewsChannel;
+export type USABLE_GUILD_CHANNEL_TYPES = TextChannel | NewsChannel;
+
 export const PRESENCE_UPDATE_INTERVAL = 60 * 1000;
 export const COMMAND_EDITABLE_TIME = 3 * 60 * 1000;
 
 export const RATE_RESET_SCHEDULE = '0 * * * *';
-export const USER_RATE_LIMIT    = 30;
-export const BOT_RATE_LIMIT     = 20;
-export const WEBHOOK_RATE_LIMIT = 20;
+export const USER_RATE_LIMIT    = 60;
+export const BOT_RATE_LIMIT     = 30;
+export const WEBHOOK_RATE_LIMIT = 30;
 
 export const POLL_MAX_OPTIONS = 20;
 export const POLL_QUESTION_MAX = 200;

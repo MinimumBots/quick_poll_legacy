@@ -10,13 +10,13 @@ export const bot = new Client({
   presence: { status: 'dnd', activity: { type: 'COMPETING', name: '再接続' } },
 });
 
-const fetchGuildCount = async (): Promise<string> => {
+async function fetchGuildCount(): Promise<string> {
   const counts = await bot.shard?.fetchClientValues('guilds.cache.size');
   const count = counts?.reduce((a, b) => a + b, 0);
   return typeof count === 'number' && count > 0 ? `${count}` : 'いくつかの';
 }
 
-const updatePresence = async (count: number): Promise<void> => {
+async function updatePresence(count: number): Promise<void> {
   let type: ActivityType, name: string;
 
   switch (count % 2) {

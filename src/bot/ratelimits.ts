@@ -14,7 +14,7 @@ export const UsersRateLimit: {
   readonly limit: number;
   counts: { [userID: string]: number };
   remaining(userID: Snowflake): number;
-  addition(userID: Snowflake): number;
+  addition(userID: Snowflake): boolean;
   reset(userID: Snowflake): void;
   allReset(): void;
 } = {
@@ -26,7 +26,7 @@ export const UsersRateLimit: {
   addition(userID) {
     this.counts[userID] ??= 0;
     this.counts[userID]++;
-    return this.remaining(userID);
+    return !!this.remaining(userID);
   },
   reset(userID) {
     delete this.counts[userID];
@@ -46,7 +46,7 @@ export const BotsRateLimit: {
     }
   }
   remaining(botID: Snowflake, guildID: Snowflake): number;
-  addition(botID: Snowflake, guildID: Snowflake): number;
+  addition(botID: Snowflake, guildID: Snowflake): boolean;
   reset(botID: Snowflake, guildID: Snowflake): void;
   allReset(): void;
 } = {
@@ -56,9 +56,10 @@ export const BotsRateLimit: {
     return this.limit - (this.counts[botID][guildID] ?? 0);
   },
   addition(botID, guildID) {
+    this.counts[botID] ??= {};
     this.counts[botID][guildID] ??= 0;
     this.counts[botID][guildID]++;
-    return this.remaining(botID, guildID);
+    return !!this.remaining(botID, guildID);
   },
   reset(botID, guildID) {
     delete this.counts[botID][guildID];
@@ -74,7 +75,7 @@ export const WebhooksRateLimit: {
   readonly limit: number;
   counts: { [guildID: string]: number };
   remaining(guildID: Snowflake): number;
-  addition(guild: Snowflake): number;
+  addition(guild: Snowflake): boolean;
   reset(guildID: Snowflake): void;
   allReset(): void;
 } = {
@@ -86,7 +87,7 @@ export const WebhooksRateLimit: {
   addition(guildID) {
     this.counts[guildID] ??= 0;
     this.counts[guildID]++;
-    return this.remaining(guildID);
+    return !!this.remaining(guildID);
   },
   reset(guildID) {
     delete this.counts[guildID];

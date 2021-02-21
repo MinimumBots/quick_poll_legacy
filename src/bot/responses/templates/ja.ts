@@ -102,62 +102,64 @@ export const templates: TemplatesStructure = {
     })
   },
   errors: {
-    common: {
-      unknown: new Template({
-        title: '⚠️ 予期しない原因でコマンドの実行に失敗しました',
-        description: '開発チームにエラー情報を送信しました\n\n'
-          + `${supportServerLink}`
-      }),
-      lackPermission: new Template({
-        title: '⚠️ コマンドに必要な権限が不足しています',
-        description: 'BOTに以下の権限が付与されているか確認してください\n'
-          + '{{ LACK_PERMISSION_NAMES }}\n\n'
-          + supportServerLink
-      })
-    },
-    poll: {
-      tooManyOptions: new Template({
-        title: `⚠️ 選択肢が ${POLL_MAX_OPTIONS} 個を超えています`,
-        description: supportServerLink
-      }),
-      tooLongQuestion: new Template({
-        title: `⚠️ 質問文が ${POLL_QUESTION_MAX} 文字を超えています`,
-        description: supportServerLink
-      }),
-      tooLongOption: new Template({
-        title: `⚠️ 選択肢が ${POLL_OPTION_MAX} 文字を超えています`,
-        description: supportServerLink
-      }),
-      duplicateEmojis: new Template({
-        title: '⚠️ 絵文字が重複しています',
-        description: supportServerLink
-      }),
-      unknownEmoji: new Template({
-        title: '⚠️ 使用できない絵文字が含まれています',
-        description: '投票に外部サーバーの絵文字を使用したい場合は、そのサーバーへBOTを導入する必要があります。\n\n'
-          + supportServerLink
-      }),
-      unavailableEmoji: new Template({
-        title: '⚠️ 使用できない絵文字が含まれています',
-        description: 'BOTに与えられたロールでは使用できない絵文字が含まれています。\n\n'
-          + supportServerLink
-      })
-    },
-    expoll: {
-      unavailableExclusive: new Template({
-        title: `⚠️ DM内では${COMMAND_PREFIX}expollコマンドを使用できません`,
-        description: supportServerLink
-      })
-    },
-    sumpoll: {
-      notExistPoll: new Template({
-        title: '⚠️ 指定された投票が見つかりません',
-        description: supportServerLink
-      }),
-      notPolled: new Template({
-        title: '⚠️ まだ誰も投票していません',
-        description: supportServerLink
-      })
-    }
+    unknown: new Template({
+      title: '⚠️ 予期しない原因でコマンドの実行に失敗しました',
+      description: '開発チームにエラー情報を送信しました\n\n'
+        + `${supportServerLink}`
+    }),
+    lackPermission: new Template({
+      title: '⚠️ コマンドに必要な権限が不足しています',
+      description: 'BOTに以下の権限が付与されているか確認してください\n'
+        + '{{ LACK_PERMISSION_NAMES }}\n\n'
+        + supportServerLink
+    }),
+    tooManyOptions: new Template({
+      title: `⚠️ 選択肢が ${POLL_MAX_OPTIONS} 個を超えています`,
+      description: supportServerLink
+    }),
+    tooLongQuestion: new Template({
+      title: `⚠️ 質問文が ${POLL_QUESTION_MAX} 文字を超えています`,
+      description: supportServerLink
+    }),
+    tooLongOption: new Template({
+      title: `⚠️ 選択肢が ${POLL_OPTION_MAX} 文字を超えています`,
+      description: supportServerLink
+    }),
+    duplicateEmojis: new Template({
+      title: '⚠️ 絵文字が重複しています',
+      description: supportServerLink
+    }),
+    unknownEmoji: new Template({
+      title: '⚠️ 使用できない絵文字が含まれています',
+      description: '投票に外部サーバーの絵文字を使用したい場合は、そのサーバーへBOTを導入する必要があります。\n\n'
+        + supportServerLink
+    }),
+    unusableEmoji: new Template({
+      title: '⚠️ 使用できない絵文字が含まれています',
+      description: 'BOTに与えられたロールでは使用できない絵文字が含まれています。\n\n'
+        + supportServerLink
+    }),
+    unavailableExclusive: new Template({
+      title: `⚠️ DM内では${COMMAND_PREFIX}expollコマンドを使用できません`,
+      description: supportServerLink
+    }),
+    notExistPoll: new Template({
+      title: '⚠️ 指定された投票が見つかりません',
+      description: supportServerLink
+    }),
+    notPolled: new Template({
+      title: '⚠️ まだ誰も投票していません',
+      description: supportServerLink
+    })
+  },
+  reports: {
+    error: new Template({
+      title: '⚠️ エラーレポート',
+      fields: [{ name: '実行コマンド', value: '{{ EXECUTED_COMMAND }}' }],
+      field: {
+        name: 'バックトレース{{ STACK_TRACE_NUMBER }}',
+        value: '```{{ STACK_TRACE_TEXT }}```'
+      }
+    })
   }
 };

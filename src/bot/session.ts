@@ -28,10 +28,6 @@ export default class Session {
 
   private readonly cancelEmoji = '↩️';
 
-  update(response: Message): void {
-    this.response = response;
-  }
-
   cancel(): void {
     if (this.timeout) this.bot.clearTimeout(this.timeout);
 

@@ -26,6 +26,7 @@
     "node-cron": "^2.0.3"
   },
   "config": {
+    "botOwnerIDs": "622262101938798652",
     "commandPrefix": "/",
     "botDocumentURL": "https://grapecolor.github.io/quick_poll/",
     "supportServerURL": "https://discord.gg/STzZ6GK",

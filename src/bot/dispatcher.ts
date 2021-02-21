@@ -1,9 +1,15 @@
 import { Collection, Message, Snowflake } from 'discord.js';
 
-import { UsersRateLimit, BotsRateLimit, WebhooksRateLimit } from './ratelimits';
+import {
+  UsersRateLimit,
+  BotsRateLimit,
+  WebhooksRateLimit
+} from './ratelimits';
 import Session from './session';
+import { removeMessageCache } from './utils';
 
-export type Responder = (request: Message, args: string[]) => Promise<Message>;
+export type Responder
+  = (request: Message, args: string[], response?: Message) => Promise<Message>;
 export type CommandArgs = string[];
 
 export const Dispatcher: {
@@ -14,7 +20,7 @@ export const Dispatcher: {
   accept(request: Message): boolean;
   respond(request: Message, responder: Responder, args: CommandArgs): void;
 
-  dispatch(request: Message, response: Message): void;
+  dispatch(request: Message, response: Message, session?: Session): void;
   free(requestID: Snowflake): void;
 } = {
   responders: new Collection,
@@ -22,7 +28,7 @@ export const Dispatcher: {
 
   submit(request, prefix, args) {
     if (!this.accept(request)) {
-      request.channel.messages.cache.delete(request.id);
+      removeMessageCache(request);
       return;
     }
 
@@ -35,26 +41,31 @@ export const Dispatcher: {
 
     if (user.bot) {
       if (guild) {
-        if (request.webhookID) return !!WebhooksRateLimit.addition(guild.id);
-        else return !!BotsRateLimit.addition(user.id, guild.id);
+        if (request.webhookID)
+          return WebhooksRateLimit.addition(guild.id);
+        else
+          return BotsRateLimit.addition(user.id, guild.id);
       }
-      else return false;
+      else
+        return false;
     }
-    else return !!UsersRateLimit.addition(user.id);
+    else
+      return UsersRateLimit.addition(user.id);
   },
   respond(request, responder, args) {
-    responder(request, args)
-      .then(response => this.dispatch(request, response))
+    const session = this.sessions.get(request.id);
+    const response = session?.response;
+
+    responder(request, args, response)
+      .then(response => this.dispatch(request, response, session))
       .catch(console.error);
   },
 
-  dispatch(request, response) {
-    let session = this.sessions.get(request.id);
-
-    if (session) session.update(response);
-    else session = new Session(request, response, this.free);
-
-    this.sessions.set(request.id, session);
+  dispatch(request, response, session) {
+    if (session) this.sessions.set(
+      request.id,
+      new Session(request, response, this.free)
+    );
   },
   free(requestID) {
     this.sessions.delete(requestID);
