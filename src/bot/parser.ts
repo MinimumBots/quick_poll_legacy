@@ -5,14 +5,37 @@ import { Dispatcher } from './dispatcher';
 import { COMMAND_PREFIX, COMMAND_EDITABLE_TIME } from './constants';
 import { removeMessageCache } from './utils';
 
+class ParsingData {
+  readonly quotePairs: { [quote: string]: string }
+    = { '"': '"', "'": "'", '”': '”', '“': '”', '„': '”', "‘": "’", "‚": "’" };
+
+  args: string[] = [];
+  arg: string = '';
+  quote: string = '';
+  escape: boolean = false;
+
+  addArg(force: boolean = false): string[] {
+    if (this.arg || force) this.args.push(this.arg);
+    this.arg = '';
+    return this.args;
+  }
+}
+
 export const Parser: {
+  parseArgsLimit: number;
   quotePairs: { [quote: string]: string };
 
   parse(message: Message): void;
   reparse(_: Message | PartialMessage, message: Message | PartialMessage): void;
   accept(message: Message): boolean;
+
   split(content: string): string[];
+  checkArgsLength(data: ParsingData): boolean;
+  parseQuote(char: string, data: ParsingData): boolean;
+  parseSpace(char: string, data: ParsingData): boolean;
+  parseEscape(char: string, data: ParsingData): boolean;
 } = {
+  parseArgsLimit: 60,
   quotePairs: { '"': '"', "'": "'", '”': '”', '“': '”', '„': '”', "‘": "’", "‚": "’" },
 
   parse(message) {
@@ -35,41 +58,44 @@ export const Parser: {
     return message.type !== 'DEFAULT'
       || message.content.startsWith(COMMAND_PREFIX);
   },
+
   split(content) {
-    const args: string[] = [];
-    let arg = '';
-    let quote = '';
-    let escape = false;
+    const data = new ParsingData();
 
-    for (const char of [...content]) {
-      if (!escape && (!quote && this.quotePairs[char]) || char === quote) {
-        if (char === quote) {
-          args.push(arg);
-          quote = '';
-        }
-        else {
-          if (arg) args.push(arg);
-          quote = this.quotePairs[char];
-        }
-
-        arg = '';
-        continue;
-      }
-
-      if (!escape && !quote && /\s/.test(char)) {
-        if (arg) args.push(arg);
-        arg = '';
-        continue;
-      }
-
-      escape = !escape && char === '\\';
-      if (escape) continue;
-
-      arg += char;
+    for(const char of [...content]) {
+      if (!this.checkArgsLength(data)) break;
+      if (this.parseQuote (char, data)) continue;
+      if (this.parseSpace (char, data)) continue;
+      if (this.parseEscape(char, data)) continue;
+      data.arg += char;
     }
 
-    if (arg) args.push(arg);
-    return args;
+    return data.addArg();
+  },
+  checkArgsLength(data) {
+    if (data.args.length <= this.parseArgsLimit) return true;
+
+    data.args = [];
+    return false;
+  },
+  parseQuote(char, data) {
+    const ended = char === data.quote;
+
+    if (data.escape || (data.quote || !data.quotePairs[char]) && !ended)
+      return false;
+
+    data.addArg(ended);
+    data.quote = ended ? '' : data.quotePairs[char];
+    return true;
+  },
+  parseSpace(char, data) {
+    if (data.escape || data.quote || !/\s/.test(char)) return false;
+
+    data.addArg();
+    return true;
+  },
+  parseEscape(char, data) {
+    return data.escape = !data.escape && char === '\\';
   }
 };
 
