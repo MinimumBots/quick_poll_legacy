@@ -31,10 +31,9 @@ export type USABLE_GUILD_CHANNEL_TYPES = TextChannel | NewsChannel;
 export const PRESENCE_UPDATE_INTERVAL = 60 * 1000;
 export const COMMAND_EDITABLE_TIME = 3 * 60 * 1000;
 
-export const RATE_RESET_SCHEDULE = '0 * * * *';
 export const USER_RATE_LIMIT = 60;
 export const BOT_RATE_LIMIT  = 30;
 
-export const POLL_MAX_OPTIONS = 20;
-export const POLL_QUESTION_MAX = 200;
-export const POLL_OPTION_MAX   = 80;
+export const COMMAND_MAX_OPTIONS  = 20;
+export const COMMAND_QUESTION_MAX = 200;
+export const COMMAND_OPTION_MAX   = 80;

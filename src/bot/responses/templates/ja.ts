@@ -4,9 +4,9 @@ import {
   BOT_DOCUMENT_URL,
   SUPPORT_SERVER_URL,
   DONATION_SERVICE_URL,
-  POLL_MAX_OPTIONS,
-  POLL_QUESTION_MAX,
-  POLL_OPTION_MAX
+  COMMAND_MAX_OPTIONS,
+  COMMAND_QUESTION_MAX,
+  COMMAND_OPTION_MAX
 } from '../../constants';
 
 const supportServerLink = `[ご質問・不具合報告](${SUPPORT_SERVER_URL})`;
@@ -43,7 +43,7 @@ export const templates: TemplatesStructure = {
         {
           name: '🌟 ヒント',
           value: '```\n'
-            + '● 投票の選択肢は最大20個まで\n'
+            + `● 投票の選択肢は最大${COMMAND_MAX_OPTIONS}個まで\n`
             + '● 文・絵文字の区切りは半角スペースか改行\n'
             + '● 半角スペースを含めたい場合 "" で文を囲む\n'
             + '● 画像を添付すると画像付きの投票を作成\n'
@@ -51,53 +51,53 @@ export const templates: TemplatesStructure = {
             + '```'
         },
         {
-          name: '↩️ でコマンド実行をキャンセル(3分以内)',
+          name: '↩️ でコマンドをキャンセル(3分以内)',
           value: `💟 [BOT開発・運用資金の寄付](${DONATION_SERVICE_URL})\n`
             + `⚠️ ${supportServerLink}\n`
-            + '➡️ **[サーバーへ追加]({{ BOT_INVITE_URL }})**'
+            + '➡️ **[サーバーへ追加]({{ botInviteURL }})**'
         }
       ]
     }),
     poll: new Template({
       author: {
-        iconURL: '{{ POLL_AUTHOR_ICON_URL }}',
-        name: '{{ POLL_AUTHOR_NAME }}'
+        iconURL: '{{ pollAuthorIconURL }}',
+        name: '{{ pollAuthorName }}'
       },
-      title: '{{ POLL_QUESTION }}',
-      description: '{{ POLL_CHOICES }}\n\n'
-        + `[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll {{ POLL_MESSAGE_ID }}\``,
+      title: '{{ pollQuestion }}',
+      description: '{{ pollChoices }}\n\n'
+        + `[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll {{ pollMessageID }}\``,
       footer: { text: '選択肢にリアクションで投票できます' }
     }),
     expoll: new Template({
       author: {
-        iconURL: '{{ POLL_AUTHOR_ICON_URL }}',
-        name: '{{ POLL_AUTHOR_NAME }}'
+        iconURL: '{{ pollAuthorIconURL }}',
+        name: '{{ pollAuthorName }}'
       },
-      title: '{{ POLL_QUESTION }}',
-      description: '{{ POLL_CHOICES }}\n\n'
-        + `[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll {{ POLL_MESSAGE_ID }}\``,
+      title: '{{ pollQuestion }}',
+      description: '{{ pollChoices }}\n\n'
+        + `[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll {{ pollMessageID }}\``,
       footer: { text: '選択肢にリアクションで1人1票だけ投票できます' }
     }),
     graphpoll: new Template({
       author: {
-        iconURL: '{{ POLL_AUTHOR_ICON_URL }}',
-        name: '{{ POLL_AUTHOR_NAME }}'
+        iconURL: '{{ pollAuthorIconURL }}',
+        name: '{{ pollAuthorName }}'
       },
-      title: '{{ POLL_QUESTION }}',
+      title: '{{ pollQuestion }}',
       field: {
-        name: '{{ POLL_CHOICE }} ({{ POLL_CHOICE_COUNT }}票)',
-        value: '`{{ POLL_CHOICE_RATE }}%` {{ POLL_CHOICE_GRAPH }}'
+        name: '{{ pollChoice }} ({{ pollChoiceCount }}票)',
+        value: '`{{ pollChoiceRate }}%` {{ pollChoiceGraph }}'
       }
     }),
     listpoll: new Template({
       author: {
-        iconURL: '{{ POLL_AUTHOR_ICON_URL }}',
-        name: '{{ POLL_AUTHOR_NAME }}'
+        iconURL: '{{ pollAuthorIconURL }}',
+        name: '{{ pollAuthorName }}'
       },
-      title: '{{ POLL_QUESTION }}',
+      title: '{{ pollQuestion }}',
       field: {
-        name: '{{ POLL_CHOICE }} ({{ POLL_CHOICE_COUNT }}票|{{ POLL_CHOICE_RATE }}%)',
-        value: '{{ POLLED_USERS_LIST }}'
+        name: '{{ pollChoice }} ({{ pollChoiceCount }}票|{{ pollChoiceRate }}%)',
+        value: '{{ polledUsersList }}'
       }
     })
   },
@@ -110,19 +110,19 @@ export const templates: TemplatesStructure = {
     lackPermission: new Template({
       title: '⚠️ コマンドに必要な権限が不足しています',
       description: 'BOTに以下の権限が付与されているか確認してください\n'
-        + '{{ LACK_PERMISSION_NAMES }}\n\n'
+        + '{{ lackPermissionNames }}\n\n'
         + supportServerLink
     }),
     tooManyOptions: new Template({
-      title: `⚠️ 選択肢が ${POLL_MAX_OPTIONS} 個を超えています`,
+      title: `⚠️ 選択肢が ${COMMAND_MAX_OPTIONS} 個を超えています`,
       description: supportServerLink
     }),
     tooLongQuestion: new Template({
-      title: `⚠️ 質問文が ${POLL_QUESTION_MAX} 文字を超えています`,
+      title: `⚠️ 質問文が ${COMMAND_QUESTION_MAX} 文字を超えています`,
       description: supportServerLink
     }),
     tooLongOption: new Template({
-      title: `⚠️ 選択肢が ${POLL_OPTION_MAX} 文字を超えています`,
+      title: `⚠️ 選択肢が ${COMMAND_OPTION_MAX} 文字を超えています`,
       description: supportServerLink
     }),
     duplicateEmojis: new Template({
@@ -155,10 +155,10 @@ export const templates: TemplatesStructure = {
   reports: {
     error: new Template({
       title: '⚠️ エラーレポート',
-      fields: [{ name: '実行コマンド', value: '{{ EXECUTED_COMMAND }}' }],
+      fields: [{ name: '実行コマンド', value: '{{ executedCommand }}' }],
       field: {
-        name: 'バックトレース{{ STACK_TRACE_NUMBER }}',
-        value: '```{{ STACK_TRACE_TEXT }}```'
+        name: 'バックトレース{{ stackTraceNumber }}',
+        value: '```{{ stackTraceText }}```'
       }
     })
   }
