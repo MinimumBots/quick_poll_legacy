@@ -6,8 +6,8 @@ import {
   USABLE_CHANNEL_TYPES
 } from '../constants';
 import { Preference } from '../preference';
-import { Template, TemplateValues } from './template';
-import { LocaleTypes, LocaleTemplates } from './locales';
+import { Template, TemplateValues } from '../templates/template';
+import { LocaleTypes, LocaleTemplates } from '../templates/locale';
 import { bot } from '../bot';
 import { partingText } from '../utils';
 

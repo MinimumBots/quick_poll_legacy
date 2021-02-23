@@ -1,4 +1,4 @@
-import { templates as ja } from './templates/ja';
+import { templates as ja } from './locales/ja';
 
 export type LocaleTypes = 'ja';
 

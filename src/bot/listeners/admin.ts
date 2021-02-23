@@ -1,8 +1,8 @@
 import { DMChannel, Message } from 'discord.js';
 
-import { BOT_OWNER_IDS } from './constants';
-import { bot } from './bot';
-import { partingText } from './utils';
+import { BOT_OWNER_IDS } from '../constants';
+import { bot } from '../bot';
+import { partingText } from '../utils';
 
 function respondLog(channel: DMChannel, log: string): void {
   const logs = partingText(log, 2000, '```', '```');

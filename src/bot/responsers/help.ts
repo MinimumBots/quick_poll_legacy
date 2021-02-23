@@ -1,4 +1,4 @@
-import { ClientUser } from "discord.js";
+import { ClientUser } from 'discord.js';
 
 let mentionRegex: RegExp;
 

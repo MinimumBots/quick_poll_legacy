@@ -1,16 +1,16 @@
 import { Guild, Message, PartialMessage, User } from 'discord.js';
 
-import { bot } from './bot';
-import RateLimits from './ratelimits';
+import { bot } from '../bot';
 import Parsing from './parsing';
-import { Dispatcher } from './dispatcher';
-import { removeMessageCache } from './utils';
+import RateLimits from '../allotters/ratelimits';
+import { Dispatcher } from '../allotters/dispatcher';
+import { removeMessageCache } from '../utils';
 import {
   COMMAND_PREFIX,
   COMMAND_EDITABLE_TIME,
   USER_RATE_LIMIT,
   BOT_RATE_LIMIT,
-} from './constants';
+} from '../constants';
 
 export const Decrypter: {
   readonly userRateLimits: RateLimits;

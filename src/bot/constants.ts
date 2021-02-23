@@ -1,5 +1,5 @@
 import { Intents, DMChannel, NewsChannel, TextChannel } from 'discord.js';
-import { LocaleTypes } from './responses/locales';
+import { LocaleTypes } from './templates/locale';
 
 export const BOT_OWNER_IDS: string[]
   = process.env['npm_package_config_botOwnerIDs']?.split(',') ?? [];
