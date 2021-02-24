@@ -105,7 +105,7 @@ export const templates: TemplatesStructure = {
     unknown: new Template({
       title: '⚠️ 予期しない原因でコマンドの実行に失敗しました',
       description: '開発チームにエラー情報を送信しました\n\n'
-        + `${supportServerLink}`
+        + supportServerLink
     }),
     lackPermission: new Template({
       title: '⚠️ コマンドに必要な権限が不足しています',

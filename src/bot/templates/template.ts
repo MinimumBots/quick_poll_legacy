@@ -118,3 +118,11 @@ export interface TemplatesStructure {
   errors   : { [key: string]: Template };
   reports  : { [key: string]: Template };
 }
+
+import { templates as ja } from './locales/ja';
+
+export type Locale = 'ja';
+
+export const Templates = {
+  ja: ja
+}

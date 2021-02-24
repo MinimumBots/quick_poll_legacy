@@ -1,6 +1,6 @@
 export default class Parsing {
-  readonly maxChunks: number = 60;
-  readonly quotePairs: { [quote: string]: string } = {
+  private readonly maxChunks: number = 60;
+  private readonly quotePairs: { [quote: string]: string } = {
     '"': '"', "'": "'", '”': '”', '“': '”', '„': '”', "‘": "’", "‚": "’"
   };
 
@@ -9,15 +9,15 @@ export default class Parsing {
   private quote: string = '';
   private escape: boolean = false;
 
+  addCharacter(char: string): void {
+    this.chunk += char;
+  }
+
   overLength(): boolean {
     if (this.chunks.length <= this.maxChunks) return false;
 
     this.chunks = [];
     return true;
-  }
-
-  addCharacter(char: string): void {
-    this.chunk += char;
   }
 
   pushChunk(force: boolean = false): string[] {

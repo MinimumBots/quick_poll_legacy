@@ -1,16 +1,18 @@
 import { Guild, Message, PartialMessage, User } from 'discord.js';
 
-import { bot } from '../bot';
-import Parsing from './parsing';
-import RateLimits from '../allotters/ratelimits';
-import { Dispatcher } from '../allotters/dispatcher';
-import { removeMessageCache } from '../utils';
 import {
   COMMAND_PREFIX,
   COMMAND_EDITABLE_TIME,
   USER_RATE_LIMIT,
   BOT_RATE_LIMIT,
 } from '../constants';
+
+import { bot } from '../bot';
+import { removeMessageCache } from '../utils';
+
+import RateLimits from '../allotters/ratelimits';
+import { Allocater } from '../allotters/allocater';
+import Parsing from './parsing';
 
 export const Decrypter: {
   readonly userRateLimits: RateLimits;
@@ -34,7 +36,7 @@ export const Decrypter: {
     }
 
     const args = this.parse(message.content);
-    Dispatcher.submit(message, args[0], args.slice(1));
+    Allocater.submit(message, args[0], args.slice(1));
   },
   redecrypt(_, message) {
     if (Date.now() - message.createdTimestamp > COMMAND_EDITABLE_TIME) return;
@@ -62,8 +64,8 @@ export const Decrypter: {
     const parsing = new Parsing;
 
     for(const char of [...content]) {
-      if (parsing.overLength()) break;
       if (parsing.parseSyntax(char)) continue;
+      if (parsing.overLength()) break;
       parsing.addCharacter(char);
     }
 

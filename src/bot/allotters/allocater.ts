@@ -1,19 +1,22 @@
 import { Collection, Message, Snowflake } from 'discord.js';
 
 import Session from './session';
+import { Rejecter } from '../responders/rejecter';
 
 export type Responder
   = (request: Message, args: string[], response?: Message) => Promise<Message>;
 export type CommandArgs = string[];
 
-export const Dispatcher: {
+export const Allocater: {
   readonly responders: Collection<string, Responder>;
   readonly sessions  : Collection<Snowflake, Session>;
 
   submit(request: Message, prefix: string, args: CommandArgs): void;
   respond(request: Message, responder: Responder, args: CommandArgs): void;
 
-  dispatch(request: Message, response: Message, session?: Session): void;
+  exception(exception: unknown, request: Message): void;
+
+  allocate(request: Message, response: Message, session?: Session): void;
   free(requestID: Snowflake): void;
 } = {
   responders: new Collection,
@@ -28,12 +31,18 @@ export const Dispatcher: {
     const response = session?.response;
 
     responder(request, args, response)
-      .then(response => this.dispatch(request, response, session))
+      .then(response => this.allocate(request, response, session))
+      .catch(exception => this.exception(exception, request));
+  },
+
+  exception(exception, request) {
+    Rejecter.issue(exception, request)
+      .then(response => response && this.allocate(request, response))
       .catch(console.error);
   },
 
-  dispatch(request, response, session) {
-    if (session) this.sessions.set(
+  allocate(request, response, session) {
+    if (!session) this.sessions.set(
       request.id,
       new Session(request, response, this.free)
     );
