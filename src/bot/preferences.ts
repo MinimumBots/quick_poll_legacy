@@ -3,7 +3,7 @@ import { Guild, User } from 'discord.js';
 import { DEFAULT_LOCALE } from './constants';
 import { Locale } from './templates/template';
 
-export const Preference: {
+export const Preferences: {
   fetchUserLocale(user: User): Promise<Locale | undefined>;
   fetchLocale(guild: Guild | null): Promise<Locale>;
 } = {

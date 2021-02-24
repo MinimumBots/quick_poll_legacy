@@ -3,7 +3,7 @@ import { HTTPError, Guild, Message, User } from 'discord.js';
 import { BOT_OWNER_IDS, DEFAULT_LOCALE } from '../constants';
 
 import { Locale, Templates } from '../templates/template';
-import { Preference } from '../preference';
+import { Preferences } from '../preferences';
 import { partingText } from '../utils';
 
 export const Rejecter: {
@@ -70,7 +70,7 @@ export const Rejecter: {
   },
 
   async getLocale(user, guild) {
-    const { fetchUserLocale, fetchLocale } = Preference;
+    const { fetchUserLocale, fetchLocale } = Preferences;
     return await fetchUserLocale(user) ?? await fetchLocale(guild);
   }
 }
