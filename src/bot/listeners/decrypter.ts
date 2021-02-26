@@ -1,10 +1,12 @@
 import { Guild, Message, PartialMessage, User } from 'discord.js';
 
 import {
-  COMMAND_PREFIX,
-  COMMAND_EDITABLE_TIME,
+  USABLE_CHANNEL_TYPES,
   USER_RATE_LIMIT,
   BOT_RATE_LIMIT,
+  COMMAND_EDITABLE_TIME,
+  COMMAND_PREFIX,
+  MINIMUM_BOT_PERMISSIONS,
 } from '../constants';
 
 import { bot } from '../bot';
@@ -22,7 +24,9 @@ export const Decrypter: {
   redecrypt(_: any, message: Message | PartialMessage): void;
 
   accept(message: Message): boolean;
-  overRate(user: User, guild: Guild | null): boolean;
+  isMatch(message: Message): boolean;
+  hasPermissions(channel: USABLE_CHANNEL_TYPES): boolean;
+  isUnderRate(user: User, guild: Guild | null): boolean;
 
   parse(content: string): string[];
 } = {
@@ -30,13 +34,12 @@ export const Decrypter: {
   botRateLimits : new RateLimits(BOT_RATE_LIMIT),
 
   decrypt(message) {
-    if (!this.accept(message)) {
-      removeMessageCache(message);
-      return;
+    if (this.accept(message)) {
+      const args = this.parse(message.content);
+      Allocater.submit(message, args[0], args.slice(1));
     }
-
-    const args = this.parse(message.content);
-    Allocater.submit(message, args[0], args.slice(1));
+    else
+      removeMessageCache(message);
   },
   redecrypt(_, message) {
     if (Date.now() - message.createdTimestamp > COMMAND_EDITABLE_TIME) return;
@@ -48,16 +51,29 @@ export const Decrypter: {
 
   accept(message) {
     return (
-      message.type === 'DEFAULT'
-      && message.content.startsWith(COMMAND_PREFIX)
-      && !this.overRate(message.author, message.guild)
+      this.isMatch(message)
+      && this.hasPermissions(message.channel)
+      && this.isUnderRate(message.author, message.guild)
     );
   },
-  overRate(user, guild) {
+  isMatch(message) {
+    return (
+      message.type === 'DEFAULT'
+      && message.content.startsWith(COMMAND_PREFIX)
+    );
+  },
+  hasPermissions(channel) {
+    return !!(
+      channel.type === 'dm'
+      || bot.user
+      && channel.permissionsFor(bot.user)?.any(MINIMUM_BOT_PERMISSIONS)
+    );
+  },
+  isUnderRate(user, guild) {
     if (user.bot)
-      return guild ? !this.botRateLimits.addition(guild.id) : true;
+      return guild ? this.botRateLimits.addition(guild.id) : false;
     else
-      return !this.userRateLimits.addition(user.id);
+      return this.userRateLimits.addition(user.id);
   },
 
   parse(content) {
