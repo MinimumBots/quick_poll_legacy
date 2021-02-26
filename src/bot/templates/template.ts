@@ -25,20 +25,7 @@ export class Template {
   }) {}
 
   render(values?: TemplateValues): MessageEmbed {
-    return new MessageEmbed(
-      {
-        title      : this.renderTitle(values),
-        description: this.renderDescription(values),
-        url        : this.renderURL(values),
-        timestamp  : this.renderTimestamp(),
-        color      : this.renderColor(),
-        footer     : this.renderFooter(values),
-        image      : this.renderImage(values),
-        thumbnail  : this.renderThumbnail(values),
-        author     : this.renderAuthor(values),
-        fields     : this.renderFields(values),
-      }
-    );
+    return this.supply(new MessageEmbed, values);
   }
 
   renderTitle(values?: TemplateValues): string | undefined {
@@ -53,12 +40,16 @@ export class Template {
     return this.replace(this.template.url, values);
   }
 
-  renderTimestamp(): number | undefined {
-    return this.template.timestamp;
+  renderTimestamp(values?: TemplateValues): number | undefined {
+    const timestamp = values?.['timestamp'];
+    const date = timestamp ? new Date(timestamp) : undefined;
+    return this.template.timestamp = date?.getTime();
   }
 
-  renderColor(): number | undefined {
-    return this.template.color;
+  renderColor(values?: TemplateValues): number | undefined {
+    const colorHex = values?.['color'];
+    const color = colorHex ? parseInt(colorHex, 16) : undefined;
+    return this.template.color = color;
   }
 
   renderFooter(values?: TemplateValues): MessageEmbedFooter | undefined {
@@ -97,7 +88,72 @@ export class Template {
     return fields;
   }
 
-  addField(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
+  supply(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
+    this.supplyTitle(embed, values);
+    this.supplyDescription(embed, values);
+    this.supplyURL(embed, values);
+    this.supplyTimestamp(embed, values);
+    this.supplyColor(embed, values);
+    this.supplyFooter(embed, values);
+    this.supplyImage(embed, values);
+    this.supplyThumbnail(embed, values);
+    this.supplyAuthor(embed, values);
+    this.supplyFields(embed, values);
+    return embed;
+  }
+
+  supplyTitle(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
+    embed.title = this.renderTitle(values) ?? null;
+    return embed;
+  }
+
+  supplyDescription(
+    embed: MessageEmbed, values?: TemplateValues
+  ): MessageEmbed {
+    embed.description = this.renderDescription(values) ?? null;
+    return embed
+  }
+
+  supplyURL(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
+    embed.url = this.renderURL(values) ?? null;
+    return embed;
+  }
+
+  supplyTimestamp(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
+    embed.timestamp = this.renderTimestamp(values) ?? null;
+    return embed;
+  }
+
+  supplyColor(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
+    embed.color = this.renderColor(values) ?? null
+    return embed
+  }
+
+  supplyFooter(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
+    embed.footer = this.renderFooter(values) ?? null;
+    return embed;
+  }
+
+  supplyImage(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
+    embed.image = this.renderImage(values) ?? null;
+    return embed;
+  }
+
+  supplyThumbnail(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
+    embed.thumbnail = this.renderThumbnail(values) ?? null
+    return embed;
+  }
+
+  supplyAuthor(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
+    embed.author = this.renderAuthor(values) ?? null
+    return embed;
+  }
+
+  supplyFields(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
+    return embed.addFields(this.renderFields(values));
+  }
+
+  appendField(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
     const name   = this.replace(this.template.field?.name, values);
     const value  = this.replace(this.template.field?.value, values);
     const inline = this.template.field?.inline;
