@@ -1,0 +1,48 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const discord_js_1 = require("discord.js");
+const constants_1 = require("./constants");
+const allocater_1 = require("./allotters/allocater");
+const admin_1 = require("./listeners/admin");
+const decrypter_1 = require("./listeners/decrypter");
+const bot = new discord_js_1.Client({
+    messageCacheMaxSize: 500,
+    partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
+    restTimeOffset: 100,
+    retryLimit: 3,
+    ws: { intents: constants_1.BOT_INTENTS },
+    presence: { status: 'dnd', activity: { type: 'COMPETING', name: '再接続' } },
+});
+function initialize() {
+    admin_1.Admin.initialize(bot);
+    decrypter_1.Decrypter.initialize(bot);
+    allocater_1.Allocater.initialize(bot);
+}
+async function fetchGuildCount() {
+    const counts = await bot.shard?.fetchClientValues('guilds.cache.size');
+    const count = counts?.reduce((a, b) => a + b, 0);
+    return typeof count === 'number' && count > 0 ? `${count}` : 'いくつかの';
+}
+async function updatePresence(count) {
+    let type, name;
+    switch (count % 2) {
+        case 1:
+            type = 'WATCHING';
+            name = `${await fetchGuildCount()} サーバー`;
+            break;
+        default:
+            type = 'PLAYING';
+            name = '/poll | /expoll';
+            break;
+    }
+    await bot.user?.setPresence({ status: 'online', activity: { type, name } });
+}
+let presenceCount = 0;
+bot.setInterval(() => {
+    updatePresence(presenceCount++)
+        .catch(console.error);
+}, constants_1.PRESENCE_UPDATE_INTERVAL);
+bot.on('ready', () => initialize());
+bot.login(process.env['QUICK_POLL_TOKEN'])
+    .catch(console.error);
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYm90LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL2JvdC9ib3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFBQSwyQ0FBa0Q7QUFFbEQsMkNBQW9FO0FBQ3BFLHFEQUFrRDtBQUNsRCw2Q0FBMEM7QUFDMUMscURBQWtEO0FBRWxELE1BQU0sR0FBRyxHQUFHLElBQUksbUJBQU0sQ0FBQztJQUNyQixtQkFBbUIsRUFBRSxHQUFHO0lBQ3hCLFFBQVEsRUFBRSxDQUFDLE1BQU0sRUFBRSxTQUFTLEVBQUUsY0FBYyxFQUFFLFNBQVMsRUFBRSxVQUFVLENBQUM7SUFDcEUsY0FBYyxFQUFFLEdBQUc7SUFDbkIsVUFBVSxFQUFFLENBQUM7SUFDYixFQUFFLEVBQUUsRUFBRSxPQUFPLEVBQUUsdUJBQVcsRUFBRTtJQUM1QixRQUFRLEVBQUUsRUFBRSxNQUFNLEVBQUUsS0FBSyxFQUFFLFFBQVEsRUFBRSxFQUFFLElBQUksRUFBRSxXQUFXLEVBQUUsSUFBSSxFQUFFLEtBQUssRUFBRSxFQUFFO0NBQzFFLENBQUMsQ0FBQztBQUVILFNBQVMsVUFBVTtJQUNqQixhQUFLLENBQUMsVUFBVSxDQUFDLEdBQUcsQ0FBQyxDQUFDO0lBQ3RCLHFCQUFTLENBQUMsVUFBVSxDQUFDLEdBQUcsQ0FBQyxDQUFDO0lBQzFCLHFCQUFTLENBQUMsVUFBVSxDQUFDLEdBQUcsQ0FBQyxDQUFDO0FBQzVCLENBQUM7QUFFRCxLQUFLLFVBQVUsZUFBZTtJQUM1QixNQUFNLE1BQU0sR0FBRyxNQUFNLEdBQUcsQ0FBQyxLQUFLLEVBQUUsaUJBQWlCLENBQUMsbUJBQW1CLENBQUMsQ0FBQztJQUN2RSxNQUFNLEtBQUssR0FBRyxNQUFNLEVBQUUsTUFBTSxDQUFDLENBQUMsQ0FBQyxFQUFFLENBQUMsRUFBRSxFQUFFLENBQUMsQ0FBQyxHQUFHLENBQUMsRUFBRSxDQUFDLENBQUMsQ0FBQztJQUNqRCxPQUFPLE9BQU8sS0FBSyxLQUFLLFFBQVEsSUFBSSxLQUFLLEdBQUcsQ0FBQyxDQUFDLENBQUMsQ0FBQyxHQUFHLEtBQUssRUFBRSxDQUFDLENBQUMsQ0FBQyxPQUFPLENBQUM7QUFDdkUsQ0FBQztBQUVELEtBQUssVUFBVSxjQUFjLENBQUMsS0FBYTtJQUN6QyxJQUFJLElBQWtCLEVBQUUsSUFBWSxDQUFDO0lBRXJDLFFBQVEsS0FBSyxHQUFHLENBQUMsRUFBRTtRQUNqQixLQUFLLENBQUM7WUFDSixJQUFJLEdBQUcsVUFBVSxDQUFDO1lBQ2xCLElBQUksR0FBRyxHQUFHLE1BQU0sZUFBZSxFQUFFLE9BQU8sQ0FBQztZQUN6QyxNQUFNO1FBRVI7WUFDRSxJQUFJLEdBQUcsU0FBUyxDQUFDO1lBQ2pCLElBQUksR0FBRyxpQkFBaUIsQ0FBQztZQUN6QixNQUFNO0tBQ1Q7SUFFRCxNQUFNLEdBQUcsQ0FBQyxJQUFJLEVBQUUsV0FBVyxDQUFDLEVBQUUsTUFBTSxFQUFFLFFBQVEsRUFBRSxRQUFRLEVBQUUsRUFBRSxJQUFJLEVBQUUsSUFBSSxFQUFFLEVBQUUsQ0FBQyxDQUFDO0FBQzlFLENBQUM7QUFFRCxJQUFJLGFBQWEsR0FBRyxDQUFDLENBQUM7QUFDdEIsR0FBRyxDQUFDLFdBQVcsQ0FBQyxHQUFHLEVBQUU7SUFDbkIsY0FBYyxDQUFDLGFBQWEsRUFBRSxDQUFDO1NBQzVCLEtBQUssQ0FBQyxPQUFPLENBQUMsS0FBSyxDQUFDLENBQUM7QUFDMUIsQ0FBQyxFQUFFLG9DQUF3QixDQUFDLENBQUM7QUFFN0IsR0FBRyxDQUFDLEVBQUUsQ0FBQyxPQUFPLEVBQUUsR0FBRyxFQUFFLENBQUMsVUFBVSxFQUFFLENBQUMsQ0FBQztBQUVwQyxHQUFHLENBQUMsS0FBSyxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUMsa0JBQWtCLENBQUMsQ0FBQztLQUN2QyxLQUFLLENBQUMsT0FBTyxDQUFDLEtBQUssQ0FBQyxDQUFDIn0=

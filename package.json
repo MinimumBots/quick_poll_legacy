@@ -4,7 +4,8 @@
   "description": "The simple and versatile polling bot for Discord.",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node -r dotenv/config src/index.ts",
+    "start": "node -r dotenv/config dist/index.js",
+    "dev": "ts-node -r dotenv/config src/bot/bot.ts",
     "build": "run-s clean compile",
     "compile": "tsc",
     "clean": "rimraf ./dist"
@@ -26,7 +27,6 @@
     "node-cron": "^2.0.3"
   },
   "config": {
-    "botOwnerIDs": "622262101938798652",
     "commandPrefix": "/",
     "botDocumentURL": "https://grapecolor.github.io/quick_poll/",
     "supportServerURL": "https://discord.gg/STzZ6GK",

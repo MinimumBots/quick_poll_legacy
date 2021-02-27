@@ -18,7 +18,9 @@ export default class Session {
       .catch(console.error);
 
     this.bot.on('messageReactionAdd', this.onCancel);
-    this.timeout = this.bot.setTimeout(this.close, COMMAND_EDITABLE_TIME);
+    this.timeout = this.bot.setTimeout(
+      () => this.close(), COMMAND_EDITABLE_TIME
+    );
   }
 
   public  readonly id  : Snowflake;
@@ -38,7 +40,9 @@ export default class Session {
     this.close();
   }
 
-  private onCancel(reaction: MessageReaction, user: User | PartialUser): void {
+  private onCancel = (
+    reaction: MessageReaction, user: User | PartialUser
+  ): void => {
     if (reaction.emoji.name === this.cancelEmoji && user.id === this.user.id)
       this.cancel();
   }

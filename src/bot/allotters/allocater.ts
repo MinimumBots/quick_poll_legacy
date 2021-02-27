@@ -1,6 +1,8 @@
-import { Collection, Message, Snowflake } from 'discord.js';
+import { Client, Collection, Message, Snowflake } from 'discord.js';
 
+import { DEBUG_MODE } from '../constants';
 import Session from './session';
+import { Help } from '../responders/help';
 import { Rejecter } from '../responders/rejecter';
 import { removeMessageCache } from '../utils';
 
@@ -10,6 +12,8 @@ export type Responder = (
 export type CommandArgs = string[];
 
 export const Allocater: {
+  initialize(bot: Client): void;
+
   readonly responders: Collection<string, Responder>;
   readonly sessions  : Collection<Snowflake, Session>;
 
@@ -21,6 +25,10 @@ export const Allocater: {
   allocate(request: Message, response?: Message, session?: Session): void;
   free(requestID: Snowflake): void;
 } = {
+  initialize(bot) {
+    Help.initialize(bot);
+  },
+
   responders: new Collection,
   sessions  : new Collection,
 
@@ -38,6 +46,8 @@ export const Allocater: {
   },
 
   exception(exception, request) {
+    if (DEBUG_MODE) console.error(exception);
+
     Rejecter.issue(exception, request)
       .then(response => response && this.allocate(request, response))
       .catch(console.error);
@@ -47,7 +57,9 @@ export const Allocater: {
     if (!response)
       removeMessageCache(request);
     else if (!session)
-      this.sessions.set(request.id, new Session(request, response, this.free));
+      this.sessions.set(
+        request.id, new Session(request, response, id => this.free(id))
+      );
   },
   free(requestID) {
     this.sessions.delete(requestID);

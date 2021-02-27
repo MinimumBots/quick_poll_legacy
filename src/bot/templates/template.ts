@@ -9,20 +9,22 @@ import {
 
 export type TemplateValues = { [key: string]: string };
 
+export type TemplateStructure = {
+  title?: string;
+  description?: string;
+  url?: string;
+  timestamp?: number;
+  color?: number;
+  footer?: { text: string; iconURL?: string; };
+  image?: { url: string; };
+  thumbnail?: { url: string; };
+  author?: { name: string; url?: string; iconURL?: string; };
+  fields?: { name: string; value: string; inline?: boolean; }[];
+  field?: { name: string; value: string; inline?: boolean; };
+}
+
 export class Template {
-  constructor(private readonly template: {
-    title?: string;
-    description?: string;
-    url?: string;
-    timestamp?: number;
-    color?: number;
-    footer?: { text: string; iconURL?: string; };
-    image?: { url: string; };
-    thumbnail?: { url: string; };
-    author?: { name: string; url?: string; iconURL?: string; };
-    fields?: { name: string; value: string; inline?: boolean; }[];
-    field?: { name: string; value: string; inline?: boolean; };
-  }) {}
+  constructor(readonly template: TemplateStructure) {}
 
   render(values?: TemplateValues): MessageEmbed {
     return this.supply(new MessageEmbed, values);
@@ -43,17 +45,17 @@ export class Template {
   renderTimestamp(values?: TemplateValues): number | undefined {
     const timestamp = values?.['timestamp'];
     const date = timestamp ? new Date(timestamp) : undefined;
-    return this.template.timestamp = date?.getTime();
+    return date?.getTime() ?? this.template.timestamp;
   }
 
   renderColor(values?: TemplateValues): number | undefined {
     const colorHex = values?.['color'];
     const color = colorHex ? parseInt(colorHex, 16) : undefined;
-    return this.template.color = color;
+    return color ?? this.template.color;
   }
 
   renderFooter(values?: TemplateValues): MessageEmbedFooter | undefined {
-    const text    = this.replace(this.template.footer?.text, values);
+    const text    = this.replace(this.template.footer?.text,    values);
     const iconURL = this.replace(this.template.footer?.iconURL, values);
     return text ? { text, iconURL } : undefined;
   }
@@ -69,8 +71,8 @@ export class Template {
   }
 
   renderAuthor(values?: TemplateValues): MessageEmbedAuthor | undefined {
-    const name    = this.replace(this.template.author?.name, values);
-    const url     = this.replace(this.template.author?.url, values);
+    const name    = this.replace(this.template.author?.name,    values);
+    const url     = this.replace(this.template.author?.url,     values);
     const iconURL = this.replace(this.template.author?.iconURL, values);
     return name ? { name, url, iconURL } : undefined;
   }
@@ -79,7 +81,7 @@ export class Template {
     const fields: EmbedFieldData[] = [];
 
     for (const field of this.template.fields ?? []) {
-      const name   = this.replace(field.name, values);
+      const name   = this.replace(field.name,  values);
       const value  = this.replace(field.value, values);
       const inline = field.inline;
       fields.push({ name, value, inline });
@@ -88,18 +90,18 @@ export class Template {
     return fields;
   }
 
-  supply(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
-    this.supplyTitle(embed, values);
-    this.supplyDescription(embed, values);
-    this.supplyURL(embed, values);
-    this.supplyTimestamp(embed, values);
-    this.supplyColor(embed, values);
-    this.supplyFooter(embed, values);
-    this.supplyImage(embed, values);
-    this.supplyThumbnail(embed, values);
-    this.supplyAuthor(embed, values);
-    this.supplyFields(embed, values);
-    return embed;
+  supply(...params: [MessageEmbed, TemplateValues?]): MessageEmbed {
+    this.supplyTitle      (...params);
+    this.supplyDescription(...params);
+    this.supplyURL        (...params);
+    this.supplyTimestamp  (...params);
+    this.supplyColor      (...params);
+    this.supplyFooter     (...params);
+    this.supplyImage      (...params);
+    this.supplyThumbnail  (...params);
+    this.supplyAuthor     (...params);
+    this.supplyFields     (...params);
+    return params[0];
   }
 
   supplyTitle(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
@@ -154,7 +156,7 @@ export class Template {
   }
 
   appendField(embed: MessageEmbed, values?: TemplateValues): MessageEmbed {
-    const name   = this.replace(this.template.field?.name, values);
+    const name   = this.replace(this.template.field?.name,  values);
     const value  = this.replace(this.template.field?.value, values);
     const inline = this.template.field?.inline;
     return name ? embed.addField(name, value, inline) : embed;
@@ -168,11 +170,11 @@ export class Template {
   }
 }
 
-export interface TemplatesStructure {
-  loadings : { [key: string]: Template };
-  successes: { [key: string]: Template };
-  errors   : { [key: string]: Template };
-  reports  : { [key: string]: Template };
+export interface LocaleStructure {
+  loadings : { [key: string]: TemplateStructure };
+  successes: { [key: string]: TemplateStructure };
+  errors   : { [key: string]: TemplateStructure };
+  reports  : { [key: string]: TemplateStructure };
 }
 
 import { templates as ja } from './locales/ja';

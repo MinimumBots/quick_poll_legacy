@@ -8,7 +8,7 @@ const manager = new ShardingManager('./dist/bot/bot.js', {
 });
 
 manager.on('shardCreate', shard => {
-  console.log(`Launched shard ${shard.id + 1}/${manager.totalShards}.`);
+  console.info(`Launched shard ${shard.id + 1}/${manager.totalShards}.`);
 });
 
 console.info('Start launching shards.');

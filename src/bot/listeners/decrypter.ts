@@ -1,4 +1,4 @@
-import { Guild, Message, PartialMessage, User } from 'discord.js';
+import { Client, Guild, Message, PartialMessage, User } from 'discord.js';
 
 import {
   USABLE_CHANNEL_TYPES,
@@ -9,7 +9,6 @@ import {
   MINIMUM_BOT_PERMISSIONS,
 } from '../constants';
 
-import { bot } from '../bot';
 import { removeMessageCache } from '../utils';
 
 import RateLimits from '../allotters/ratelimits';
@@ -17,11 +16,13 @@ import { Allocater } from '../allotters/allocater';
 import Parsing from './parsing';
 
 export const Decrypter: {
+  initialize(bot: Client): void;
+
   readonly userRateLimits: RateLimits;
   readonly botRateLimits : RateLimits;
 
   decrypt(message: Message): void;
-  redecrypt(_: any, message: Message | PartialMessage): void;
+  redecrypt(message: Message | PartialMessage): void;
 
   accept(message: Message): boolean;
   isMatch(message: Message): boolean;
@@ -30,6 +31,11 @@ export const Decrypter: {
 
   parse(content: string): string[];
 } = {
+  initialize(bot) {
+    bot.on('message', message => Decrypter.decrypt(message));
+    bot.on('messageUpdate', (_, message) => Decrypter.redecrypt(message));
+  },
+
   userRateLimits: new RateLimits(USER_RATE_LIMIT),
   botRateLimits : new RateLimits(BOT_RATE_LIMIT),
 
@@ -41,11 +47,11 @@ export const Decrypter: {
     else
       removeMessageCache(message);
   },
-  redecrypt(_, message) {
+  redecrypt(message) {
     if (Date.now() - message.createdTimestamp > COMMAND_EDITABLE_TIME) return;
 
     message.fetch()
-      .then(this.decrypt)
+      .then(message => this.decrypt(message))
       .catch(console.error);
   },
 
@@ -57,12 +63,16 @@ export const Decrypter: {
     );
   },
   isMatch(message) {
+    const content = message.content;
+
     return (
       message.type === 'DEFAULT'
-      && message.content.startsWith(COMMAND_PREFIX)
+      && (content.startsWith(COMMAND_PREFIX) || content.startsWith('<@'))
     );
   },
   hasPermissions(channel) {
+    const bot = channel.client
+
     return !!(
       channel.type === 'dm'
       || bot.user
@@ -88,6 +98,3 @@ export const Decrypter: {
     return parsing.pushChunk();
   }
 };
-
-bot.on('message', Decrypter.decrypt);
-bot.on('messageUpdate', Decrypter.redecrypt);

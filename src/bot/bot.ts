@@ -1,11 +1,11 @@
 import { ActivityType, Client } from 'discord.js';
-import {
-  BOT_INTENTS,
-  DEFAULT_BOT_PERMISSIONS,
-  PRESENCE_UPDATE_INTERVAL
-} from './constants';
 
-export const bot = new Client({
+import { BOT_INTENTS, PRESENCE_UPDATE_INTERVAL } from './constants';
+import { Allocater } from './allotters/allocater';
+import { Admin } from './listeners/admin';
+import { Decrypter } from './listeners/decrypter';
+
+const bot = new Client({
   messageCacheMaxSize: 500,
   partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
   restTimeOffset: 100,
@@ -14,11 +14,10 @@ export const bot = new Client({
   presence: { status: 'dnd', activity: { type: 'COMPETING', name: '再接続' } },
 });
 
-export let botInviteURL: string = '';
-function generateInviteURL(): void {
-  bot.generateInvite({ permissions: DEFAULT_BOT_PERMISSIONS })
-    .then(url => botInviteURL = url)
-    .catch(() => bot.setTimeout(generateInviteURL, 30000));
+function initialize(): void {
+  Admin.initialize(bot);
+  Decrypter.initialize(bot);
+  Allocater.initialize(bot);
 }
 
 async function fetchGuildCount(): Promise<string> {
@@ -51,7 +50,7 @@ bot.setInterval(() => {
     .catch(console.error);
 }, PRESENCE_UPDATE_INTERVAL);
 
-bot.on('ready', generateInviteURL);
+bot.on('ready', () => initialize());
 
 bot.login(process.env['QUICK_POLL_TOKEN'])
   .catch(console.error);

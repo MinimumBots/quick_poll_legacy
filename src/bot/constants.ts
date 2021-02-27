@@ -1,8 +1,17 @@
-import { Intents, DMChannel, NewsChannel, TextChannel, PermissionResolvable, Permissions, PermissionFlags, PermissionString } from 'discord.js';
+import {
+  Intents,
+  DMChannel,
+  NewsChannel,
+  TextChannel,
+  Permissions,
+  PermissionString
+} from 'discord.js';
 import { Locale } from './templates/template';
 
+export const DEBUG_MODE: boolean = process.env['DEBUG_MODE'] === 'true';
+
 export const BOT_OWNER_IDS: string[]
-  = process.env['npm_package_config_botOwnerIDs']?.split(',') ?? [];
+  = process.env['BOT_OWNER_IDS']?.split(',') ?? [];
 
 export const COMMAND_PREFIX
   = process.env['npm_package_config_commandPrefix'] ?? '/';
