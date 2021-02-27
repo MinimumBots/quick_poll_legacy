@@ -7,16 +7,14 @@ import { Preferences } from '../preferences';
 import { partingText } from '../utils';
 
 export const Rejecter: {
-  issue(exception: unknown, request: Message): Promise<Message|void>;
+  issue(exception: unknown, request: Message): Promise<Message | void>;
 
-  forHTTPError(exception: HTTPError, request: Message): Promise<Message|void>;
+  forHTTPError(exception: HTTPError, request: Message): Promise<Message | void>;
   forUnknown(exception: unknown, request: Message): Promise<Message>;
   destroy(exception: unknown): void;
 
   report(exception: unknown, request: Message): Promise<void>;
   renderStacks(exception: unknown): string[];
-
-  getLocale(user: User, guild: Guild | null): Promise<Locale>;
 } = {
   async issue(exception, request) {
     if (exception instanceof HTTPError)
@@ -32,7 +30,7 @@ export const Rejecter: {
       return await this.forUnknown(exception, request);
   },
   async forUnknown(exception, request) {
-    const locale = await this.getLocale(request.author, request.guild);
+    const locale = await Preferences.fetchLocale(request.author, request.guild);
     const template = Templates[locale].errors['unknown'];
 
     this.report(exception, request)
@@ -52,7 +50,7 @@ export const Rejecter: {
     const stacks = this.renderStacks(exception);
     const embed = template.render({ executedCommand: request.content });
 
-    stacks.forEach((text, index) => template.addField(embed, {
+    stacks.forEach((text, index) => template.appendField(embed, {
       stackTraceNumber: `${index + 1}`, stackTraceText: text
     }));
 
@@ -67,10 +65,5 @@ export const Rejecter: {
       stack = String(exception);
 
     return partingText(stack, 1024, '```', '```');
-  },
-
-  async getLocale(user, guild) {
-    const { fetchUserLocale, fetchLocale } = Preferences;
-    return await fetchUserLocale(user) ?? await fetchLocale(guild);
   }
 }

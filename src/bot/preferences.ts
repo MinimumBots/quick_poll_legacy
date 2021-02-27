@@ -4,13 +4,21 @@ import { DEFAULT_LOCALE } from './constants';
 import { Locale } from './templates/template';
 
 export const Preferences: {
+  fetchLocale(user: User, guild?: Guild | null): Promise<Locale>;
   fetchUserLocale(user: User): Promise<Locale | undefined>;
-  fetchLocale(guild: Guild | null): Promise<Locale>;
+  fetchGuildLocale(guild: Guild | null): Promise<Locale | undefined>;
 } = {
-  async fetchUserLocale(user) {
-    return DEFAULT_LOCALE;
+  async fetchLocale(user, guild) {
+    return (
+      await this.fetchUserLocale(user)
+      ?? (guild && await this.fetchGuildLocale(guild))
+      ?? DEFAULT_LOCALE
+    );
   },
-  async fetchLocale(guild) {
-    return DEFAULT_LOCALE;
+  async fetchUserLocale(user) {
+    return undefined;
+  },
+  async fetchGuildLocale(guild) {
+    return undefined;
   }
 };

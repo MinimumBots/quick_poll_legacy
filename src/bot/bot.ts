@@ -1,5 +1,9 @@
 import { ActivityType, Client } from 'discord.js';
-import { BOT_INTENTS, PRESENCE_UPDATE_INTERVAL } from './constants';
+import {
+  BOT_INTENTS,
+  DEFAULT_BOT_PERMISSIONS,
+  PRESENCE_UPDATE_INTERVAL
+} from './constants';
 
 export const bot = new Client({
   messageCacheMaxSize: 500,
@@ -9,6 +13,13 @@ export const bot = new Client({
   ws: { intents: BOT_INTENTS },
   presence: { status: 'dnd', activity: { type: 'COMPETING', name: '再接続' } },
 });
+
+export let botInviteURL: string = '';
+function generateInviteURL(): void {
+  bot.generateInvite({ permissions: DEFAULT_BOT_PERMISSIONS })
+    .then(url => botInviteURL = url)
+    .catch(() => bot.setTimeout(generateInviteURL, 30000));
+}
 
 async function fetchGuildCount(): Promise<string> {
   const counts = await bot.shard?.fetchClientValues('guilds.cache.size');
@@ -39,6 +50,8 @@ bot.setInterval(() => {
   updatePresence(presenceCount++)
     .catch(console.error);
 }, PRESENCE_UPDATE_INTERVAL);
+
+bot.on('ready', generateInviteURL);
 
 bot.login(process.env['QUICK_POLL_TOKEN'])
   .catch(console.error);

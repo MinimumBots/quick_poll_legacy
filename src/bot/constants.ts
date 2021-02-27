@@ -1,4 +1,4 @@
-import { Intents, DMChannel, NewsChannel, TextChannel, PermissionResolvable } from 'discord.js';
+import { Intents, DMChannel, NewsChannel, TextChannel, PermissionResolvable, Permissions, PermissionFlags, PermissionString } from 'discord.js';
 import { Locale } from './templates/template';
 
 export const BOT_OWNER_IDS: string[]
@@ -23,6 +23,26 @@ export const BOT_INTENTS = 0
   | Intents.FLAGS.DIRECT_MESSAGES
   | Intents.FLAGS.DIRECT_MESSAGE_REACTIONS;
 
+export const DEFAULT_BOT_PERMISSIONS: PermissionString[] = [
+  'ADD_REACTIONS',
+  'VIEW_CHANNEL',
+  'SEND_MESSAGES',
+  'MANAGE_MESSAGES',
+  'EMBED_LINKS',
+  'ATTACH_FILES',
+  'READ_MESSAGE_HISTORY',
+  'MENTION_EVERYONE',
+  'USE_EXTERNAL_EMOJIS',
+  'MANAGE_WEBHOOKS',
+];
+export const MINIMUM_BOT_PERMISSIONS: PermissionString[] = [
+  'VIEW_CHANNEL',
+  'SEND_MESSAGES',
+  'EMBED_LINKS',
+];
+
+Permissions.FLAGS
+
 export const DEFAULT_LOCALE: Locale = 'ja';
 
 export type USABLE_CHANNEL_TYPES = DMChannel | TextChannel | NewsChannel;
@@ -37,7 +57,3 @@ export const BOT_RATE_LIMIT  = 30;
 export const COMMAND_MAX_OPTIONS  = 20;
 export const COMMAND_QUESTION_MAX = 200;
 export const COMMAND_OPTION_MAX   = 80;
-
-export const MINIMUM_BOT_PERMISSIONS: PermissionResolvable = [
-  'VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS'
-];

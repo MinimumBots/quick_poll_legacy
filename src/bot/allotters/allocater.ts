@@ -2,9 +2,11 @@ import { Collection, Message, Snowflake } from 'discord.js';
 
 import Session from './session';
 import { Rejecter } from '../responders/rejecter';
+import { removeMessageCache } from '../utils';
 
-export type Responder
-  = (request: Message, args: string[], response?: Message) => Promise<Message>;
+export type Responder = (
+  request: Message, args: string[], response?: Message
+) => Promise<Message | undefined>;
 export type CommandArgs = string[];
 
 export const Allocater: {
@@ -16,7 +18,7 @@ export const Allocater: {
 
   exception(exception: unknown, request: Message): void;
 
-  allocate(request: Message, response: Message, session?: Session): void;
+  allocate(request: Message, response?: Message, session?: Session): void;
   free(requestID: Snowflake): void;
 } = {
   responders: new Collection,
@@ -42,10 +44,10 @@ export const Allocater: {
   },
 
   allocate(request, response, session) {
-    if (!session) this.sessions.set(
-      request.id,
-      new Session(request, response, this.free)
-    );
+    if (!response)
+      removeMessageCache(request);
+    else if (!session)
+      this.sessions.set(request.id, new Session(request, response, this.free));
   },
   free(requestID) {
     this.sessions.delete(requestID);
