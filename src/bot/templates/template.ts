@@ -7,9 +7,7 @@ import {
   EmbedFieldData
 } from 'discord.js';
 
-export type TemplateValues = { [key: string]: string };
-
-export type TemplateStructure = {
+export type TemplateData = {
   title?: string;
   description?: string;
   url?: string;
@@ -23,8 +21,10 @@ export type TemplateStructure = {
   field?: { name: string; value: string; inline?: boolean; };
 }
 
+type TemplateValues = { [key: string]: string };
+
 export class Template {
-  constructor(readonly template: TemplateStructure) {}
+  constructor(readonly template: TemplateData) {}
 
   render(values?: TemplateValues): MessageEmbed {
     return this.supply(new MessageEmbed, values);
@@ -168,19 +168,4 @@ export class Template {
     if (!target) return;
     return target.replace(/{{ (\w+) }}/gm, (_, key) => values[key] ?? '');
   }
-}
-
-export interface LocaleStructure {
-  loadings : { [key: string]: TemplateStructure };
-  successes: { [key: string]: TemplateStructure };
-  errors   : { [key: string]: TemplateStructure };
-  reports  : { [key: string]: TemplateStructure };
-}
-
-import { templates as ja } from './locales/ja';
-
-export type Locale = 'ja';
-
-export const Templates = {
-  ja: ja
 }

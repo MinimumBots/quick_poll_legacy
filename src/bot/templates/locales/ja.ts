@@ -1,4 +1,5 @@
-import { LocaleStructure, TemplateStructure } from '../template';
+import { LocaleStructure } from '../locale';
+import { TemplateData } from '../template';
 import {
   COMMAND_PREFIX,
   BOT_DOCUMENT_URL,
@@ -11,7 +12,7 @@ import {
 
 const supportServerLink = `[ご質問・不具合報告](${SUPPORT_SERVER_URL})`;
 
-export const templates: LocaleStructure = {
+export const localeData: LocaleStructure<TemplateData> = {
   loadings: {
     poll: {
       title: '⌛ 投票生成中...'
