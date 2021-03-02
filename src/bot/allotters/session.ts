@@ -1,6 +1,6 @@
 import { Client, Message, MessageReaction, PartialUser, Snowflake, User } from 'discord.js';
 import { COMMAND_EDITABLE_TIME } from '../constants';
-import { removeMessageCache } from '../utils';
+import { Utils } from '../utils';
 
 type Terminater = (requestID: Snowflake) => void;
 
@@ -53,7 +53,7 @@ export default class Session {
     this.request.reactions.cache.get(this.cancelEmoji)?.users.remove()
       .catch(console.error);
 
-    removeMessageCache(this.request);
+    Utils.removeMessageCache(this.request);
 
     this.terminater(this.id);
   }

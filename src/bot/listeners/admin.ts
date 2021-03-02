@@ -1,7 +1,7 @@
 import { Client, DMChannel, Message } from 'discord.js';
 
 import { BOT_OWNER_IDS } from '../constants';
-import { partingText } from '../utils';
+import { Utils } from '../utils';
 
 export const Admin: {
   initialize(bot: Client): void;
@@ -43,7 +43,7 @@ export const Admin: {
     this.respondLog(message.channel, log);
   },
   respondLog(channel, log) {
-    const logs = partingText(log, 2000, '```', '```');
+    const logs = Utils.partingText(log, 2000, '```', '```');
 
     Promise.all(logs.map(channel.send))
       .catch(console.error);

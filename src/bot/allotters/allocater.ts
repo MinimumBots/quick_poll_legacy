@@ -4,7 +4,7 @@ import { DEBUG_MODE } from '../constants';
 import Session from './session';
 import { Help } from '../responders/help';
 import { Rejecter } from '../responders/rejecter';
-import { removeMessageCache } from '../utils';
+import { Utils } from '../utils';
 
 export type Responder = (
   request: Message, args: string[], response?: Message
@@ -55,7 +55,7 @@ export const Allocater: {
 
   allocate(request, response, session) {
     if (!response)
-      removeMessageCache(request);
+      Utils.removeMessageCache(request);
     else if (!session)
       this.sessions.set(
         request.id, new Session(request, response, id => this.free(id))

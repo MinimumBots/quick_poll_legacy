@@ -9,7 +9,7 @@ import {
   MINIMUM_BOT_PERMISSIONS,
 } from '../constants';
 
-import { removeMessageCache } from '../utils';
+import { Utils } from '../utils';
 
 import RateLimits from '../allotters/ratelimits';
 import { Allocater } from '../allotters/allocater';
@@ -45,7 +45,7 @@ export const Decrypter: {
       Allocater.submit(message, args[0], args.slice(1));
     }
     else
-      removeMessageCache(message);
+      Utils.removeMessageCache(message);
   },
   redecrypt(message) {
     if (Date.now() - message.createdTimestamp > COMMAND_EDITABLE_TIME) return;

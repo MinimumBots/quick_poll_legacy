@@ -4,7 +4,7 @@ import { BOT_OWNER_IDS, DEFAULT_LOCALE } from '../constants';
 
 import { Locales } from '../templates/locale';
 import { Preferences } from '../preferences';
-import { partingText } from '../utils';
+import { Utils } from '../utils';
 
 export const Rejecter: {
   issue(exception: unknown, request: Message): Promise<Message | void>;
@@ -61,6 +61,6 @@ export const Rejecter: {
     else
       stack = String(exception);
 
-    return partingText(stack, 1024, '```', '```');
+    return Utils.partingText(stack, 1024, '```', '```');
   }
 }
