@@ -2,7 +2,7 @@ import { Client, Guild, Message, MessageEmbed, User } from 'discord.js';
 
 import { DEFAULT_BOT_PERMISSIONS, USABLE_CHANNEL_TYPES } from '../constants';
 import { Allocater, Responder } from '../allotters/allocater';
-import { Templates } from '../templates/template';
+import { Locales } from '../templates/locale';
 import { Preferences } from '../preferences';
 
 export const Help: {
@@ -60,8 +60,7 @@ export const Help: {
 
   async getEmbed(user, guild) {
     const locale = await Preferences.fetchLocale(user, guild);
-    return Templates[locale].successes['help'].render({
-      botInviteURL: this.botInviteURL
-    });
+    const template = Locales[locale].successes.help(this.botInviteURL);
+    return new MessageEmbed(template);
   }
 }

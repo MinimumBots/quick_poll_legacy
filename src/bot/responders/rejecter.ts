@@ -1,8 +1,8 @@
-import { HTTPError, Guild, Message, User } from 'discord.js';
+import { HTTPError, Message } from 'discord.js';
 
 import { BOT_OWNER_IDS, DEFAULT_LOCALE } from '../constants';
 
-import { Locale, Templates } from '../templates/template';
+import { Locales } from '../templates/locale';
 import { Preferences } from '../preferences';
 import { partingText } from '../utils';
 
@@ -31,30 +31,27 @@ export const Rejecter: {
   },
   async forUnknown(exception, request) {
     const locale = await Preferences.fetchLocale(request.author, request.guild);
-    const template = Templates[locale].errors['unknown'];
+    const template = Locales[locale].errors.unknown();
 
     this.report(exception, request)
       .catch(console.error);
 
-    return await request.channel.send(template.render());
+    return await request.channel.send(template);
   },
   destroy(exception) {
     console.error(exception);
   },
 
   async report(exception, request) {
+    const stacks = this.renderStacks(exception);
+    const template = Locales[DEFAULT_LOCALE].reports.error(
+      request.content, stacks
+    );
     const users = await Promise.all(
       BOT_OWNER_IDS.map(userID => request.client.users.fetch(userID))
     );
-    const template = Templates[DEFAULT_LOCALE].reports['error'];
-    const stacks = this.renderStacks(exception);
-    const embed = template.render({ executedCommand: request.content });
 
-    stacks.forEach((text, index) => template.appendField(embed, {
-      stackTraceNumber: `${index + 1}`, stackTraceText: text
-    }));
-
-    await Promise.all(users.map(user => user.dmChannel?.send(embed)));
+    await Promise.all(users.map(user => user.dmChannel?.send(template)));
   },
   renderStacks(exception) {
     let stack: string;

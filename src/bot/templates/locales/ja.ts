@@ -1,5 +1,4 @@
 import { LocaleStructure } from '../locale';
-import { TemplateData } from '../template';
 import {
   COMMAND_PREFIX,
   BOT_DOCUMENT_URL,
@@ -12,14 +11,14 @@ import {
 
 const supportServerLink = `[ご質問・不具合報告](${SUPPORT_SERVER_URL})`;
 
-export const localeData: LocaleStructure<TemplateData> = {
+export const ja: LocaleStructure = {
   loadings: {
-    poll: {
+    poll: () => ({
       title: '⌛ 投票生成中...'
-    }
+    })
   },
   successes: {
-    help: {
+    help: botInviteURL => ({
       color: 0xff9440,
       title: '📊 Quick Pollの使い方',
       url: `${BOT_DOCUMENT_URL}`,
@@ -56,112 +55,120 @@ export const localeData: LocaleStructure<TemplateData> = {
           name: '↩️ でコマンドをキャンセル(3分以内)',
           value: `💟 [BOT開発・運用資金の寄付](${DONATION_SERVICE_URL})\n`
             + `⚠️ ${supportServerLink}\n`
-            + '➡️ **[サーバーへ追加]({{ botInviteURL }})**'
+            + `➡️ **[サーバーへ追加](${botInviteURL})**`
         }
       ]
-    },
-    poll: {
+    }),
+    poll: (authorIconURL, authorName, question, choices, messageID) => ({
       author: {
-        iconURL: '{{ pollAuthorIconURL }}',
-        name: '{{ pollAuthorName }}'
+        iconURL: authorIconURL,
+        name: authorName
       },
-      title: '{{ pollQuestion }}',
-      description: '{{ pollChoices }}\n\n'
-        + `[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll {{ pollMessageID }}\``,
+      title: question,
+      description: `${choices}\n\n`
+        + `[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll ${messageID}\``,
       footer: { text: '選択肢にリアクションで投票できます' }
-    },
-    expoll: {
+    }),
+    expoll: (authorIconURL, authorName, question, choices, messageID) => ({
       author: {
-        iconURL: '{{ pollAuthorIconURL }}',
-        name: '{{ pollAuthorName }}'
+        iconURL: authorIconURL,
+        name: authorName
       },
-      title: '{{ pollQuestion }}',
-      description: '{{ pollChoices }}\n\n'
-        + `[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll {{ pollMessageID }}\``,
+      title: question,
+      description: `${choices}\n\n`
+        + `[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll ${messageID}\``,
       footer: { text: '選択肢にリアクションで1人1票だけ投票できます' }
-    },
-    graphpoll: {
+    }),
+    graphpoll: (
+      authorIconURL, authorName, question, choices, choiceCounts, choiceRates, choiceGraphs
+    ) => ({
       author: {
-        iconURL: '{{ pollAuthorIconURL }}',
-        name: '{{ pollAuthorName }}'
+        iconURL: authorIconURL,
+        name: authorName
       },
-      title: '{{ pollQuestion }}',
-      field: {
-        name: '{{ pollChoice }} ({{ pollChoiceCount }}票)',
-        value: '`{{ pollChoiceRate }}%` {{ pollChoiceGraph }}'
+      title: question,
+      get fields() {
+        return choices.map((choice, i) => ({
+          name: `${choice} (${choiceCounts[i]}票)`,
+          value: `\`${choiceRates[i]}%\` ${choiceGraphs[i]}`
+        }));
       }
-    },
-    listpoll: {
+    }),
+    listpoll: (
+      authorIconURL, authorName, question, choices, choiceCounts, choiceRates, choiceUsersLists
+    ) => ({
       author: {
-        iconURL: '{{ pollAuthorIconURL }}',
-        name: '{{ pollAuthorName }}'
+        iconURL: authorIconURL,
+        name: authorName
       },
-      title: '{{ pollQuestion }}',
-      field: {
-        name: '{{ pollChoice }} ({{ pollChoiceCount }}票|{{ pollChoiceRate }}%)',
-        value: '{{ polledUsersList }}'
+      title: question,
+      get fields() {
+        return choices.map((choice, i) => ({
+          name: `${choice} (${choiceCounts[i]}票|${choiceRates[i]}%)`,
+          value: choiceUsersLists[i]
+        }));
       }
-    }
+    })
   },
   errors: {
-    unknown: {
+    unknown: () => ({
       title: '⚠️ 予期しない原因でコマンドの実行に失敗しました',
-      description: '開発チームにエラー情報を送信しました\n\n'
-        + supportServerLink
-    },
-    lackPermission: {
+      description: `開発チームにエラー情報を送信しました\n\n${supportServerLink}`
+    }),
+    lackPermission: permissionNames => ({
       title: '⚠️ コマンドに必要な権限が不足しています',
       description: 'BOTに以下の権限が付与されているか確認してください\n'
-        + '{{ lackPermissionNames }}\n\n'
-        + supportServerLink
-    },
-    tooManyOptions: {
+        + `${permissionNames}\n\n${supportServerLink}`
+    }),
+    tooManyOptions: () => ({
       title: `⚠️ 選択肢が ${COMMAND_MAX_OPTIONS} 個を超えています`,
       description: supportServerLink
-    },
-    tooLongQuestion: {
+    }),
+    tooLongQuestion: () => ({
       title: `⚠️ 質問文が ${COMMAND_QUESTION_MAX} 文字を超えています`,
       description: supportServerLink
-    },
-    tooLongOption: {
+    }),
+    tooLongOption: () => ({
       title: `⚠️ 選択肢が ${COMMAND_OPTION_MAX} 文字を超えています`,
       description: supportServerLink
-    },
-    duplicateEmojis: {
+    }),
+    duplicateEmojis: () => ({
       title: '⚠️ 絵文字が重複しています',
       description: supportServerLink
-    },
-    unknownEmoji: {
+    }),
+    unknownEmoji: () => ({
       title: '⚠️ 使用できない絵文字が含まれています',
       description: '投票に外部サーバーの絵文字を使用したい場合は、そのサーバーへBOTを導入する必要があります。\n\n'
         + supportServerLink
-    },
-    unusableEmoji: {
+    }),
+    unusableEmoji: () => ({
       title: '⚠️ 使用できない絵文字が含まれています',
       description: 'BOTに与えられたロールでは使用できない絵文字が含まれています。\n\n'
         + supportServerLink
-    },
-    unavailableExclusive: {
+    }),
+    unavailableExclusive: () => ({
       title: `⚠️ DM内では${COMMAND_PREFIX}expollコマンドを使用できません`,
       description: supportServerLink
-    },
-    notExistPoll: {
+    }),
+    notExistPoll: () => ({
       title: '⚠️ 指定された投票が見つかりません',
       description: supportServerLink
-    },
-    notPolled: {
+    }),
+    notPolled: () => ({
       title: '⚠️ まだ誰も投票していません',
       description: supportServerLink
-    }
+    })
   },
   reports: {
-    error: {
+    error: (executedCommand, traceTexts) => ({
       title: '⚠️ エラーレポート',
-      fields: [{ name: '実行コマンド', value: '{{ executedCommand }}' }],
-      field: {
-        name: 'バックトレース{{ stackTraceNumber }}',
-        value: '```{{ stackTraceText }}```'
+      description: `実行コマンド\n\`\`\`${executedCommand}\`\`\``,
+      get fields() {
+        return traceTexts.map((text, i) => ({
+          name: `バックトレース${i}`,
+          value: `\`\`\`${text}\`\`\``
+        }));
       }
-    }
+    })
   }
 };
