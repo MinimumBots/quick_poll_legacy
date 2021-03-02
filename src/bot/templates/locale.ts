@@ -2,7 +2,7 @@ import {
   LoadingTemplate,
   SuccesseTemplate,
   ErrorTemplate,
-  ReportTemplate
+  ReportTemplate,
 } from './template';
 
 export type LocaleStructure = {
@@ -11,6 +11,15 @@ export type LocaleStructure = {
   errors   : ErrorTemplate;
   reports  : ReportTemplate;
 };
+
+export const DefaultColors: {
+  [Group in keyof LocaleStructure]: number;
+} = {
+  loadings : 0x9867c6,
+  successes: 0x67b160,
+  errors   : 0xffcc4d,
+  reports  : 0xffcc4d,
+}
 
 import { ja } from './locales/ja';
 

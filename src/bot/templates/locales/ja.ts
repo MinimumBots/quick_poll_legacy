@@ -1,4 +1,4 @@
-import { LocaleStructure } from '../locale';
+import { LocaleStructure, DefaultColors } from '../locale';
 import {
   COMMAND_PREFIX,
   BOT_DOCUMENT_URL,
@@ -6,7 +6,8 @@ import {
   DONATION_SERVICE_URL,
   COMMAND_MAX_OPTIONS,
   COMMAND_QUESTION_MAX,
-  COMMAND_OPTION_MAX
+  COMMAND_OPTION_MAX,
+  COLORS
 } from '../../constants';
 
 const supportServerLink = `[ご質問・不具合報告](${SUPPORT_SERVER_URL})`;
@@ -14,12 +15,13 @@ const supportServerLink = `[ご質問・不具合報告](${SUPPORT_SERVER_URL})`
 export const ja: LocaleStructure = {
   loadings: {
     poll: () => ({
+      color: DefaultColors.loadings,
       title: '⌛ 投票生成中...'
     })
   },
   successes: {
     help: botInviteURL => ({
-      color: 0xff9440,
+      color: COLORS.HELP,
       title: '📊 Quick Pollの使い方',
       url: `${BOT_DOCUMENT_URL}`,
       description: 'アンケートを作成し、投票を募ることができるBOTです。\n'
@@ -60,6 +62,7 @@ export const ja: LocaleStructure = {
       ]
     }),
     poll: (authorIconURL, authorName, question, choices, messageID) => ({
+      color: COLORS.POLL,
       author: {
         iconURL: authorIconURL,
         name: authorName
@@ -70,6 +73,7 @@ export const ja: LocaleStructure = {
       footer: { text: '選択肢にリアクションで投票できます' }
     }),
     expoll: (authorIconURL, authorName, question, choices, messageID) => ({
+      color: COLORS.EXPOLL,
       author: {
         iconURL: authorIconURL,
         name: authorName
@@ -82,6 +86,7 @@ export const ja: LocaleStructure = {
     graphpoll: (
       authorIconURL, authorName, question, choices, choiceCounts, choiceRates, choiceGraphs
     ) => ({
+      color: COLORS.RESULT,
       author: {
         iconURL: authorIconURL,
         name: authorName
@@ -97,6 +102,7 @@ export const ja: LocaleStructure = {
     listpoll: (
       authorIconURL, authorName, question, choices, choiceCounts, choiceRates, choiceUsersLists
     ) => ({
+      color: COLORS.RESULT,
       author: {
         iconURL: authorIconURL,
         name: authorName

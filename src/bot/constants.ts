@@ -4,7 +4,7 @@ import {
   NewsChannel,
   TextChannel,
   Permissions,
-  PermissionString
+  PermissionString,
 } from 'discord.js';
 import { LocaleID } from './templates/locale';
 
@@ -66,3 +66,11 @@ export const BOT_RATE_LIMIT  = 30;
 export const COMMAND_MAX_OPTIONS  = 20;
 export const COMMAND_QUESTION_MAX = 200;
 export const COMMAND_OPTION_MAX   = 80;
+
+export const COLORS = {
+  HELP  : 0xff9440,
+  POLL  : 0x3b88c3,
+  EXPOLL: 0x3b88c4,
+  RESULT: 0xdd2e44,
+  ENDED : 0x818181,
+}
