@@ -1,6 +1,6 @@
 import { Client, Guild, Message, MessageEmbed, User } from 'discord.js';
 
-import { DEFAULT_BOT_PERMISSIONS, USABLE_CHANNEL_TYPES } from '../constants';
+import { DEFAULT_BOT_PERMISSIONS, USABLE_CHANNEL_TYPES } from '../../constants';
 import { Allocater, Responder } from '../allotters/allocater';
 import { Locales } from '../templates/locale';
 import { Preferences } from '../preferences';

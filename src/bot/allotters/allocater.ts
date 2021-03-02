@@ -1,6 +1,6 @@
 import { Client, Collection, Message, Snowflake } from 'discord.js';
 
-import { DEBUG_MODE } from '../constants';
+import { DEBUG_MODE } from '../../constants';
 import Session from './session';
 import { Help } from '../responders/help';
 import { Rejecter } from '../responders/rejecter';

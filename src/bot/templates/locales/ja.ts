@@ -8,7 +8,7 @@ import {
   COMMAND_QUESTION_MAX,
   COMMAND_OPTION_MAX,
   COLORS
-} from '../../constants';
+} from '../../../constants';
 
 const supportServerLink = `[ご質問・不具合報告](${SUPPORT_SERVER_URL})`;
 

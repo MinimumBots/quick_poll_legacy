@@ -1,5 +1,5 @@
 import { Client, Message, MessageReaction, PartialUser, Snowflake, User } from 'discord.js';
-import { COMMAND_EDITABLE_TIME } from '../constants';
+import { COMMAND_EDITABLE_TIME } from '../../constants';
 import { Utils } from '../utils';
 
 type Terminater = (requestID: Snowflake) => void;

@@ -6,21 +6,24 @@ import {
   Permissions,
   PermissionString,
 } from 'discord.js';
-import { LocaleID } from './templates/locale';
+import { LocaleID } from './bot/templates/locale';
 
 export const DEBUG_MODE: boolean = process.env['DEBUG_MODE'] === 'true';
 
 export const BOT_OWNER_IDS: string[]
   = process.env['BOT_OWNER_IDS']?.split(',') ?? [];
 
-export const COMMAND_PREFIX
+export const BOT_TOTAL_SHARDS: number | 'auto'
+  = Number(process.env['BOT_TOTAL_SHARDS']) || 'auto';
+
+export const COMMAND_PREFIX: string
   = process.env['npm_package_config_commandPrefix'] ?? '/';
 
-export const BOT_DOCUMENT_URL
+export const BOT_DOCUMENT_URL: string
   = process.env['npm_package_config_botDocumentURL'] ?? '';
-export const SUPPORT_SERVER_URL
+export const SUPPORT_SERVER_URL: string
   = process.env['npm_package_config_supportServerURL'] ?? '';
-export const DONATION_SERVICE_URL
+export const DONATION_SERVICE_URL: string
   = process.env['npm_package_config_donationServiceURL'] ?? '';
 
 export const BOT_INTENTS = 0

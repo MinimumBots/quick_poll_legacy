@@ -1,6 +1,6 @@
 import { Client, DMChannel, Message } from 'discord.js';
 
-import { BOT_OWNER_IDS } from '../constants';
+import { BOT_OWNER_IDS } from '../../constants';
 import { Utils } from '../utils';
 
 export const Admin: {

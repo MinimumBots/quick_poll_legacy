@@ -1,6 +1,6 @@
 import { Guild, User } from 'discord.js';
 
-import { DEFAULT_LOCALE } from './constants';
+import { DEFAULT_LOCALE } from '../constants';
 import { LocaleID } from './templates/locale';
 
 export const Preferences: {

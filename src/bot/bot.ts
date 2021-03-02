@@ -1,6 +1,6 @@
 import { Client } from 'discord.js';
 
-import { BOT_INTENTS, PRESENCE_UPDATE_INTERVAL } from './constants';
+import { BOT_INTENTS, PRESENCE_UPDATE_INTERVAL } from '../constants';
 import { Utils } from './utils';
 
 import { Admin } from './listeners/admin';

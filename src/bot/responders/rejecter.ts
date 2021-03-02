@@ -1,6 +1,6 @@
 import { HTTPError, Message } from 'discord.js';
 
-import { BOT_OWNER_IDS, DEFAULT_LOCALE } from '../constants';
+import { BOT_OWNER_IDS, DEFAULT_LOCALE } from '../../constants';
 
 import { Locales } from '../templates/locale';
 import { Preferences } from '../preferences';

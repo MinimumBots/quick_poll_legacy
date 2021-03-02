@@ -7,7 +7,7 @@ import {
   COMMAND_EDITABLE_TIME,
   COMMAND_PREFIX,
   MINIMUM_BOT_PERMISSIONS,
-} from '../constants';
+} from '../../constants';
 
 import { Utils } from '../utils';
 
