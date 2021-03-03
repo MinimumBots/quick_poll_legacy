@@ -12,6 +12,7 @@ export type SuccesseTemplate = {
     authorIconURL: string,
     authorName   : string,
     question     : string,
+    selectors    : string[],
     choices      : string,
     messageID    : string,
   ): MessageEmbedOptions;
@@ -19,22 +20,27 @@ export type SuccesseTemplate = {
     authorIconURL: string,
     authorName   : string,
     question     : string,
+    selectors    : string[],
     choices      : string,
     messageID    : string,
   ): MessageEmbedOptions;
   graphpoll(
+    pollURL      : string,
     authorIconURL: string,
     authorName   : string,
     question     : string,
+    selectors    : string[],
     choices      : string[],
     choiceCounts : number[],
     choiceRates  : number[],
     choiceGraphs : string[],
   ): MessageEmbedOptions;
   listpoll(
+    pollURL         : string,
     authorIconURL   : string,
     authorName      : string,
     question        : string,
+    selectors       : string[],
     choices         : string[],
     choiceCounts    : number[],
     choiceRates     : number[],

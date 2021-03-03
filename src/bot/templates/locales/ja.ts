@@ -61,30 +61,36 @@ export const ja: LocaleStructure = {
         }
       ]
     }),
-    poll: (authorIconURL, authorName, question, choices, messageID) => ({
+    poll: (authorIconURL, authorName, question, selectors, choices, messageID) => ({
       color: COLORS.POLL,
       author: {
         iconURL: authorIconURL,
         name: authorName
       },
-      title: question,
-      description: `${choices}\n\n`
-        + `[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll ${messageID}\``,
+      title: `${question}\u200C`,
+      get description() {
+        return selectors.map((selector, i) => `\u200B${selector} ${choices[i]}\u200C`)
+          .join('\n')
+          + `\n\n[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll ${messageID}\``;
+      },
       footer: { text: '選択肢にリアクションで投票できます' }
     }),
-    expoll: (authorIconURL, authorName, question, choices, messageID) => ({
+    expoll: (authorIconURL, authorName, question, selectors, choices, messageID) => ({
       color: COLORS.EXPOLL,
       author: {
         iconURL: authorIconURL,
         name: authorName
       },
-      title: question,
-      description: `${choices}\n\n`
-        + `[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll ${messageID}\``,
+      title: `${question}\u200C`,
+      get description() {
+        return selectors.map((selector, i) => `\u200B${selector} ${choices[i]}\u200C`)
+          .join('\n')
+          + `\n\n[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll ${messageID}\``;
+      },
       footer: { text: '選択肢にリアクションで1人1票だけ投票できます' }
     }),
     graphpoll: (
-      authorIconURL, authorName, question, choices, choiceCounts, choiceRates, choiceGraphs
+      pollURL, authorIconURL, authorName, question, selectors, choices, choiceCounts, choiceRates, choiceGraphs
     ) => ({
       color: COLORS.RESULT,
       author: {
@@ -92,15 +98,16 @@ export const ja: LocaleStructure = {
         name: authorName
       },
       title: question,
+      url: pollURL,
       get fields() {
-        return choices.map((choice, i) => ({
-          name: `${choice} (${choiceCounts[i]}票)`,
+        return selectors.map((selector, i) => ({
+          name: `${selector} ${choices[i]} (${choiceCounts[i]}票)`,
           value: `\`${choiceRates[i]}%\` ${choiceGraphs[i]}`
         }));
       }
     }),
     listpoll: (
-      authorIconURL, authorName, question, choices, choiceCounts, choiceRates, choiceUsersLists
+      pollURL, authorIconURL, authorName, question, selectors, choices, choiceCounts, choiceRates, choiceUsersLists
     ) => ({
       color: COLORS.RESULT,
       author: {
@@ -108,9 +115,10 @@ export const ja: LocaleStructure = {
         name: authorName
       },
       title: question,
+      url: pollURL,
       get fields() {
-        return choices.map((choice, i) => ({
-          name: `${choice} (${choiceCounts[i]}票|${choiceRates[i]}%)`,
+        return selectors.map((selector, i) => ({
+          name: `${selector} ${choices[i]} (${choiceCounts[i]}票|${choiceRates[i]}%)`,
           value: choiceUsersLists[i]
         }));
       }
