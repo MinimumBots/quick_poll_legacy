@@ -23,10 +23,10 @@ export const DefaultColors: {
 
 import { ja } from './locales/ja';
 
-export type LocaleID = 'ja';
+export type Lang = 'ja';
 
 export const Locales: {
-  [ID in LocaleID]: LocaleStructure;
+  [Key in Lang]: LocaleStructure;
 } = {
   ja
 };

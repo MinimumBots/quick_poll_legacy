@@ -6,7 +6,7 @@ import {
   Permissions,
   PermissionString,
 } from 'discord.js';
-import { LocaleID } from './bot/templates/locale';
+import { Lang } from './bot/templates/locale';
 
 export const DEBUG_MODE: boolean = process.env['DEBUG_MODE'] === 'true';
 
@@ -55,7 +55,7 @@ export const MINIMUM_BOT_PERMISSIONS: PermissionString[] = [
 
 Permissions.FLAGS
 
-export const DEFAULT_LOCALE: LocaleID = 'ja';
+export const DEFAULT_LANG: Lang = 'ja';
 
 export type USABLE_CHANNEL_TYPES = DMChannel | TextChannel | NewsChannel;
 export type USABLE_GUILD_CHANNEL_TYPES = TextChannel | NewsChannel;

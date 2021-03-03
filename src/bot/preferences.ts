@@ -1,24 +1,24 @@
 import { Guild, User } from 'discord.js';
 
-import { DEFAULT_LOCALE } from '../constants';
-import { LocaleID } from './templates/locale';
+import { DEFAULT_LANG } from '../constants';
+import { Lang } from './templates/locale';
 
 export const Preferences: {
-  fetchLocale(user: User, guild?: Guild | null): Promise<LocaleID>;
-  fetchUserLocale(user: User): Promise<LocaleID | undefined>;
-  fetchGuildLocale(guild: Guild | null): Promise<LocaleID | undefined>;
+  fetchLang(user: User, guild?: Guild | null): Promise<Lang>;
+  fetchUserLang(user: User): Promise<Lang | undefined>;
+  fetchGuildLang(guild: Guild | null): Promise<Lang | undefined>;
 } = {
-  async fetchLocale(user, guild) {
+  async fetchLang(user, guild) {
     return (
-      await this.fetchUserLocale(user)
-      ?? (guild && await this.fetchGuildLocale(guild))
-      ?? DEFAULT_LOCALE
+      await this.fetchUserLang(user)
+      ?? (guild && await this.fetchGuildLang(guild))
+      ?? DEFAULT_LANG
     );
   },
-  async fetchUserLocale(user) {
+  async fetchUserLang(user) {
     return undefined;
   },
-  async fetchGuildLocale(guild) {
+  async fetchGuildLang(guild) {
     return undefined;
   }
 };

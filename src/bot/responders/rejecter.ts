@@ -1,6 +1,6 @@
 import { HTTPError, Message } from 'discord.js';
 
-import { BOT_OWNER_IDS, DEFAULT_LOCALE } from '../../constants';
+import { BOT_OWNER_IDS, DEFAULT_LANG } from '../../constants';
 
 import { Locales } from '../templates/locale';
 import { Preferences } from '../preferences';
@@ -30,8 +30,8 @@ export const Rejecter: {
       return await this.forUnknown(exception, request);
   },
   async forUnknown(exception, request) {
-    const locale = await Preferences.fetchLocale(request.author, request.guild);
-    const template = Locales[locale].errors.unknown();
+    const lang = await Preferences.fetchLang(request.author, request.guild);
+    const template = Locales[lang].errors.unknown();
 
     this.report(exception, request)
       .catch(console.error);
@@ -44,7 +44,7 @@ export const Rejecter: {
 
   async report(exception, request) {
     const stacks = this.renderStacks(exception);
-    const template = Locales[DEFAULT_LOCALE].reports.error(
+    const template = Locales[DEFAULT_LANG].reports.error(
       request.content, stacks
     );
     const users = await Promise.all(
