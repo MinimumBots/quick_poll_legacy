@@ -1,7 +1,7 @@
 import { Client, Guild, Message, PartialMessage, User } from 'discord.js';
 
 import {
-  USABLE_CHANNEL_TYPES,
+  USABLE_CHANNEL,
   USER_RATE_LIMIT,
   BOT_RATE_LIMIT,
   COMMAND_EDITABLE_TIME,
@@ -26,7 +26,7 @@ export const Decrypter: {
 
   accept(message: Message): boolean;
   isMatch(message: Message): boolean;
-  hasPermissions(channel: USABLE_CHANNEL_TYPES): boolean;
+  hasPermissions(channel: USABLE_CHANNEL): boolean;
   isUnderRate(user: User, guild: Guild | null): boolean;
 
   parse(content: string): string[];

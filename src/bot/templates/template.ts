@@ -50,7 +50,10 @@ export type SuccesseTemplate = {
 
 export type ErrorTemplate = {
   unknown()             : MessageEmbedOptions;
-  lackPermission(permissionNames: string): MessageEmbedOptions;
+  lackPermission(permissionNames: string[]): MessageEmbedOptions;
+  duplicateChannels()   : MessageEmbedOptions;
+  unusableChannel()     : MessageEmbedOptions;
+  unavailableChannel()  : MessageEmbedOptions;
   tooManyOptions()      : MessageEmbedOptions;
   tooLongQuestion()     : MessageEmbedOptions;
   tooLongOption()       : MessageEmbedOptions;

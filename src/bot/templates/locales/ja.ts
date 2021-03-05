@@ -4,9 +4,9 @@ import {
   BOT_DOCUMENT_URL,
   SUPPORT_SERVER_URL,
   DONATION_SERVICE_URL,
-  COMMAND_MAX_OPTIONS,
+  COMMAND_MAX_CHOICES,
   COMMAND_QUESTION_MAX,
-  COMMAND_OPTION_MAX,
+  COMMAND_CHOICE_MAX,
   COLORS
 } from '../../../constants';
 
@@ -46,7 +46,7 @@ export const ja: LocaleStructure = {
         {
           name: '🌟 ヒント',
           value: '```\n'
-            + `● 投票の選択肢は最大${COMMAND_MAX_OPTIONS}個まで\n`
+            + `● 投票の選択肢は最大${COMMAND_MAX_CHOICES}個まで\n`
             + '● 文・絵文字の区切りは半角スペースか改行\n'
             + '● 半角スペースを含めたい場合 "" で文を囲む\n'
             + '● 画像を添付すると画像付きの投票を作成\n'
@@ -131,11 +131,27 @@ export const ja: LocaleStructure = {
     }),
     lackPermission: permissionNames => ({
       title: '⚠️ コマンドに必要な権限が不足しています',
-      description: 'BOTに以下の権限が付与されているか確認してください\n'
-        + `${permissionNames}\n\n${supportServerLink}`
+      get description() {
+        return 'BOTに以下の権限が付与されているか確認してください\n'
+          + `\`\`\`\n${permissionNames.join('\n')}\n\`\`\``
+          + `\n\n${supportServerLink}`;
+      }
+    }),
+    duplicateChannels: () => ({
+      title: '⚠️ チャンネルが複数指定されています',
+      description: supportServerLink
+    }),
+    unusableChannel: () => ({
+      title: '⚠️ 使用できないチャンネルが指定されています',
+      description: 'アンケートを送信できるのは同じサーバーのチャンネルのみです。\n\n'
+        + supportServerLink
+    }),
+    unavailableChannel: () => ({
+      title: '⚠️ DM内ではアンケートを送信するチャンネルは指定できません',
+      description: supportServerLink
     }),
     tooManyOptions: () => ({
-      title: `⚠️ 選択肢が ${COMMAND_MAX_OPTIONS} 個を超えています`,
+      title: `⚠️ 選択肢が ${COMMAND_MAX_CHOICES} 個を超えています`,
       description: supportServerLink
     }),
     tooLongQuestion: () => ({
@@ -143,7 +159,7 @@ export const ja: LocaleStructure = {
       description: supportServerLink
     }),
     tooLongOption: () => ({
-      title: `⚠️ 選択肢が ${COMMAND_OPTION_MAX} 文字を超えています`,
+      title: `⚠️ 選択肢が ${COMMAND_CHOICE_MAX} 文字を超えています`,
       description: supportServerLink
     }),
     duplicateEmojis: () => ({

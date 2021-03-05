@@ -7,7 +7,7 @@ import { Rejecter } from '../responders/rejecter';
 import { Utils } from '../utils';
 
 export type Responder = (
-  request: Message, args: string[], response?: Message
+  request: Message, prefix: string, args: string[], response?: Message
 ) => Promise<Message | undefined>;
 export type CommandArgs = string[];
 
@@ -18,7 +18,9 @@ export const Allocater: {
   readonly sessions  : Collection<Snowflake, Session>;
 
   submit(request: Message, prefix: string, args: CommandArgs): void;
-  respond(request: Message, responder: Responder, args: CommandArgs): void;
+  respond(
+    request: Message, responder: Responder, prefix: string, args: CommandArgs
+  ): void;
 
   exception(exception: unknown, request: Message): void;
 
@@ -34,13 +36,13 @@ export const Allocater: {
 
   submit(request, prefix, args) {
     const responder = this.responders.get(prefix);
-    if (responder) this.respond(request, responder, args);
+    if (responder) this.respond(request, responder, prefix, args);
   },
-  respond(request, responder, args) {
+  respond(request, responder, prefix, args) {
     const session = this.sessions.get(request.id);
     const response = session?.response;
 
-    responder(request, args, response)
+    responder(request, prefix, args, response)
       .then(response => this.allocate(request, response, session))
       .catch(exception => this.exception(exception, request));
   },

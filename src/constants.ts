@@ -3,7 +3,6 @@ import {
   DMChannel,
   NewsChannel,
   TextChannel,
-  Permissions,
   PermissionString,
 } from 'discord.js';
 import { Lang } from './bot/templates/locale';
@@ -26,8 +25,8 @@ export const SUPPORT_SERVER_URL: string
 export const DONATION_SERVICE_URL: string
   = process.env['npm_package_config_donationServiceURL'] ?? '';
 
-export const BOT_INTENTS = 0
-  | Intents.FLAGS.GUILDS
+export const BOT_INTENTS
+  = Intents.FLAGS.GUILDS
   | Intents.FLAGS.GUILD_EMOJIS
   | Intents.FLAGS.GUILD_WEBHOOKS
   | Intents.FLAGS.GUILD_MESSAGES
@@ -53,12 +52,10 @@ export const MINIMUM_BOT_PERMISSIONS: PermissionString[] = [
   'EMBED_LINKS',
 ];
 
-Permissions.FLAGS
-
 export const DEFAULT_LANG: Lang = 'ja';
 
-export type USABLE_CHANNEL_TYPES = DMChannel | TextChannel | NewsChannel;
-export type USABLE_GUILD_CHANNEL_TYPES = TextChannel | NewsChannel;
+export type USABLE_CHANNEL = DMChannel | TextChannel | NewsChannel;
+export type USABLE_GUILD_CHANNEL = TextChannel | NewsChannel;
 
 export const PRESENCE_UPDATE_INTERVAL = 60 * 1000;
 export const COMMAND_EDITABLE_TIME = 3 * 60 * 1000;
@@ -66,9 +63,9 @@ export const COMMAND_EDITABLE_TIME = 3 * 60 * 1000;
 export const USER_RATE_LIMIT = 60;
 export const BOT_RATE_LIMIT  = 30;
 
-export const COMMAND_MAX_OPTIONS  = 20;
+export const COMMAND_MAX_CHOICES  = 20;
 export const COMMAND_QUESTION_MAX = 200;
-export const COMMAND_OPTION_MAX   = 80;
+export const COMMAND_CHOICE_MAX   = 80;
 
 export const COLORS = {
   HELP  : 0xff9440,
@@ -76,4 +73,4 @@ export const COLORS = {
   EXPOLL: 0x3b88c4,
   RESULT: 0xdd2e44,
   ENDED : 0x818181,
-}
+};

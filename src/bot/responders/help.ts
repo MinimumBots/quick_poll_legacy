@@ -1,6 +1,6 @@
-import { Client, Guild, Message, MessageEmbed, User } from 'discord.js';
+import { Client, Guild, MessageEmbed, User } from 'discord.js';
 
-import { DEFAULT_BOT_PERMISSIONS, USABLE_CHANNEL_TYPES } from '../../constants';
+import { DEFAULT_BOT_PERMISSIONS } from '../../constants';
 import { Allocater, Responder } from '../allotters/allocater';
 import { Locales } from '../templates/locale';
 import { Preferences } from '../preferences';
@@ -8,15 +8,10 @@ import { Preferences } from '../preferences';
 export const Help: {
   initialize(bot: Client): void;
   entryResponder(bot: Client): void;
-  generateInviteURL(bot: Client): void;
   botInviteURL: string;
+  generateInviteURL(bot: Client): void;
 
   respond: Responder;
-  create: (
-    channel: USABLE_CHANNEL_TYPES, embed: MessageEmbed
-  ) => Promise<Message>;
-  edit: (response: Message, embed: MessageEmbed) => Promise<Message>;
-
   getEmbed: (user: User, guild: Guild | null) => Promise<MessageEmbed>;
 } = {
   initialize(bot) {
@@ -28,39 +23,30 @@ export const Help: {
       bot.setTimeout(() => this.entryResponder(bot), 30000);
     else {
       Allocater.responders.set(
-        `<@${bot.user.id}>`,  (...params) => Help.respond(...params)
+        `<@${bot.user.id}>`,  (...params) => this.respond(...params)
       );
       Allocater.responders.set(
-        `<@!${bot.user.id}>`, (...params) => Help.respond(...params)
+        `<@!${bot.user.id}>`, (...params) => this.respond(...params)
       );
     }
   },
+  botInviteURL: '',
   generateInviteURL(bot) {
     bot.generateInvite({ permissions: DEFAULT_BOT_PERMISSIONS })
       .then(url => this.botInviteURL = url)
       .catch(() => bot.setTimeout(() => this.generateInviteURL(bot), 30000));
   },
-  botInviteURL: '',
 
-  async respond(request, args, response) {
+  async respond(request, _, args, response) {
     if (args.length) return;
 
     const embed = await this.getEmbed(request.author, request.guild);
-    if (!response)
-      return this.create(request.channel, embed);
-    else
-      return this.edit(response, embed);
-  },
-  create(channel, embed) {
-    return channel.send(embed);
-  },
-  edit(response, embed) {
-    return response.edit(embed);
+    return response ? response.edit(embed) : request.channel.send(embed);
   },
 
   async getEmbed(user, guild) {
-    const locale = await Preferences.fetchLocale(user, guild);
-    const template = Locales[locale].successes.help(this.botInviteURL);
+    const lang = await Preferences.fetchLang(user, guild);
+    const template = Locales[lang].successes.help(this.botInviteURL);
     return new MessageEmbed(template);
   }
 }
