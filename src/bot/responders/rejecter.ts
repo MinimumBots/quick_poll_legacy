@@ -6,44 +6,43 @@ import { Locales } from '../templates/locale';
 import { Preferences } from '../preferences';
 import { Utils } from '../utils';
 
-export const Rejecter: {
-  issue(exception: unknown, request: Message): Promise<Message | void>;
-
-  forHTTPError(exception: HTTPError, request: Message): Promise<Message | void>;
-  forUnknown(exception: unknown, request: Message): Promise<Message>;
-  destroy(exception: unknown): void;
-
-  report(exception: unknown, request: Message): Promise<void>;
-  renderStacks(exception: unknown): string[];
-} = {
-  async issue(exception, request) {
+export namespace Rejecter {
+  export async function issue(
+    exception: unknown, request: Message
+  ): Promise<Message | void> {
     if (exception instanceof HTTPError)
-      return await this.forHTTPError(exception, request);
+      return await forHTTPError(exception, request);
     else
-      return await this.forUnknown(exception, request);
-  },
+      return await forUnknown(exception, request);
+  }
 
-  async forHTTPError(exception, request) {
+  async function forHTTPError(
+    exception: HTTPError, request: Message
+  ): Promise<Message | void> {
     if (exception.code / 500)
-      return this.destroy(exception);
+      return destroy(exception);
     else
-      return await this.forUnknown(exception, request);
-  },
-  async forUnknown(exception, request) {
+      return await forUnknown(exception, request);
+  }
+
+  async function forUnknown(
+    exception: unknown, request: Message
+  ): Promise<Message> {
     const lang = await Preferences.fetchLang(request.author, request.guild);
     const template = Locales[lang].errors.unknown();
 
-    this.report(exception, request)
+    report(exception, request)
       .catch(console.error);
 
     return await request.channel.send(template);
-  },
-  destroy(exception) {
-    console.error(exception);
-  },
+  }
 
-  async report(exception, request) {
-    const stacks = this.renderStacks(exception);
+  function destroy(exception: unknown): void {
+    console.error(exception);
+  }
+
+  async function report(exception: unknown, request: Message): Promise<void> {
+    const stacks = renderStacks(exception);
     const template = Locales[DEFAULT_LANG].reports.error(
       request.content, stacks
     );
@@ -52,8 +51,9 @@ export const Rejecter: {
     );
 
     await Promise.all(users.map(user => user.dmChannel?.send(template)));
-  },
-  renderStacks(exception) {
+  }
+
+  function renderStacks(exception: unknown): string[] {
     let stack: string;
 
     if (exception instanceof Error)

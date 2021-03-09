@@ -34,22 +34,30 @@ export const BOT_INTENTS
   | Intents.FLAGS.DIRECT_MESSAGES
   | Intents.FLAGS.DIRECT_MESSAGE_REACTIONS;
 
-export const DEFAULT_BOT_PERMISSIONS: PermissionString[] = [
+export const MINIMUM_BOT_PERMISSIONS: PermissionString[] = [
+  'VIEW_CHANNEL',
+  'SEND_MESSAGES',
+  'EMBED_LINKS',
+];
+export const DEFAULT_BOT_PERMISSIONS: PermissionString[]
+  = MINIMUM_BOT_PERMISSIONS.concat(
+    'ADD_REACTIONS',
+    'MANAGE_MESSAGES',
+    'ATTACH_FILES',
+    'READ_MESSAGE_HISTORY',
+    'MENTION_EVERYONE',
+    'USE_EXTERNAL_EMOJIS',
+    'MANAGE_WEBHOOKS',
+  );
+export const ASSUMING_DM_PERMISSIONS: PermissionString[] = [
   'ADD_REACTIONS',
   'VIEW_CHANNEL',
   'SEND_MESSAGES',
-  'MANAGE_MESSAGES',
   'EMBED_LINKS',
   'ATTACH_FILES',
   'READ_MESSAGE_HISTORY',
   'MENTION_EVERYONE',
   'USE_EXTERNAL_EMOJIS',
-  'MANAGE_WEBHOOKS',
-];
-export const MINIMUM_BOT_PERMISSIONS: PermissionString[] = [
-  'VIEW_CHANNEL',
-  'SEND_MESSAGES',
-  'EMBED_LINKS',
 ];
 
 export const DEFAULT_LANG: Lang = 'ja';

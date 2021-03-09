@@ -7,16 +7,49 @@ import {
   COMMAND_MAX_CHOICES,
   COMMAND_QUESTION_MAX,
   COMMAND_CHOICE_MAX,
-  COLORS
+  COLORS,
 } from '../../../constants';
 
 const supportServerLink = `[ご質問・不具合報告](${SUPPORT_SERVER_URL})`;
 
 export const ja: LocaleStructure = {
+  permissionNames: {
+    CREATE_INSTANT_INVITE: '招待を作成',
+    KICK_MEMBERS         : 'メンバーをキック',
+    BAN_MEMBERS          : 'メンバーをBAN',
+    ADMINISTRATOR        : '管理者',
+    MANAGE_CHANNELS      : 'チャンネルの管理',
+    MANAGE_GUILD         : 'サーバー管理',
+    ADD_REACTIONS        : 'リアクションの追加',
+    VIEW_AUDIT_LOG       : '監査ログを表示',
+    PRIORITY_SPEAKER     : '優先スピーカー',
+    STREAM               : '動画',
+    VIEW_CHANNEL         : 'チャンネルを見る',
+    SEND_MESSAGES        : 'メッセージを送信',
+    SEND_TTS_MESSAGES    : 'テキスト読み上げメッセージを送信する',
+    MANAGE_MESSAGES      : 'メッセージの管理',
+    EMBED_LINKS          : '埋め込みリンク',
+    ATTACH_FILES         : 'ファイルを添付',
+    READ_MESSAGE_HISTORY : 'メッセージ履歴を読む',
+    MENTION_EVERYONE     : '@everyone、@here、全てのロールにメンション',
+    USE_EXTERNAL_EMOJIS  : '外部の絵文字を使用する',
+    VIEW_GUILD_INSIGHTS  : 'サーバーインサイトを見る',
+    CONNECT              : '接続',
+    SPEAK                : '発言',
+    MUTE_MEMBERS         : 'メンバーをミュート',
+    DEAFEN_MEMBERS       : 'メンバーのスピーカーをミュート',
+    MOVE_MEMBERS         : 'メンバーを移動',
+    USE_VAD              : '音声検出の使用',
+    CHANGE_NICKNAME      : 'ニックネームの変更',
+    MANAGE_NICKNAMES     : 'ニックネームの管理',
+    MANAGE_ROLES         : 'ロールの管理',
+    MANAGE_WEBHOOKS      : 'ウェブフックの管理',
+    MANAGE_EMOJIS        : '絵文字の管理',
+  },
   loadings: {
     poll: () => ({
       color: DefaultColors.loadings,
-      title: '⌛ 投票生成中...'
+      title: '⌛ アンケート生成中...'
     })
   },
   successes: {
@@ -61,7 +94,9 @@ export const ja: LocaleStructure = {
         }
       ]
     }),
-    poll: (authorIconURL, authorName, question, selectors, choices, messageID) => ({
+    poll: (
+      authorIconURL, authorName, question, selectors, choices, messageID
+    ) => ({
       color: COLORS.POLL,
       author: {
         iconURL: authorIconURL,
@@ -75,7 +110,9 @@ export const ja: LocaleStructure = {
       },
       footer: { text: '選択肢にリアクションで投票できます' }
     }),
-    expoll: (authorIconURL, authorName, question, selectors, choices, messageID) => ({
+    expoll: (
+      authorIconURL, authorName, question, selectors, choices, messageID
+    ) => ({
       color: COLORS.EXPOLL,
       author: {
         iconURL: authorIconURL,
@@ -150,6 +187,14 @@ export const ja: LocaleStructure = {
       title: '⚠️ DM内ではアンケートを送信するチャンネルは指定できません',
       description: supportServerLink
     }),
+    unusableRole: () => ({
+      title: '⚠️ 使用できないロールが指定されています',
+      description: supportServerLink
+    }),
+    ungivenQuestion: () => ({
+      title: '⚠️ 質問文が指定されていません',
+      description: supportServerLink
+    }),
     tooManyOptions: () => ({
       title: `⚠️ 選択肢が ${COMMAND_MAX_CHOICES} 個を超えています`,
       description: supportServerLink
@@ -166,14 +211,11 @@ export const ja: LocaleStructure = {
       title: '⚠️ 絵文字が重複しています',
       description: supportServerLink
     }),
-    unknownEmoji: () => ({
-      title: '⚠️ 使用できない絵文字が含まれています',
-      description: '投票に外部サーバーの絵文字を使用したい場合は、そのサーバーへBOTを導入する必要があります。\n\n'
-        + supportServerLink
-    }),
     unusableEmoji: () => ({
       title: '⚠️ 使用できない絵文字が含まれています',
-      description: 'BOTに与えられたロールでは使用できない絵文字が含まれています。\n\n'
+      description: '以下のいずれかの理由により、BOTが絵文字を使用できません。\n'
+        + `●\`${ja.permissionNames.USE_EXTERNAL_EMOJIS}\`権限がこのBOTにない\n`
+        + '●絵文字があるサーバーにこのBOTが導入されていない\n\n'
         + supportServerLink
     }),
     unavailableExclusive: () => ({

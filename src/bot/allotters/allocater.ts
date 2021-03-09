@@ -5,65 +5,76 @@ import Session from './session';
 import { Help } from '../responders/help';
 import { Rejecter } from '../responders/rejecter';
 import { Utils } from '../utils';
+import { Preferences } from '../preferences';
+import { Lang } from '../templates/locale';
 
-export type Responder = (
-  request: Message, prefix: string, args: string[], response?: Message
-) => Promise<Message | undefined>;
+export interface RequestData {
+  request : Message;
+  prefix  : string;
+  args    : string[];
+  response: Message | null;
+  lang    : Lang;
+}
+
+export type Responder = (data: RequestData) => Promise<Message | undefined>;
+
 export type CommandArgs = string[];
 
-export const Allocater: {
-  initialize(bot: Client): void;
-
-  readonly responders: Collection<string, Responder>;
-  readonly sessions  : Collection<Snowflake, Session>;
-
-  submit(request: Message, prefix: string, args: CommandArgs): void;
-  respond(
-    request: Message, responder: Responder, prefix: string, args: CommandArgs
-  ): void;
-
-  exception(exception: unknown, request: Message): void;
-
-  allocate(request: Message, response?: Message, session?: Session): void;
-  free(requestID: Snowflake): void;
-} = {
-  initialize(bot) {
+export namespace Allocater {
+  export function initialize(bot: Client): void {
     Help.initialize(bot);
-  },
+  }
 
-  responders: new Collection,
-  sessions  : new Collection,
+  export const responders: Collection<string, Responder> = new Collection;
+  const sessions: Collection<Snowflake, Session> = new Collection;
 
-  submit(request, prefix, args) {
-    const responder = this.responders.get(prefix);
-    if (responder) this.respond(request, responder, prefix, args);
-  },
-  respond(request, responder, prefix, args) {
-    const session = this.sessions.get(request.id);
-    const response = session?.response;
+  export function submit(
+    request: Message, prefix: string, args: CommandArgs
+  ): void {
+    const responder = responders.get(prefix);
+    if (responder)
+      respond(request, responder, prefix, args)
+        .catch(console.error);
+  }
 
-    responder(request, prefix, args, response)
-      .then(response => this.allocate(request, response, session))
-      .catch(exception => this.exception(exception, request));
-  },
+  async function respond(
+    request: Message, responder: Responder, prefix: string, args: CommandArgs
+  ): Promise<void> {
+    const session  = sessions.get(request.id);
+    const response = session?.response ?? null;
+    const lang     = await Preferences.fetchLang(request.author, request.guild);
 
-  exception(exception, request) {
+    try {
+      const newResponse = await responder({
+        request, prefix, args, response, lang
+      });
+      allocate(request, newResponse, session);
+    }
+    catch (exception: unknown) {
+      reject(exception, request);
+    }
+  }
+
+  function reject(exception: unknown, request: Message): void {
     if (DEBUG_MODE) console.error(exception);
 
     Rejecter.issue(exception, request)
-      .then(response => response && this.allocate(request, response))
+      .then(response => response && allocate(request, response))
       .catch(console.error);
-  },
+  }
 
-  allocate(request, response, session) {
+  function allocate(
+    request: Message, response?: Message, session?: Session
+  ): void {
     if (!response)
       Utils.removeMessageCache(request);
     else if (!session)
-      this.sessions.set(
-        request.id, new Session(request, response, id => this.free(id))
+      sessions.set(
+        request.id, new Session(request, response, id => free(id))
       );
-  },
-  free(requestID) {
-    this.sessions.delete(requestID);
+  }
+
+  function free(requestID: Snowflake): void {
+    sessions.delete(requestID);
   }
 };

@@ -1,4 +1,8 @@
-import { MessageEmbedOptions } from 'discord.js';
+import { MessageEmbedOptions, PermissionString } from 'discord.js';
+
+export type PermissionNameTemplate = {
+  [Name in PermissionString]: string;
+};
 
 export type LoadingTemplate = {
   poll(): MessageEmbedOptions;
@@ -13,7 +17,7 @@ export type SuccesseTemplate = {
     authorName   : string,
     question     : string,
     selectors    : string[],
-    choices      : string,
+    choices      : string[],
     messageID    : string,
   ): MessageEmbedOptions;
   expoll(
@@ -21,7 +25,7 @@ export type SuccesseTemplate = {
     authorName   : string,
     question     : string,
     selectors    : string[],
-    choices      : string,
+    choices      : string[],
     messageID    : string,
   ): MessageEmbedOptions;
   graphpoll(
@@ -54,11 +58,12 @@ export type ErrorTemplate = {
   duplicateChannels()   : MessageEmbedOptions;
   unusableChannel()     : MessageEmbedOptions;
   unavailableChannel()  : MessageEmbedOptions;
+  unusableRole()        : MessageEmbedOptions;
+  ungivenQuestion()     : MessageEmbedOptions;
   tooManyOptions()      : MessageEmbedOptions;
   tooLongQuestion()     : MessageEmbedOptions;
   tooLongOption()       : MessageEmbedOptions;
   duplicateEmojis()     : MessageEmbedOptions;
-  unknownEmoji()        : MessageEmbedOptions;
   unusableEmoji()       : MessageEmbedOptions;
   unavailableExclusive(): MessageEmbedOptions;
   notExistPoll()        : MessageEmbedOptions;

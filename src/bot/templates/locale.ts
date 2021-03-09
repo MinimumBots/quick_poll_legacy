@@ -3,9 +3,11 @@ import {
   SuccesseTemplate,
   ErrorTemplate,
   ReportTemplate,
+  PermissionNameTemplate,
 } from './template';
 
 export type LocaleStructure = {
+  permissionNames: PermissionNameTemplate;
   loadings : LoadingTemplate;
   successes: SuccesseTemplate;
   errors   : ErrorTemplate;
@@ -15,6 +17,7 @@ export type LocaleStructure = {
 export const DefaultColors: {
   [Group in keyof LocaleStructure]: number;
 } = {
+　permissionNames: 0x000000,
   loadings : 0x9867c6,
   successes: 0x67b160,
   errors   : 0xffcc4d,

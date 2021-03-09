@@ -1,4 +1,4 @@
-export default class Parsing {
+export default class Splitter {
   private readonly maxChunks: number = 60;
   private readonly quotePairs: { [quote: string]: string } = {
     '"': '"', "'": "'", '”': '”', '“': '”', '„': '”', "‘": "’", "‚": "’"
