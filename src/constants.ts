@@ -66,7 +66,7 @@ export type USABLE_CHANNEL = DMChannel | TextChannel | NewsChannel;
 export type USABLE_GUILD_CHANNEL = TextChannel | NewsChannel;
 
 export const PRESENCE_UPDATE_INTERVAL = 60 * 1000;
-export const COMMAND_EDITABLE_TIME = 3 * 60 * 1000;
+export const COMMAND_EDITABLE_TIME = 5 * 60 * 1000;
 
 export const USER_RATE_LIMIT = 60;
 export const BOT_RATE_LIMIT  = 30;

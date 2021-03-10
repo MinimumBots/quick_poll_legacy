@@ -7,6 +7,7 @@ import { Rejecter } from '../responders/rejecter';
 import { Utils } from '../utils';
 import { Preferences } from '../preferences';
 import { Lang } from '../templates/locale';
+import { Poll } from '../responders/poll';
 
 export interface RequestData {
   request : Message;
@@ -23,6 +24,7 @@ export type CommandArgs = string[];
 export namespace Allocater {
   export function initialize(bot: Client): void {
     Help.initialize(bot);
+    Poll.initialize();
   }
 
   export const responders: Collection<string, Responder> = new Collection;
@@ -48,6 +50,8 @@ export namespace Allocater {
       const newResponse = await responder({
         request, prefix, args, response, lang
       });
+      if (!newResponse) return;
+
       allocate(request, newResponse, session);
     }
     catch (exception: unknown) {

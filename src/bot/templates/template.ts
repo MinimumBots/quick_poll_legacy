@@ -13,19 +13,13 @@ export type SuccesseTemplate = {
     botInviteURL: string,
   ): MessageEmbedOptions;
   poll(
+    exclusive    : boolean,
     authorIconURL: string,
     authorName   : string,
     question     : string,
     selectors    : string[],
     choices      : string[],
-    messageID    : string,
-  ): MessageEmbedOptions;
-  expoll(
-    authorIconURL: string,
-    authorName   : string,
-    question     : string,
-    selectors    : string[],
-    choices      : string[],
+    imageName    : string | null,
     messageID    : string,
   ): MessageEmbedOptions;
   graphpoll(

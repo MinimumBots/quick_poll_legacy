@@ -95,9 +95,9 @@ export const ja: LocaleStructure = {
       ]
     }),
     poll: (
-      authorIconURL, authorName, question, selectors, choices, messageID
+      exclusive, authorIconURL, authorName, question, selectors, choices, imageName, messageID
     ) => ({
-      color: COLORS.POLL,
+      color: exclusive ? COLORS.EXPOLL : COLORS.POLL,
       author: {
         iconURL: authorIconURL,
         name: authorName
@@ -108,23 +108,10 @@ export const ja: LocaleStructure = {
           .join('\n')
           + `\n\n[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll ${messageID}\``;
       },
-      footer: { text: '選択肢にリアクションで投票できます' }
-    }),
-    expoll: (
-      authorIconURL, authorName, question, selectors, choices, messageID
-    ) => ({
-      color: COLORS.EXPOLL,
-      author: {
-        iconURL: authorIconURL,
-        name: authorName
+      footer: {
+        text: `選択肢にリアクションで${exclusive ? '1人1票だけ' : ''}投票できます`
       },
-      title: `${question}\u200C`,
-      get description() {
-        return selectors.map((selector, i) => `\u200B${selector} ${choices[i]}\u200C`)
-          .join('\n')
-          + `\n\n[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll ${messageID}\``;
-      },
-      footer: { text: '選択肢にリアクションで1人1票だけ投票できます' }
+      image: { url: imageName ? `attachment://${imageName}` : undefined }
     }),
     graphpoll: (
       pollURL, authorIconURL, authorName, question, selectors, choices, choiceCounts, choiceRates, choiceGraphs
@@ -163,10 +150,12 @@ export const ja: LocaleStructure = {
   },
   errors: {
     unknown: () => ({
+      color: DefaultColors.errors,
       title: '⚠️ 予期しない原因でコマンドの実行に失敗しました',
       description: `開発チームにエラー情報を送信しました\n\n${supportServerLink}`
     }),
     lackPermissions: permissions => ({
+      color: DefaultColors.errors,
       title: '⚠️ BOTに必要な権限が不足しています',
       get description() {
         const names = permissions.map(permission => ja.permissionNames[permission]);
@@ -176,6 +165,7 @@ export const ja: LocaleStructure = {
       }
     }),
     lackYourPermissions: permissions => ({
+      color: DefaultColors.errors,
       title: '⚠️ コマンド実行者に必要な権限が不足しています',
       get description() {
         const names = permissions.map(permission => ja.permissionNames[permission]);
@@ -185,43 +175,53 @@ export const ja: LocaleStructure = {
       }
     }),
     duplicateChannels: () => ({
+      color: DefaultColors.errors,
       title: '⚠️ チャンネルが複数指定されています',
       description: supportServerLink
     }),
     unusableChannel: () => ({
+      color: DefaultColors.errors,
       title: '⚠️ 使用できないチャンネルが指定されています',
       description: 'アンケートを送信できるのは同じサーバーのチャンネルのみです。\n\n'
         + supportServerLink
     }),
     unavailableChannel: () => ({
+      color: DefaultColors.errors,
       title: '⚠️ DM内ではアンケートを送信するチャンネルは指定できません',
       description: supportServerLink
     }),
     unusableRole: () => ({
+      color: DefaultColors.errors,
       title: '⚠️ 使用できないロールが指定されています',
       description: supportServerLink
     }),
     ungivenQuestion: () => ({
+      color: DefaultColors.errors,
       title: '⚠️ 質問文が指定されていません',
       description: supportServerLink
     }),
     tooManyOptions: () => ({
+      color: DefaultColors.errors,
       title: `⚠️ 選択肢が ${COMMAND_MAX_CHOICES} 個を超えています`,
       description: supportServerLink
     }),
     tooLongQuestion: () => ({
+      color: DefaultColors.errors,
       title: `⚠️ 質問文が ${COMMAND_QUESTION_MAX} 文字を超えています`,
       description: supportServerLink
     }),
     tooLongOption: () => ({
+      color: DefaultColors.errors,
       title: `⚠️ 選択肢が ${COMMAND_CHOICE_MAX} 文字を超えています`,
       description: supportServerLink
     }),
     duplicateEmojis: () => ({
+      color: DefaultColors.errors,
       title: '⚠️ 絵文字が重複しています',
       description: supportServerLink
     }),
     unusableEmoji: () => ({
+      color: DefaultColors.errors,
       title: '⚠️ 使用できない絵文字が含まれています',
       description: '以下のいずれかの理由により、BOTが絵文字を使用できません。\n'
         + `●\`${ja.permissionNames.USE_EXTERNAL_EMOJIS}\`権限がこのBOTにない\n`
@@ -229,20 +229,24 @@ export const ja: LocaleStructure = {
         + supportServerLink
     }),
     unavailableExclusive: () => ({
+      color: DefaultColors.errors,
       title: `⚠️ DM内では${COMMAND_PREFIX}expollコマンドを使用できません`,
       description: supportServerLink
     }),
     notExistPoll: () => ({
+      color: DefaultColors.errors,
       title: '⚠️ 指定された投票が見つかりません',
       description: supportServerLink
     }),
     notPolled: () => ({
+      color: DefaultColors.errors,
       title: '⚠️ まだ誰も投票していません',
       description: supportServerLink
     })
   },
   reports: {
     error: (executedCommand, traceTexts) => ({
+      color: DefaultColors.reports,
       title: '⚠️ エラーレポート',
       description: `実行コマンド\n\`\`\`${executedCommand}\`\`\``,
       get fields() {
