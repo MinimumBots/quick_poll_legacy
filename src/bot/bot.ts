@@ -13,7 +13,7 @@ const bot = new Client({
   restTimeOffset: 100,
   retryLimit: 3,
   ws: { intents: BOT_INTENTS },
-  presence: { status: 'dnd', activity: { type: 'COMPETING', name: '再接続' } },
+  presence: { status: 'dnd', activity: { type: 'PLAYING', name: '再接続' } },
 });
 
 function initialize(): void {

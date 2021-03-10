@@ -166,11 +166,21 @@ export const ja: LocaleStructure = {
       title: '⚠️ 予期しない原因でコマンドの実行に失敗しました',
       description: `開発チームにエラー情報を送信しました\n\n${supportServerLink}`
     }),
-    lackPermission: permissionNames => ({
-      title: '⚠️ コマンドに必要な権限が不足しています',
+    lackPermissions: permissions => ({
+      title: '⚠️ BOTに必要な権限が不足しています',
       get description() {
-        return 'BOTに以下の権限が付与されているか確認してください\n'
-          + `\`\`\`\n${permissionNames.join('\n')}\n\`\`\``
+        const names = permissions.map(permission => ja.permissionNames[permission]);
+        return '以下の権限が与えられているか確認してください\n'
+          + `\`\`\`\n${names.join('\n')}\n\`\`\``
+          + `\n\n${supportServerLink}`;
+      }
+    }),
+    lackYourPermissions: permissions => ({
+      title: '⚠️ コマンド実行者に必要な権限が不足しています',
+      get description() {
+        const names = permissions.map(permission => ja.permissionNames[permission]);
+        return '以下の権限が与えられているか確認してください\n'
+          + `\`\`\`\n${names.join('\n')}\n\`\`\``
           + `\n\n${supportServerLink}`;
       }
     }),

@@ -1,4 +1,4 @@
-import { Client, MessageEmbed } from 'discord.js';
+import { Client, Message, MessageEmbedOptions } from 'discord.js';
 
 import { DEFAULT_BOT_PERMISSIONS } from '../../constants';
 import { Allocater, RequestData } from '../allotters/allocater';
@@ -31,17 +31,15 @@ export namespace Help{
       .catch(() => bot.setTimeout(() => generateInviteURL(bot), 30000));
   }
 
-  async function respond(data: RequestData) {
-    if (data.args.length) return;
+  async function respond(data: RequestData): Promise<Message | null> {
+    if (data.args.length) return null;
 
-    const embed = await getEmbed(data.lang);
     return data.response
-      ? data.response.edit(embed)
-      : data.request.channel.send(embed);
+      ? data.response.edit({ embed: getEmbed(data.lang) })
+      : data.request.channel.send({ embed: getEmbed(data.lang) });
   }
 
-  async function getEmbed(lang: Lang): Promise<MessageEmbed> {
-    const template = Locales[lang].successes.help(botInviteURL);
-    return new MessageEmbed(template);
+  export function getEmbed(lang: Lang): MessageEmbedOptions {
+    return Locales[lang].successes.help(botInviteURL);
   }
 }

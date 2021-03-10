@@ -16,7 +16,7 @@ export interface RequestData {
   lang    : Lang;
 }
 
-export type Responder = (data: RequestData) => Promise<Message | undefined>;
+export type Responder = (data: RequestData) => Promise<Message | null>;
 
 export type CommandArgs = string[];
 
@@ -64,7 +64,7 @@ export namespace Allocater {
   }
 
   function allocate(
-    request: Message, response?: Message, session?: Session
+    request: Message, response: Message | null, session?: Session
   ): void {
     if (!response)
       Utils.removeMessageCache(request);

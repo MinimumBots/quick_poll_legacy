@@ -4,25 +4,25 @@ import {
   Permissions,
   MessageEmbedOptions,
   Snowflake,
-  GuildChannel,
   HTTPError,
   PermissionString,
   Guild,
   Message,
+  ClientUser,
 } from 'discord.js';
 
 import {
   ASSUMING_DM_PERMISSIONS,
   COMMAND_PREFIX,
   MINIMUM_BOT_PERMISSIONS,
-  USABLE_GUILD_CHANNEL,
+  USABLE_CHANNEL,
 } from '../../constants';
 import { Locales } from '../templates/locale';
 import { Allocater, RequestData, Responder } from '../allotters/allocater';
 import CommandError from './error';
+import { Help } from './help';
 
 export namespace Poll {
-  type Channels = Collection<Snowflake, Channel>;
   type Choice = { emoji: string, text: string | null, external: boolean };
   type Author = { iconURL: string, name: string };
 
@@ -37,7 +37,20 @@ export namespace Poll {
   }
 
   function renderEmbed(data: RequestData, parsed: Parsed): MessageEmbedOptions {
-    return Locales[data.lang].successes.poll()
+    if (!parsed.question) return Help.getEmbed(data.lang);
+
+    const choices = parsed.choices;
+    const selectors: string[] = choices.some(choice => choice.text !== null)
+      ? choices.map(choice => choice.emoji) : [];
+
+    return Locales[data.lang].successes.poll(
+      parsed.author.iconURL,
+      parsed.author.name,
+      parsed.question,
+      selectors,
+      choices.map(choice => choice.text ?? ''),
+      parsed.response.id,
+    );
   }
 
   async function renderSelectors(
@@ -45,7 +58,7 @@ export namespace Poll {
   ): Promise<void> {
     try {
       await Promise.all(
-        parsed.choices.map(choice => data.response?.react(choice.emoji))
+        parsed.choices.map(choice => parsed.response.react(choice.emoji))
       );
     }
     catch (exception: unknown) {
@@ -59,27 +72,76 @@ export namespace Poll {
   const pollPermissions: PermissionString[] = [
     'ADD_REACTIONS', 'READ_MESSAGE_HISTORY'
   ];
-  const expollPermissions: PermissionString[] = [
+  const exclusivePermissions: PermissionString[] = [
     'MANAGE_MESSAGES'
   ];
-
-  const mentionPermissons: PermissionString[] = [
+  const externalPermissions: PermissionString[] = [
+    'USE_EXTERNAL_EMOJIS'
+  ];
+  const mentionPermissions: PermissionString[] = [
     'MENTION_EVERYONE'
   ];
 
-  function comparePermissions(data: RequestData, parsed: Parsed) {
+  function sumRequireAuthoerPermissions(
+    parsed: Parsed, permissions: Readonly<Permissions>
+  ): PermissionString[] {
+    return parsed.mentions.length && permissions.has(mentionPermissions)
+      ? mentionPermissions : [];
+  }
+
+  function sumRequireMyPermissions(parsed: Parsed): PermissionString[] {
+    const permissions = MINIMUM_BOT_PERMISSIONS;
+    permissions.push(...pollPermissions);
+    if (parsed.exclusive) permissions.push(...exclusivePermissions);
+    if (parsed.choices.some(choice => choice.external))
+      permissions.push(...externalPermissions);
+    return permissions;
+  }
+
+  function validateAuthorPermissions(
+    data: RequestData, parsed: Parsed, permissions: Readonly<Permissions>
+  ): boolean {
+    const requirePermissions = sumRequireAuthoerPermissions(parsed, permissions);
+    const missingPermissions = permissions.missing(requirePermissions);
+    if (missingPermissions)
+      throw new CommandError(
+        'lackYourPermissions', data.lang, missingPermissions
+      );
+
+    return true;
+  }
+
+  function validateMyPermissions(
+    data: RequestData, parsed: Parsed, permissions: Readonly<Permissions>
+  ): boolean {
+    const requirePermissions = sumRequireMyPermissions(parsed);
+    const missingPermissions = permissions.missing(requirePermissions);
+    if (missingPermissions)
+      throw new CommandError(
+        'lackPermissions', data.lang, missingPermissions
+      );
+
+    return true;
+  }
+
+  function validatePermissions(data: RequestData, parsed: Parsed): boolean {
     const request = data.request;
     const channel = parsed.response.channel;
-    const user = request.author;
     const botUser = request.client.user;
-    if (!botUser || !channel) return;
+    if (!botUser) return false;
 
     const myPermissions = channel.type === 'dm'
       ? new Permissions(ASSUMING_DM_PERMISSIONS)
       : channel.permissionsFor(botUser);
-    const authorPermissons = channel.type === 'dm'
+    const authorPermissions = channel.type === 'dm'
       ? new Permissions(ASSUMING_DM_PERMISSIONS)
-      : channel.permissionsFor(user);
+      : channel.permissionsFor(request.author);
+    if (!myPermissions || !authorPermissions) return false;
+
+    return (
+      validateMyPermissions(data, parsed, myPermissions)
+      && validateAuthorPermissions(data, parsed, authorPermissions)
+    );
   }
 
   const defaultEmojis = [
@@ -138,7 +200,7 @@ export namespace Poll {
     const question = data.args.shift();
 
     if (question === undefined) {
-      if (mentions) throw new CommandError('ungivenQuestion', data.lang);
+      if (mentions.length) throw new CommandError('ungivenQuestion', data.lang);
       return null;
     }
     return question;
@@ -180,38 +242,6 @@ export namespace Poll {
     return mentions;
   }
 
-  function searchChannel(
-    data: RequestData, channelID: Snowflake
-  ): USABLE_GUILD_CHANNEL {
-    const channels = data.request.mentions.channels as Channels;
-
-    const channel = channels.get(channelID);
-    if (!channel) throw new CommandError('unusableChannel', data.lang);
-    if (channel.type === 'dm')
-      throw new CommandError('unavailableChannel', data.lang);
-    if (
-      !(channel instanceof GuildChannel)
-      || channel.guild.id !== data.request.guild?.id
-      || !channel.isText()
-    ) throw new CommandError('unusableChannel', data.lang);
-    return channel;
-  }
-
-  function parseChannel(data: RequestData): USABLE_GUILD_CHANNEL | null {
-    let channel: USABLE_GUILD_CHANNEL | null = null;
-
-    for (const arg of data.args) {
-      const match = arg.match(/^<#(\d+)>$/);
-      if (!match) break;
-
-      if (channel) throw new CommandError('duplicateChannels', data.lang);
-
-      data.args.shift();
-      channel = searchChannel(data, match[1]);
-    }
-    return channel;
-  }
-
   const prefixes = {
     poll  : `${COMMAND_PREFIX}poll`,
     expoll: `${COMMAND_PREFIX}expoll`,
@@ -234,16 +264,17 @@ export namespace Poll {
 
   async function generate(
     data: RequestData, response: Message
-  ): Promise<MessageEmbedOptions> {
+  ): Promise<MessageEmbedOptions | null> {
     try {
       const parsed = parse(data, response);
-      if (parsed.question) comparePermissions(data, parsed);
+      if (parsed.question)
+        if (validatePermissions(data, parsed)) return null;
 
       await renderSelectors(data, parsed);
       return renderEmbed(data, parsed);
     }
     catch (error: unknown) {
-      if (error instanceof CommandError) return renderError(error);
+      if (error instanceof CommandError) return error.embed;
       throw error;
     }
   }
@@ -261,9 +292,10 @@ export namespace Poll {
     else
       response = await request.channel.send(Locales[lang].loadings.poll());
 
-    return response.edit({
-      embed: await generate({ request, prefix, args, response, lang }, response)
-    });
+    const embed = await generate({ request, prefix, args, response, lang }, response);
+    if (!embed) return null;
+
+    return response.edit({ embed });
   }
 
   export function initialize(): void {

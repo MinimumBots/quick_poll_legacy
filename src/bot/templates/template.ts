@@ -54,7 +54,8 @@ export type SuccesseTemplate = {
 
 export type ErrorTemplate = {
   unknown()             : MessageEmbedOptions;
-  lackPermission(permissionNames: string[]): MessageEmbedOptions;
+  lackPermissions    (permissions: PermissionString[]): MessageEmbedOptions;
+  lackYourPermissions(permissions: PermissionString[]): MessageEmbedOptions;
   duplicateChannels()   : MessageEmbedOptions;
   unusableChannel()     : MessageEmbedOptions;
   unavailableChannel()  : MessageEmbedOptions;

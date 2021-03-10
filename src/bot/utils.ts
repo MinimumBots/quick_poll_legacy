@@ -1,17 +1,13 @@
 import { Client, ActivityType, Message } from 'discord.js';
 
-export const Utils: {
-  removeMessageCache(message: Message): boolean;
-  partingText(
-    text: string, limit: number, prepend: string, append: string
-  ): string[];
-  fetchGuildCount(bot: Client): Promise<string>;
-  updatePresence(bot: Client, count: number): Promise<void>;
-} = {
-  removeMessageCache(message) {
+export namespace Utils {
+  export function removeMessageCache(message: Message): boolean {
     return message.channel.messages.cache.delete(message.id);
-  },
-  partingText(text, limit, prepend, append) {
+  }
+
+  export function partingText(
+    text: string, limit: number, prepend: string, append: string
+  ): string[] {
     const texts: string[] = [];
     let part: string = prepend;
 
@@ -29,27 +25,31 @@ export const Utils: {
     }
 
     return texts.concat(`${part}\n${append}`);
-  },
-  async fetchGuildCount(bot) {
+  }
+
+  async function fetchGuildCount(bot: Client): Promise<string> {
     const counts = await bot.shard?.fetchClientValues('guilds.cache.size');
     const count = counts?.reduce((a, b) => a + b, 0);
     return typeof count === 'number' && count > 0 ? `${count}` : 'いくつかの';
-  },
-  async updatePresence(bot, count) {
+  }
+
+  export async function updatePresence(
+    bot: Client, count: number
+  ): Promise<void> {
     let type: ActivityType, name: string;
 
     switch (count % 2) {
       case 1:
-        type = 'WATCHING';
-        name = `${await this.fetchGuildCount(bot)} サーバー`;
+        type = 'COMPETING';
+        name = `${await fetchGuildCount(bot)} サーバー`;
         break;
   
       default:
-        type = 'PLAYING';
+        type = 'WATCHING';
         name = '/poll | /expoll';
         break;
     }
   
     await bot.user?.setPresence({ status: 'online', activity: { type, name } });
   }
-};
+}
