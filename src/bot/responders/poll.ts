@@ -1,10 +1,17 @@
 import { basename, extname } from 'path';
-import { Guild, HTTPError, Message, Permissions, PermissionString } from 'discord.js';
+import {
+  DiscordAPIError,
+  Guild,
+  Message,
+  Permissions,
+  PermissionString,
+} from 'discord.js';
+
 import { ASSUMING_DM_PERMISSIONS, COMMAND_PREFIX } from '../../constants';
+import { Locales } from '../templates/locale';
 import { Allocater, RequestData } from '../allotters/allocater';
 import CommandError from './error';
 import { Help } from './help';
-import { Locales } from '../templates/locale';
 
 export namespace Poll {
   type Choice = { emoji: string, text: string | null, external: boolean };
@@ -31,6 +38,9 @@ export namespace Poll {
   const mentionPermissions: PermissionString[] = [
     'MENTION_EVERYONE'
   ];
+  const attachImagePermissions: PermissionString[] = [
+    'ATTACH_FILES'
+  ];
 
   function sumRequireAuthoerPermissions(
     query: Query, permissions: Readonly<Permissions>
@@ -45,6 +55,7 @@ export namespace Poll {
     if (query.exclusive) permissions.push(...exclusivePermissions);
     if (query.choices.some(choice => choice.external))
       permissions.push(...externalPermissions);
+    if (query.imageURL) permissions.push(...attachImagePermissions);
 
     return permissions;
   }
@@ -80,12 +91,10 @@ export namespace Poll {
   ): boolean {
     const request = data.request;
     const channel = request.channel;
-    const botUser = request.client.user;
-    if (!botUser) return false;
 
     const myPermissions = channel.type === 'dm'
       ? new Permissions(ASSUMING_DM_PERMISSIONS)
-      : channel.permissionsFor(botUser);
+      : channel.permissionsFor(data.botID);
     const authorPermissions = channel.type === 'dm'
       ? new Permissions(ASSUMING_DM_PERMISSIONS)
       : channel.permissionsFor(request.author);
@@ -154,10 +163,14 @@ export namespace Poll {
     const mentions: string[] = [];
 
     for (const arg of data.args) {
-      const match = arg.match(/^(@everyone|@here|<@&\d+>)$/);
-      if (!match) break;
+      const matchMention = arg.match(/^(@everyone|@here|<@&\d+>)$/);
+      const matchEvery   = arg.match(/^(?!\\)(everyone|here)$/);
+      const matchNumber  = arg.match(/^(?!\\)(\d+)$/);
+      if (!matchMention && !matchEvery && !matchNumber) break;
 
-      mentions.push(arg);
+      if (matchMention) mentions.push(matchMention[1]);
+      if (matchEvery)   mentions.push(`@${matchEvery[1]}`);
+      if (matchNumber)  mentions.push(`<@&${matchNumber[1]}>`);
     }
 
     mentions.forEach(() => data.args.shift());
@@ -212,7 +225,7 @@ export namespace Poll {
   ): Promise<Message> {
     const choices = query.choices;
     const selectors: string[] = choices.some(choice => choice.text !== null)
-      ? choices.map(choice => choice.emoji) : []
+      ? choices.map(choice => choice.emoji) : [];
 
     return response.edit(
       query.mentions.join(' '),
@@ -240,7 +253,7 @@ export namespace Poll {
       );
     }
     catch (exception: unknown) {
-      if (exception instanceof HTTPError)
+      if (exception instanceof DiscordAPIError)
         if (exception.code === 400)
           throw new CommandError('unusableEmoji', data.lang);
     }

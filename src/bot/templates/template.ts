@@ -61,7 +61,10 @@ export type ErrorTemplate = {
   duplicateEmojis()     : MessageEmbedOptions;
   unusableEmoji()       : MessageEmbedOptions;
   unavailableExclusive(): MessageEmbedOptions;
-  notExistPoll()        : MessageEmbedOptions;
+  ungivenMessageID()    : MessageEmbedOptions;
+  notFoundChannel()     : MessageEmbedOptions;
+  notFoundPoll()        : MessageEmbedOptions;
+  missingFormatPoll()   : MessageEmbedOptions;
   notPolled()           : MessageEmbedOptions;
 };
 

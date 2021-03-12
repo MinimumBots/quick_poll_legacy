@@ -1,26 +1,22 @@
-import { Client, Message, MessageEmbedOptions } from 'discord.js';
+import { Client, Message, MessageEmbedOptions, Snowflake } from 'discord.js';
 
 import { DEFAULT_BOT_PERMISSIONS } from '../../constants';
 import { Allocater, RequestData } from '../allotters/allocater';
 import { Lang, Locales } from '../templates/locale';
 
 export namespace Help{
-  export function initialize(bot: Client): void {
-    entryResponder(bot);
+  export function initialize(bot: Client, botID: Snowflake): void {
+    entryResponder(botID);
     generateInviteURL(bot);
   }
 
-  function entryResponder(bot: Client): void {
-    if (!bot.user) 
-      bot.setTimeout(() => entryResponder(bot), 30000);
-    else {
-      Allocater.responders.set(
-        `<@${bot.user.id}>`,  data => respond(data)
-      );
-      Allocater.responders.set(
-        `<@!${bot.user.id}>`, data => respond(data)
-      );
-    }
+  function entryResponder(botID: Snowflake): void {
+    Allocater.responders.set(
+      `<@${botID}>`,  data => respond(data)
+    );
+    Allocater.responders.set(
+      `<@!${botID}>`, data => respond(data)
+    );
   }
 
   let botInviteURL = '';

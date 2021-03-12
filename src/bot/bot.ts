@@ -1,4 +1,4 @@
-import { Client } from 'discord.js';
+import { Client, Snowflake } from 'discord.js';
 
 import { BOT_INTENTS, PRESENCE_UPDATE_INTERVAL } from '../constants';
 import { Utils } from './utils';
@@ -16,10 +16,10 @@ const bot = new Client({
   presence: { status: 'dnd', activity: { type: 'PLAYING', name: '再接続' } },
 });
 
-function initialize(): void {
+function initialize(botID: Snowflake): void {
   Admin.initialize(bot);
-  Decrypter.initialize(bot);
-  Allocater.initialize(bot);
+  Decrypter.initialize(bot, botID);
+  Allocater.initialize(bot, botID);
 }
 
 let presenceCount = 0;
@@ -28,7 +28,11 @@ bot.setInterval(() => {
     .catch(console.error);
 }, PRESENCE_UPDATE_INTERVAL);
 
-bot.on('ready', () => initialize());
+bot.on('ready', () => {
+  bot.fetchApplication()
+    .then(app => initialize(app.id))
+    .catch(console.error);
+});
 bot.on('shardReady', shardID => console.info(`Shard No.${shardID} is ready.`));
 
 bot.login(process.env['QUICK_POLL_TOKEN'])

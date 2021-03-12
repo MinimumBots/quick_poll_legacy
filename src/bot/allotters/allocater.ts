@@ -8,13 +8,15 @@ import { Utils } from '../utils';
 import { Preferences } from '../preferences';
 import { Lang } from '../templates/locale';
 import { Poll } from '../responders/poll';
+import { Result } from '../responders/result';
 
 export interface RequestData {
-  request : Message;
-  prefix  : string;
-  args    : string[];
-  response: Message | null;
-  lang    : Lang;
+  botID   : Snowflake,
+  request : Message,
+  prefix  : string,
+  args    : string[],
+  response: Message | null,
+  lang    : Lang,
 }
 
 export type Responder = (data: RequestData) => Promise<Message | null>;
@@ -22,25 +24,27 @@ export type Responder = (data: RequestData) => Promise<Message | null>;
 export type CommandArgs = string[];
 
 export namespace Allocater {
-  export function initialize(bot: Client): void {
-    Help.initialize(bot);
+  export function initialize(bot: Client, botID: Snowflake): void {
+    Help.initialize(bot, botID);
     Poll.initialize();
+    Result.initialize();
   }
 
   export const responders: Collection<string, Responder> = new Collection;
   const sessions: Collection<Snowflake, Session> = new Collection;
 
   export function submit(
-    request: Message, prefix: string, args: CommandArgs
+    request: Message, prefix: string, args: CommandArgs, botID: Snowflake
   ): void {
     const responder = responders.get(prefix);
     if (responder)
-      respond(request, responder, prefix, args)
+      respond(request, responder, prefix, args, botID)
         .catch(console.error);
   }
 
   async function respond(
-    request: Message, responder: Responder, prefix: string, args: CommandArgs
+    request: Message, responder: Responder,
+    prefix: string, args: CommandArgs, botID: Snowflake
   ): Promise<void> {
     const session  = sessions.get(request.id);
     const response = session?.response ?? null;
@@ -48,7 +52,7 @@ export namespace Allocater {
 
     try {
       const newResponse = await responder({
-        request, prefix, args, response, lang
+        botID, request, prefix, args, response, lang
       });
       if (!newResponse) return;
 

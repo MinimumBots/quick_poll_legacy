@@ -104,10 +104,15 @@ export const ja: LocaleStructure = {
       },
       title: `${question}\u200C`,
       get description() {
-        return selectors.map((selector, i) => `\u200B${selector} ${choices[i]}\u200C`)
-          .join('\n')
-          + `\n\n[📊](${BOT_DOCUMENT_URL}sumpoll) \`${COMMAND_PREFIX}sumpoll ${messageID}\``;
+        return selectors
+          .map((selector, i) => `\u200B${selector} ${choices[i]}\u200C`)
+          .join('\n');
       },
+      fields: [{
+        name: '\u200B',
+        value: `[📊](${BOT_DOCUMENT_URL}sumpoll) `
+          + `\`${COMMAND_PREFIX}sumpoll ${messageID}\``
+      }],
       footer: {
         text: `選択肢にリアクションで${exclusive ? '1人1票だけ' : ''}投票できます`
       },
@@ -233,9 +238,23 @@ export const ja: LocaleStructure = {
       title: `⚠️ DM内では${COMMAND_PREFIX}expollコマンドを使用できません`,
       description: supportServerLink
     }),
-    notExistPoll: () => ({
+    ungivenMessageID: () => ({
       color: DefaultColors.errors,
-      title: '⚠️ 指定された投票が見つかりません',
+      title: '⚠️ メッセージIDが指定されていません',
+      description: supportServerLink
+    }),
+    notFoundChannel: () => ({
+      color: DefaultColors.errors,
+      title: '⚠️ 指定されたチャンネルIDがサーバー内から見つかりません'
+    }),
+    notFoundPoll: () => ({
+      color: DefaultColors.errors,
+      title: '⚠️ 指定されたメッセージIDのアンケートが見つかりません',
+      description: supportServerLink
+    }),
+    missingFormatPoll: () => ({
+      color: DefaultColors.errors,
+      title: '⚠️ 指定されたアンケートはフォーマットが正しくありません',
       description: supportServerLink
     }),
     notPolled: () => ({

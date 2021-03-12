@@ -1,4 +1,4 @@
-import { Client, Guild, Message, PartialMessage, User } from 'discord.js';
+import { Client, Guild, Message, PartialMessage, Snowflake, User } from 'discord.js';
 
 import {
   USABLE_CHANNEL,
@@ -38,13 +38,10 @@ export namespace Decrypter {
       return userRateLimits.addition(user.id);
   }
 
-  function hasPermissions(channel: USABLE_CHANNEL): boolean {
-    const bot = channel.client;
-
+  function hasPermissions(channel: USABLE_CHANNEL, botID: Snowflake): boolean {
     return !!(
       channel.type === 'dm'
-      || bot.user
-      && channel.permissionsFor(bot.user)?.any(MINIMUM_BOT_PERMISSIONS)
+      || channel.permissionsFor(botID)?.any(MINIMUM_BOT_PERMISSIONS)
     );
   }
 
@@ -57,33 +54,35 @@ export namespace Decrypter {
     );
   }
 
-  function accept(message: Message): boolean {
+  function accept(message: Message, botID: Snowflake): boolean {
     return (
       isMatch(message)
-      && hasPermissions(message.channel)
+      && hasPermissions(message.channel, botID)
       && isUnderRate(message.author, message.guild)
     );
   }
 
-  function decrypt(message: Message): void {
-    if (accept(message)) {
+  function decrypt(message: Message, botID: Snowflake): void {
+    if (accept(message, botID)) {
       const args = split(message.content);
-      Allocater.submit(message, args[0], args.slice(1));
+      Allocater.submit(message, args[0], args.slice(1), botID);
     }
     else
       Utils.removeMessageCache(message);
   }
 
-  function redecrypt(message: Message | PartialMessage): void {
+  function redecrypt(
+    message: Message | PartialMessage, botID: Snowflake
+  ): void {
     if (Date.now() - message.createdTimestamp > COMMAND_EDITABLE_TIME) return;
 
     message.fetch()
-      .then(message => decrypt(message))
+      .then(message => decrypt(message, botID))
       .catch(console.error);
   }
 
-  export function initialize(bot: Client): void {
-    bot.on('message', message => decrypt(message));
-    bot.on('messageUpdate', (_, message) => redecrypt(message));
+  export function initialize(bot: Client, botID: Snowflake): void {
+    bot.on('message', message => decrypt(message, botID));
+    bot.on('messageUpdate', (_, message) => redecrypt(message, botID));
   }
 }
