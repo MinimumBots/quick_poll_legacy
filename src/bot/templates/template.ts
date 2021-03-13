@@ -30,7 +30,7 @@ export type SuccesseTemplate = {
     selectors    : string[],
     choices      : string[],
     choiceCounts : number[],
-    choiceRates  : number[],
+    choiceRates  : string[],
     choiceGraphs : string[],
   ): MessageEmbedOptions;
   listpoll(
@@ -41,9 +41,10 @@ export type SuccesseTemplate = {
     selectors       : string[],
     choices         : string[],
     choiceCounts    : number[],
-    choiceRates     : number[],
+    choiceRates     : string[],
     choiceUsersLists: string[],
   ): MessageEmbedOptions;
+  endpoll(): MessageEmbedOptions;
 };
 
 export type ErrorTemplate = {
@@ -65,7 +66,6 @@ export type ErrorTemplate = {
   notFoundChannel()     : MessageEmbedOptions;
   notFoundPoll()        : MessageEmbedOptions;
   missingFormatPoll()   : MessageEmbedOptions;
-  notPolled()           : MessageEmbedOptions;
 };
 
 export type ReportTemplate = {

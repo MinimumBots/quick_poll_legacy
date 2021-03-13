@@ -131,7 +131,7 @@ export const ja: LocaleStructure = {
       get fields() {
         return selectors.map((selector, i) => ({
           name: `${selector} ${choices[i]} (${choiceCounts[i]}票)`,
-          value: `\`${choiceRates[i]}%\` ${choiceGraphs[i]}`
+          value: `\`${choiceRates[i].padStart(5, ' ')}%\` ${choiceGraphs[i]}`
         }));
       }
     }),
@@ -151,6 +151,10 @@ export const ja: LocaleStructure = {
           value: choiceUsersLists[i]
         }));
       }
+    }),
+    endpoll: () => ({
+      color: COLORS.ENDED,
+      footer: { text: '投票は締め切られました' }
     })
   },
   errors: {
@@ -255,11 +259,6 @@ export const ja: LocaleStructure = {
     missingFormatPoll: () => ({
       color: DefaultColors.errors,
       title: '⚠️ 指定されたアンケートはフォーマットが正しくありません',
-      description: supportServerLink
-    }),
-    notPolled: () => ({
-      color: DefaultColors.errors,
-      title: '⚠️ まだ誰も投票していません',
       description: supportServerLink
     })
   },

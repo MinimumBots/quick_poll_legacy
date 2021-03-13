@@ -1,35 +1,114 @@
-import { DiscordAPIError, Message, Snowflake, TextChannel } from 'discord.js';
+import { DiscordAPIError, Message, Snowflake } from 'discord.js';
 
-import { COLORS, COMMAND_PREFIX, USABLE_CHANNEL, USABLE_GUILD_CHANNEL } from '../../constants';
+import {
+  COLORS,
+  COMMAND_PREFIX,
+  USABLE_CHANNEL,
+  USABLE_GUILD_CHANNEL,
+} from '../../constants';
 import { Allocater, RequestData } from '../allotters/allocater';
+import { Locales } from '../templates/locale';
 import CommandError from './error';
 import { Help } from './help';
 
 export namespace Result {
-  type Choice = { emoji: string, text: string | null };
   type Author = { iconURL: string, name: string };
+  type Choice = {
+    emoji: string, text: string | null, count: number, rate: number
+  };
 
   interface Query {
-    endpoll : boolean,
-    author  : Author,
-    imageURL: string | null,
-    mentions: string[],
-    question: string;
-    choices : Choice[],
+    poll     : Message,
+    endpoll  : boolean,
+    author   : Author,
+    imageURL : string | null,
+    mentions : string[],
+    question : string,
+    choices  : Choice[],
+  }
+
+  async function respondError(
+    data: RequestData, error: CommandError
+  ): Promise<Message> {
+    const options = { embed: error.embed };
+    const channel = data.request.channel;
+    const response = data.response;
+
+    return response ? response.edit(options) : channel.send(options);
   }
 
   async function respondResult(
     data: RequestData, query: Query
   ): Promise<Message | null> {
-    
+    const choices = query.choices;
+    const maxRate = choices.reduce(
+      (max, choice) => max < choice.rate ? choice.rate : max, 0
+    );
+    const graphs = choices.map(
+      choice => '\\|'.repeat(choice.rate * (100 / maxRate / 2))
+    );
+
+    const emojis = choices.map(choice => choice.emoji);
+    const texts  = choices.map(choice => choice.text ?? '');
+    const counts = choices.map(choice => choice.count);
+    const rates  = choices.map(choice => (choice.rate * 100).toFixed(1));
+
+    return data.request.channel.send(
+      query.mentions.join(' '),
+      {
+        embed: Locales[data.lang].successes.graphpoll(
+          query.poll.url,
+          query.author.iconURL,
+          query.author.name,
+          query.question,
+          emojis,
+          texts,
+          counts,
+          rates,
+          graphs,
+        )
+      }
+    )
   }
 
-  function parseChoices(data: RequestData, poll: Message): Choice[] {
-    const description = poll.embeds[0].description
-    const matchs = [
-      ...(description?.matchAll(/\u200B(.+?) (.+?)\u200C/g) ?? [])
-    ];
-    return matchs.map(match => ({ emoji: match[1], text: match[2] }));
+  function endPoll(data: RequestData, poll: Message): void {
+    poll.reactions.removeAll()
+      .catch(console.error);
+
+    const embed = poll.embeds[0];
+    const template = Locales[data.lang].successes.endpoll();
+
+    if (template.color)  embed.setColor(template.color);
+    if (template.footer) embed.setFooter(template.footer.text);
+
+    poll.edit({ embed })
+      .catch(console.error);
+  }
+
+  function parseChoices(poll: Message): Choice[] {
+    const reactions = poll.reactions.cache;
+    const emojis = reactions.map(reaction => reaction.emoji.toString());
+    // meプロパティはリアクションイベント発生時に不正な値になる
+    const counts = reactions.map(reaction => (
+      reaction.count ? reaction.count - Number(reaction.me) : 0
+    ));
+    const total = counts.reduce((total, count) => total + count, 0);
+    const rates = counts.map(count => count / (total || 1));
+
+    const description = poll.embeds[0].description;
+    const texts = new Map(
+      [...(description?.matchAll(/\u200B(.+?) (.+?)\u200C/g) ?? [])]
+        .map(match => [match[1], match[2]])
+    );
+
+    return emojis.map((emoji, i) => (
+      {
+        emoji: emoji,
+        text: texts.get(emoji) ?? null,
+        count: counts[i],
+        rate: rates[i],
+      }
+    ));
   }
 
   function parseQuestion(data: RequestData, poll: Message): string {
@@ -107,12 +186,13 @@ export namespace Result {
     if (!isPoll(data, poll)) throw new CommandError('notFoundPoll', data.lang);
 
     return {
-      endpoll : endpoll,
-      author  : parseAuthor(data, poll),
-      imageURL: parseImage(poll),
-      mentions: parseMentions(poll),
-      question: parseQuestion(data, poll),
-      choices : parseChoices(data, poll),
+      poll     : poll,
+      endpoll  : endpoll,
+      author   : parseAuthor(data, poll),
+      imageURL : parseImage(poll),
+      mentions : parseMentions(poll),
+      question : parseQuestion(data, poll),
+      choices  : parseChoices(poll),
     };
   }
 
@@ -131,6 +211,7 @@ export namespace Result {
 
     try {
       const query = await parse(data, endpoll);
+      if (query.endpoll) endPoll(data, query.poll);
       return respondResult(data, query);
     }
     catch (error: unknown) {
