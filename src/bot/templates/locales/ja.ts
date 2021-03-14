@@ -8,6 +8,7 @@ import {
   COMMAND_QUESTION_MAX,
   COMMAND_CHOICE_MAX,
   COLORS,
+  COMMAND_EDITABLE_TIME,
 } from '../../../constants';
 
 const supportServerLink = `[ご質問・不具合報告](${SUPPORT_SERVER_URL})`;
@@ -87,7 +88,7 @@ export const ja: LocaleStructure = {
             + '```'
         },
         {
-          name: '↩️ でコマンドをキャンセル(3分以内)',
+          name: `↩️ でコマンドをキャンセル(${COMMAND_EDITABLE_TIME / 60 / 100}分以内)`,
           value: `💟 [BOT開発・運用資金の寄付](${DONATION_SERVICE_URL})\n`
             + `⚠️ ${supportServerLink}\n`
             + `➡️ **[サーバーへ追加](${botInviteURL})**`

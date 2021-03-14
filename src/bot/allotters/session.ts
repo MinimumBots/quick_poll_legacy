@@ -15,7 +15,7 @@ export default class Session {
     this.bot  = request.client;
 
     request.react(this.cancelEmoji)
-      .catch(console.error);
+      .catch(undefined);
 
     this.bot.on('messageReactionAdd', this.onCancel);
     this.timeout = this.bot.setTimeout(
@@ -51,7 +51,7 @@ export default class Session {
     this.bot.off('messageReactionAdd', this.onCancel);
 
     this.request.reactions.cache.get(this.cancelEmoji)?.users.remove()
-      .catch(console.error);
+      .catch(undefined);
 
     Utils.removeMessageCache(this.request);
 
