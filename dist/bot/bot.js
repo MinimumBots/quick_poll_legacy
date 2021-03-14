@@ -1,0 +1,37 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const discord_js_1 = require("discord.js");
+const constants_1 = require("../constants");
+const utils_1 = require("./utils");
+const admin_1 = require("./listeners/admin");
+const decrypter_1 = require("./listeners/decrypter");
+const allocater_1 = require("./allotters/allocater");
+const judge_1 = require("./listeners/judge");
+const bot = new discord_js_1.Client({
+    messageCacheMaxSize: 500,
+    partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
+    restTimeOffset: 100,
+    retryLimit: 3,
+    ws: { intents: constants_1.BOT_INTENTS },
+    presence: { status: 'dnd', activity: { type: 'PLAYING', name: '再接続' } },
+});
+function initialize(botID) {
+    admin_1.Admin.initialize(bot);
+    decrypter_1.Decrypter.initialize(bot, botID);
+    allocater_1.Allocater.initialize(bot, botID);
+    judge_1.Judge.initialize(bot, botID);
+}
+let presenceCount = 0;
+bot.setInterval(() => {
+    utils_1.Utils.updatePresence(bot, presenceCount++)
+        .catch(console.error);
+}, constants_1.PRESENCE_UPDATE_INTERVAL);
+bot.on('ready', () => {
+    bot.fetchApplication()
+        .then(app => initialize(app.id))
+        .catch(console.error);
+});
+bot.on('shardReady', shardID => console.info(`Shard No.${shardID} is ready.`));
+bot.login(process.env['QUICK_POLL_TOKEN'])
+    .catch(console.error);
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYm90LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL2JvdC9ib3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFBQSwyQ0FBK0M7QUFFL0MsNENBQXFFO0FBQ3JFLG1DQUFnQztBQUVoQyw2Q0FBMEM7QUFDMUMscURBQWtEO0FBQ2xELHFEQUFrRDtBQUNsRCw2Q0FBMEM7QUFFMUMsTUFBTSxHQUFHLEdBQUcsSUFBSSxtQkFBTSxDQUFDO0lBQ3JCLG1CQUFtQixFQUFFLEdBQUc7SUFDeEIsUUFBUSxFQUFFLENBQUMsTUFBTSxFQUFFLFNBQVMsRUFBRSxjQUFjLEVBQUUsU0FBUyxFQUFFLFVBQVUsQ0FBQztJQUNwRSxjQUFjLEVBQUUsR0FBRztJQUNuQixVQUFVLEVBQUUsQ0FBQztJQUNiLEVBQUUsRUFBRSxFQUFFLE9BQU8sRUFBRSx1QkFBVyxFQUFFO0lBQzVCLFFBQVEsRUFBRSxFQUFFLE1BQU0sRUFBRSxLQUFLLEVBQUUsUUFBUSxFQUFFLEVBQUUsSUFBSSxFQUFFLFNBQVMsRUFBRSxJQUFJLEVBQUUsS0FBSyxFQUFFLEVBQUU7Q0FDeEUsQ0FBQyxDQUFDO0FBRUgsU0FBUyxVQUFVLENBQUMsS0FBZ0I7SUFDbEMsYUFBSyxDQUFDLFVBQVUsQ0FBQyxHQUFHLENBQUMsQ0FBQztJQUN0QixxQkFBUyxDQUFDLFVBQVUsQ0FBQyxHQUFHLEVBQUUsS0FBSyxDQUFDLENBQUM7SUFDakMscUJBQVMsQ0FBQyxVQUFVLENBQUMsR0FBRyxFQUFFLEtBQUssQ0FBQyxDQUFDO0lBQ2pDLGFBQUssQ0FBQyxVQUFVLENBQUMsR0FBRyxFQUFFLEtBQUssQ0FBQyxDQUFDO0FBQy9CLENBQUM7QUFFRCxJQUFJLGFBQWEsR0FBRyxDQUFDLENBQUM7QUFDdEIsR0FBRyxDQUFDLFdBQVcsQ0FBQyxHQUFHLEVBQUU7SUFDbkIsYUFBSyxDQUFDLGNBQWMsQ0FBQyxHQUFHLEVBQUUsYUFBYSxFQUFFLENBQUM7U0FDdkMsS0FBSyxDQUFDLE9BQU8sQ0FBQyxLQUFLLENBQUMsQ0FBQztBQUMxQixDQUFDLEVBQUUsb0NBQXdCLENBQUMsQ0FBQztBQUU3QixHQUFHLENBQUMsRUFBRSxDQUFDLE9BQU8sRUFBRSxHQUFHLEVBQUU7SUFDbkIsR0FBRyxDQUFDLGdCQUFnQixFQUFFO1NBQ25CLElBQUksQ0FBQyxHQUFHLENBQUMsRUFBRSxDQUFDLFVBQVUsQ0FBQyxHQUFHLENBQUMsRUFBRSxDQUFDLENBQUM7U0FDL0IsS0FBSyxDQUFDLE9BQU8sQ0FBQyxLQUFLLENBQUMsQ0FBQztBQUMxQixDQUFDLENBQUMsQ0FBQztBQUNILEdBQUcsQ0FBQyxFQUFFLENBQUMsWUFBWSxFQUFFLE9BQU8sQ0FBQyxFQUFFLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxZQUFZLE9BQU8sWUFBWSxDQUFDLENBQUMsQ0FBQztBQUUvRSxHQUFHLENBQUMsS0FBSyxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUMsa0JBQWtCLENBQUMsQ0FBQztLQUN2QyxLQUFLLENBQUMsT0FBTyxDQUFDLEtBQUssQ0FBQyxDQUFDIn0=
