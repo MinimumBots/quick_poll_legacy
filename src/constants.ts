@@ -16,14 +16,14 @@ export const BOT_TOTAL_SHARDS: number | 'auto'
   = Number(process.env['BOT_TOTAL_SHARDS']) || 'auto';
 
 export const COMMAND_PREFIX: string
-  = process.env['npm_package_config_commandPrefix'] ?? '/';
+  = process.env['COMMAND_PREFIX'] ?? '/';
 
 export const BOT_DOCUMENT_URL: string
-  = process.env['npm_package_config_botDocumentURL'] ?? '';
+  = process.env['BOT_DOCUMENT_URL'] ?? '';
 export const SUPPORT_SERVER_URL: string
-  = process.env['npm_package_config_supportServerURL'] ?? '';
+  = process.env['SUPPORT_SERVER_URL'] ?? '';
 export const DONATION_SERVICE_URL: string
-  = process.env['npm_package_config_donationServiceURL'] ?? '';
+  = process.env['DONATION_SERVICE_URL'] ?? '';
 
 export const BOT_INTENTS
   = Intents.FLAGS.GUILDS

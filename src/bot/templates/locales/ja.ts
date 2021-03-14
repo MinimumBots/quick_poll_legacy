@@ -88,7 +88,7 @@ export const ja: LocaleStructure = {
             + '```'
         },
         {
-          name: `↩️ でコマンドをキャンセル(${COMMAND_EDITABLE_TIME / 60 / 100}分以内)`,
+          name: `↩️ でコマンドをキャンセル(${COMMAND_EDITABLE_TIME / 60 / 1000}分以内)`,
           value: `💟 [BOT開発・運用資金の寄付](${DONATION_SERVICE_URL})\n`
             + `⚠️ ${supportServerLink}\n`
             + `➡️ **[サーバーへ追加](${botInviteURL})**`
