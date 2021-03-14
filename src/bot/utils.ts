@@ -45,7 +45,7 @@ export namespace Utils {
         break;
   
       default:
-        type = 'WATCHING';
+        type = 'PLAYING';
         name = '/poll | /expoll';
         break;
     }

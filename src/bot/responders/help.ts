@@ -24,7 +24,7 @@ export namespace Help{
   function generateInviteURL(bot: Client): void {
     bot.generateInvite({ permissions: DEFAULT_BOT_PERMISSIONS })
       .then(url => botInviteURL = url)
-      .catch(() => bot.setTimeout(() => generateInviteURL(bot), 30000));
+      .catch(console.error);
   }
 
   async function respond(data: RequestData): Promise<Message | null> {

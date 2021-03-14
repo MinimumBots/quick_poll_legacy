@@ -6,6 +6,7 @@ import { Utils } from './utils';
 import { Admin } from './listeners/admin';
 import { Decrypter } from './listeners/decrypter';
 import { Allocater } from './allotters/allocater';
+import { Judge } from './listeners/judge';
 
 const bot = new Client({
   messageCacheMaxSize: 500,
@@ -20,6 +21,7 @@ function initialize(botID: Snowflake): void {
   Admin.initialize(bot);
   Decrypter.initialize(bot, botID);
   Allocater.initialize(bot, botID);
+  Judge.initialize(bot, botID);
 }
 
 let presenceCount = 0;
