@@ -1,4 +1,4 @@
-import { HTTPError, Message } from 'discord.js';
+import { DiscordAPIError, Message } from 'discord.js';
 
 import { BOT_OWNER_IDS, DEFAULT_LANG } from '../../constants';
 
@@ -10,14 +10,14 @@ export namespace Rejecter {
   export async function issue(
     exception: unknown, request: Message
   ): Promise<Message | void> {
-    if (exception instanceof HTTPError)
-      return await forHTTPError(exception, request);
+    if (exception instanceof DiscordAPIError)
+      return await forAPIError(exception, request);
     else
       return await forUnknown(exception, request);
   }
 
-  async function forHTTPError(
-    exception: HTTPError, request: Message
+  async function forAPIError(
+    exception: DiscordAPIError, request: Message
   ): Promise<Message | void> {
     if (exception.code / 500)
       return destroy(exception);

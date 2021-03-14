@@ -119,7 +119,7 @@ export const ja: LocaleStructure = {
       image: { url: imageName ? `attachment://${imageName}` : undefined }
     }),
     graphpoll: (
-      pollURL, authorIconURL, authorName, question, selectors, choices, choiceCounts, choiceRates, choiceGraphs
+      pollURL, authorIconURL, authorName, question, selectors, choices, choiceCounts, choiceTops, choiceRates, choiceGraphs
     ) => ({
       color: COLORS.RESULT,
       author: {
@@ -130,13 +130,13 @@ export const ja: LocaleStructure = {
       url: pollURL,
       get fields() {
         return selectors.map((selector, i) => ({
-          name: `${selector} ${choices[i]} (${choiceCounts[i]}票)`,
+          name: `${selector} ${choices[i]} (${choiceCounts[i]}票) ${choiceTops[i] ? '🏆' : ''}`,
           value: `\`${choiceRates[i].padStart(5, ' ')}%\` ${choiceGraphs[i]}`
         }));
       }
     }),
     listpoll: (
-      pollURL, authorIconURL, authorName, question, selectors, choices, choiceCounts, choiceRates, choiceUsersLists
+      pollURL, authorIconURL, authorName, question, selectors, choices, choiceCounts, choiceTops, choiceRates, choiceUsersLists
     ) => ({
       color: COLORS.RESULT,
       author: {
@@ -147,7 +147,7 @@ export const ja: LocaleStructure = {
       url: pollURL,
       get fields() {
         return selectors.map((selector, i) => ({
-          name: `${selector} ${choices[i]} (${choiceCounts[i]}票|${choiceRates[i]}%)`,
+          name: `${selector} ${choices[i]} (${choiceCounts[i]}票|${choiceRates[i]}%) ${choiceTops[i] ? '🏆' : ''}`,
           value: choiceUsersLists[i]
         }));
       }

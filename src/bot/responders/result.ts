@@ -1,4 +1,4 @@
-import { DiscordAPIError, Message, Snowflake } from 'discord.js';
+import { DiscordAPIError, Message, NewsChannel, Snowflake, TextChannel } from 'discord.js';
 
 import {
   COLORS,
@@ -42,33 +42,37 @@ export namespace Result {
   ): Promise<Message | null> {
     const choices = query.choices;
     const maxRate = choices.reduce(
-      (max, choice) => max < choice.rate ? choice.rate : max, 0
+      (max, { rate }) => max < rate ? rate : max, 0
     );
     const graphs = choices.map(
-      choice => '\\|'.repeat(choice.rate * (100 / maxRate / 2))
+      ({ rate }) => '\\|'.repeat(rate * (100 / maxRate / 1.5))
     );
 
-    const emojis = choices.map(choice => choice.emoji);
-    const texts  = choices.map(choice => choice.text ?? '');
-    const counts = choices.map(choice => choice.count);
-    const rates  = choices.map(choice => (choice.rate * 100).toFixed(1));
+    const emojis = choices.map(({ emoji }) => emoji);
+    const texts  = choices.map(({ text }) => text ?? '');
+    const counts = choices.map(({ count }) => count);
+    const tops   = choices.map(({ rate }) => !!rate && rate === maxRate);
+    const rates  = choices.map(({ rate }) => (rate * 100).toFixed(1));
 
-    return data.request.channel.send(
-      query.mentions.join(' '),
-      {
-        embed: Locales[data.lang].successes.graphpoll(
-          query.poll.url,
-          query.author.iconURL,
-          query.author.name,
-          query.question,
-          emojis,
-          texts,
-          counts,
-          rates,
-          graphs,
-        )
-      }
-    )
+    const options = {
+      content: query.mentions.join(' '),
+      embed: Locales[data.lang].successes.graphpoll(
+        query.poll.url,
+        query.author.iconURL,
+        query.author.name,
+        query.question,
+        emojis,
+        texts,
+        counts,
+        tops,
+        rates,
+        graphs,
+      )
+    }
+
+    return data.response
+      ? data.response.edit(options)
+      : data.request.channel.send(options);
   }
 
   function endPoll(data: RequestData, poll: Message): void {
@@ -85,13 +89,14 @@ export namespace Result {
       .catch(console.error);
   }
 
-  function parseChoices(poll: Message): Choice[] {
-    const reactions = poll.reactions.cache;
-    const emojis = reactions.map(reaction => reaction.emoji.toString());
-    // meプロパティはリアクションイベント発生時に不正な値になる
-    const counts = reactions.map(reaction => (
-      reaction.count ? reaction.count - Number(reaction.me) : 0
-    ));
+  async function parseChoices(poll: Message): Promise<Choice[]> {
+    const reactions = await Promise.all(
+      poll.reactions.cache.map(reaction => reaction.fetch())
+    );
+    const emojis = reactions.map(({ emoji }) => emoji.toString());
+    const counts = reactions.map(
+      ({ count, me }) => count ? count - Number(me) : 0
+    );
     const total = counts.reduce((total, count) => total + count, 0);
     const rates = counts.map(count => count / (total || 1));
 
@@ -147,12 +152,13 @@ export namespace Result {
   function getChannel(
     request: Message, channelID: Snowflake | null
   ): USABLE_CHANNEL | null {
-    return channelID
-      ? request.guild?.channels.cache.find(channel => (
-        (channel.type === 'text' || channel.type === 'news')
-        && channel.id === channelID
-      )) as USABLE_GUILD_CHANNEL | undefined ?? null
-      : request.channel;
+    if (!channelID) return request.channel;
+
+    const channel = request.guild?.channels.cache.get(channelID);
+    if (channel instanceof TextChannel || channel instanceof NewsChannel)
+      return channel;
+    else
+      return null;
   }
 
   function parseIDs(data: RequestData): [string | null, string | null] {
@@ -186,13 +192,13 @@ export namespace Result {
     if (!isPoll(data, poll)) throw new CommandError('notFoundPoll', data.lang);
 
     return {
-      poll     : poll,
-      endpoll  : endpoll,
-      author   : parseAuthor(data, poll),
-      imageURL : parseImage(poll),
-      mentions : parseMentions(poll),
-      question : parseQuestion(data, poll),
-      choices  : parseChoices(poll),
+      poll    : poll,
+      endpoll : endpoll,
+      author  : parseAuthor(data, poll),
+      imageURL: parseImage(poll),
+      mentions: parseMentions(poll),
+      question: parseQuestion(data, poll),
+      choices : await parseChoices(poll),
     };
   }
 

@@ -30,6 +30,7 @@ export type SuccesseTemplate = {
     selectors    : string[],
     choices      : string[],
     choiceCounts : number[],
+    choiceTops   : boolean[],
     choiceRates  : string[],
     choiceGraphs : string[],
   ): MessageEmbedOptions;
@@ -41,6 +42,7 @@ export type SuccesseTemplate = {
     selectors       : string[],
     choices         : string[],
     choiceCounts    : number[],
+    choiceTops      : boolean[],
     choiceRates     : string[],
     choiceUsersLists: string[],
   ): MessageEmbedOptions;
