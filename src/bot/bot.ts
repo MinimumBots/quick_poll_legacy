@@ -39,3 +39,7 @@ bot.on('shardReady', shardID => console.info(`Shard No.${shardID} is ready.`));
 
 bot.login(process.env['QUICK_POLL_TOKEN'])
   .catch(console.error);
+
+process.on('exit', () => bot.destroy());
+process.on('SIGTERM', () => process.exit(0));
+process.on('SIGINT',  () => process.exit(0));
