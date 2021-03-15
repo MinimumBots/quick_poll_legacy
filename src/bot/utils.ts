@@ -1,6 +1,18 @@
-import { Client, ActivityType, Message } from 'discord.js';
+import { Client, ActivityType, Message, DiscordAPIError } from 'discord.js';
 
 export namespace Utils {
+  export async function fetchMessage(message: Message): Promise<Message | null> {
+    try {
+      return await message.fetch();
+    }
+    catch (error: unknown) {
+      if (error instanceof DiscordAPIError)
+        if (error.code / 400 > 1) return null;
+
+      throw error;
+    }
+  }
+
   export function removeMessageCache(message: Message): boolean {
     return message.channel.messages.cache.delete(message.id);
   }

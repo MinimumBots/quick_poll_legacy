@@ -21,7 +21,7 @@ export namespace Judge {
       .then(ejectVotes =>
         Promise.all(
           ejectVotes.map(({ users }) => users.remove(user.id))
-        ).catch(undefined)
+        ).catch(() => undefined)
       )
       .catch(console.error);
   }
@@ -31,7 +31,9 @@ export namespace Judge {
   ): Promise<MessageReaction[]> {
     if (user.id === botID) return [];
 
-    const poll = await vote.message.fetch();
+    const poll = await Utils.fetchMessage(vote.message);
+    if (!poll) return [];
+
     const embed = poll.embeds[0];
     if (poll.author.id !== botID || !embed) {
       Utils.removeMessageCache(poll);

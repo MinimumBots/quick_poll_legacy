@@ -78,7 +78,7 @@ export namespace Decrypter {
 
     message.fetch()
       .then(message => decrypt(message, botID))
-      .catch(console.error);
+      .catch(() => undefined);
   }
 
   export function initialize(bot: Client, botID: Snowflake): void {

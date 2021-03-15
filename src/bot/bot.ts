@@ -9,7 +9,6 @@ import { Allocater } from './allotters/allocater';
 import { Judge } from './listeners/judge';
 
 const bot = new Client({
-  messageCacheMaxSize: 500,
   partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
   restTimeOffset: 100,
   retryLimit: 3,
