@@ -1,7 +1,7 @@
 import { Client, Collection, Message, Snowflake } from 'discord.js';
 
 import { DEBUG_MODE } from '../../constants';
-import Session from './session';
+import { Session } from './session';
 import { Help } from '../responders/help';
 import { Rejecter } from '../responders/rejecter';
 import { Utils } from '../utils';
@@ -31,7 +31,6 @@ export namespace Allocater {
   }
 
   export const responders: Collection<string, Responder> = new Collection;
-  const sessions: Collection<Snowflake, Session> = new Collection;
 
   export function submit(
     request: Message, prefix: string, args: CommandArgs, botID: Snowflake
@@ -46,7 +45,7 @@ export namespace Allocater {
     request: Message, responder: Responder,
     prefix: string, args: CommandArgs, botID: Snowflake
   ): Promise<void> {
-    const session  = sessions.get(request.id);
+    const session  = Session.get(request.id);
     const response = session?.response ?? null;
     const lang     = await Preferences.fetchLang(request.author, request.guild);
 
@@ -72,17 +71,11 @@ export namespace Allocater {
   }
 
   function allocate(
-    request: Message, response: Message | null, session?: Session
+    request: Message, response: Message | null, session?: Session.Data | null
   ): void {
     if (!response)
       Utils.removeMessageCache(request);
     else if (!session)
-      sessions.set(
-        request.id, new Session(request, response, id => free(id))
-      );
-  }
-
-  function free(requestID: Snowflake): void {
-    sessions.delete(requestID);
+      Session.create(request, response);
   }
 };

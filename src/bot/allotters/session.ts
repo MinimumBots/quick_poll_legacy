@@ -1,60 +1,78 @@
-import { Client, Message, MessageReaction, PartialUser, Snowflake, User } from 'discord.js';
+import {
+  Client,
+  Message,
+  MessageReaction,
+  PartialUser,
+  Snowflake,
+  User,
+} from 'discord.js';
 import { COMMAND_EDITABLE_TIME } from '../../constants';
 import { Utils } from '../utils';
 
-type Terminater = (requestID: Snowflake) => void;
+export namespace Session {
+  export function initialize(bot: Client): void {
+    bot.on('messageReactionAdd', (reaction, user) => validate(reaction, user));
+  }
 
-export default class Session {
-  constructor(
-    public  readonly request   : Message,
-    public           response  : Message,
-    private readonly terminater: Terminater,
-  ) {
-    this.id   = request.id;
-    this.user = request.author;
-    this.bot  = request.client;
+  export interface Data {
+    readonly bot     : Client,
+    readonly id      : Snowflake,
+    readonly user    : User,
+    readonly request : Message,
+    readonly response: Message,
+    readonly timeout : NodeJS.Timeout,
+  }
 
-    request.react(this.cancelEmoji)
+  const sessions: Map<Snowflake, Data> = new Map;
+  const cancelEmoji = '↩️';
+
+  function validate(reaction: MessageReaction, user: User | PartialUser): void {
+    const data = sessions.get(reaction.message.id);
+    if (!data) return;
+
+    if (reaction.emoji.name === cancelEmoji && user.id === data.user.id)
+      cancel(data.id);
+  }
+
+  export function get(id: Snowflake): Data | null {
+    return sessions.get(id) ?? null;
+  }
+
+  export function create(request: Message, response: Message): Data {
+    const id = request.id;
+    const data: Data = {
+      bot     : request.client,
+      id      : id,
+      user    : request.author,
+      request : request,
+      response: response,
+      timeout : request.client.setTimeout(
+        () => close(id), COMMAND_EDITABLE_TIME
+      ),
+    }
+
+    sessions.set(id, data);
+    return data;
+  }
+
+  function cancel(id: Snowflake): void {
+    const data = sessions.get(id);
+    if (!data) return;
+
+    data.bot.clearTimeout(data.timeout);
+    data.response.delete()
       .catch(() => undefined);
 
-    this.bot.on('messageReactionAdd', this.onCancel);
-    this.timeout = this.bot.setTimeout(
-      () => this.close(), COMMAND_EDITABLE_TIME
-    );
+    close(id);
   }
 
-  public  readonly id  : Snowflake;
-  private readonly user: User;
-  private readonly bot : Client;
+  function close(id: Snowflake): void {
+    const data = sessions.get(id);
+    if (!data) return;
 
-  private readonly timeout?: NodeJS.Timeout;
-
-  private readonly cancelEmoji = '↩️';
-
-  cancel(): void {
-    if (this.timeout) this.bot.clearTimeout(this.timeout);
-
-    this.response.delete()
-      .catch(console.error);
-
-    this.close();
-  }
-
-  private onCancel = (
-    reaction: MessageReaction, user: User | PartialUser
-  ): void => {
-    if (reaction.emoji.name === this.cancelEmoji && user.id === this.user.id)
-      this.cancel();
-  }
-
-  close(): void {
-    this.bot.off('messageReactionAdd', this.onCancel);
-
-    this.request.reactions.cache.get(this.cancelEmoji)?.users.remove()
+    data.request.reactions.cache.get(cancelEmoji)?.users.remove()
       .catch(() => undefined);
 
-    Utils.removeMessageCache(this.request);
-
-    this.terminater(this.id);
+    Utils.removeMessageCache(data.request);
   }
 }
