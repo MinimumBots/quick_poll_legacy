@@ -9,6 +9,9 @@ import { Allocater } from './allotters/allocater';
 import { Judge } from './listeners/judge';
 
 const bot = new Client({
+  messageCacheLifetime: 60 * 60,
+  messageSweepInterval: 60 * 10,
+  messageEditHistoryMaxSize: 0,
   partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
   restTimeOffset: 100,
   retryLimit: 3,

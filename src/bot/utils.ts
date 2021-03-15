@@ -6,9 +6,7 @@ export namespace Utils {
       return await message.fetch();
     }
     catch (error: unknown) {
-      if (error instanceof DiscordAPIError)
-        if (error.httpStatus / 400 > 1) return null;
-
+      if (error instanceof DiscordAPIError) return null;
       throw error;
     }
   }
