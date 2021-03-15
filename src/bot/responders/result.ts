@@ -183,7 +183,7 @@ export namespace Result {
     }
     catch (error: unknown) {
       if (error instanceof DiscordAPIError)
-        if (error.code === 404)
+        if (error.httpStatus === 404)
           throw new CommandError('notFoundPoll', data.lang);
 
       throw error;

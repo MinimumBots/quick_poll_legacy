@@ -19,7 +19,7 @@ export namespace Rejecter {
   async function forAPIError(
     exception: DiscordAPIError, request: Message
   ): Promise<Message | void> {
-    if (exception.code / 500)
+    if (exception.httpStatus / 500)
       return destroy(exception);
     else
       return await forUnknown(exception, request);

@@ -7,7 +7,7 @@ export namespace Utils {
     }
     catch (error: unknown) {
       if (error instanceof DiscordAPIError)
-        if (error.code / 400 > 1) return null;
+        if (error.httpStatus / 400 > 1) return null;
 
       throw error;
     }

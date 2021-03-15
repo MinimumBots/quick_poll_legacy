@@ -13,6 +13,6 @@ manager.on('shardCreate', shard => {
 });
 
 console.info('Start spawning shards.');
-manager.spawn()
+manager.spawn(undefined, undefined, -1)
   .then(() => console.info('All shards were successfully spawned.'))
   .catch(console.error);

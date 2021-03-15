@@ -254,7 +254,7 @@ export namespace Poll {
     }
     catch (exception: unknown) {
       if (exception instanceof DiscordAPIError)
-        if (exception.code === 400)
+        if (exception.httpStatus === 400)
           throw new CommandError('unusableEmoji', data.lang);
     }
   }
@@ -276,7 +276,7 @@ export namespace Poll {
 
   function clearSelectors(response: Message): void {
     response.reactions.removeAll()
-      .catch(console.error);
+      .catch(() => undefined);
   }
 
   async function respond(
