@@ -1,11 +1,10 @@
 import { ShardingManager } from 'discord.js';
-import { BOT_TOTAL_SHARDS } from './constants';
-
-const totalShards = BOT_TOTAL_SHARDS;
+import { BOT_SHARD_LIST, BOT_TOTAL_SHARDS } from './constants';
 
 const manager = new ShardingManager('./dist/bot/bot.js', {
   token: process.env['QUICK_POLL_TOKEN'],
-  totalShards: totalShards
+  totalShards: BOT_TOTAL_SHARDS,
+  shardList: BOT_SHARD_LIST,
 });
 
 manager.on('shardCreate', shard => {

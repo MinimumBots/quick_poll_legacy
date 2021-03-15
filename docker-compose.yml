@@ -6,6 +6,7 @@ services:
       - QUICK_POLL_TOKEN
       - BOT_OWNER_IDS
       - BOT_TOTAL_SHARDS
+      - BOT_SHARD_LIST
       - COMMAND_PREFIX
       - BOT_DOCUMENT_URL
       - SUPPORT_SERVER_URL

@@ -14,6 +14,8 @@ export const BOT_OWNER_IDS: string[]
 
 export const BOT_TOTAL_SHARDS: number | 'auto'
   = Number(process.env['BOT_TOTAL_SHARDS']) || 'auto';
+export const BOT_SHARD_LIST: number[] | 'auto'
+  = process.env['BOT_SHARD_LIST']?.split(',').map(Number) ?? 'auto';
 
 export const COMMAND_PREFIX: string
   = process.env['COMMAND_PREFIX'] ?? '/';
