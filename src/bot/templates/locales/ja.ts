@@ -250,7 +250,8 @@ export const ja: LocaleStructure = {
     }),
     notFoundChannel: () => ({
       color: DefaultColors.errors,
-      title: '⚠️ 指定されたチャンネルIDがサーバー内から見つかりません'
+      title: '⚠️ 指定されたチャンネルIDがサーバー内から見つかりません',
+      description: supportServerLink
     }),
     notFoundPoll: () => ({
       color: DefaultColors.errors,
