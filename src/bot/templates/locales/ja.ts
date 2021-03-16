@@ -12,6 +12,7 @@ import {
 } from '../../../constants';
 
 const supportServerLink = `[ご質問・不具合報告](${SUPPORT_SERVER_URL})`;
+const botDocumentURL = `${BOT_DOCUMENT_URL}/ja/`;
 
 export const ja: LocaleStructure = {
   permissionNames: {
@@ -57,9 +58,9 @@ export const ja: LocaleStructure = {
     help: botInviteURL => ({
       color: COLORS.HELP,
       title: '📊 Quick Pollの使い方',
-      url: `${BOT_DOCUMENT_URL}`,
+      url: botDocumentURL,
       description: 'アンケートを作成し、投票を募ることができるBOTです。\n'
-        + `各コマンドの詳しい使い方は**[こちら](${BOT_DOCUMENT_URL})**をご覧ください。`,
+        + `各コマンドの詳しい使い方は**[こちら](${botDocumentURL})**をご覧ください。`,
       fields: [
         {
           name: '🇦 🇧 🇨 🇩 …で選択できる投票を作る',
@@ -111,7 +112,7 @@ export const ja: LocaleStructure = {
       },
       fields: [{
         name: '\u200B',
-        value: `[📊](${BOT_DOCUMENT_URL}sumpoll) `
+        value: `[📊](${botDocumentURL}sumpoll) `
           + `\`${COMMAND_PREFIX}sumpoll ${messageID}\``
       }],
       footer: {
