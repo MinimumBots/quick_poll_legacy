@@ -7,6 +7,7 @@ import { Admin } from './listeners/admin';
 import { Decrypter } from './listeners/decrypter';
 import { Allocater } from './allotters/allocater';
 import { Judge } from './listeners/judge';
+import { Session } from './allotters/session';
 
 const bot = new Client({
   messageCacheLifetime: 60 * 60,
@@ -23,6 +24,7 @@ function initialize(botID: Snowflake): void {
   Admin.initialize(bot);
   Decrypter.initialize(bot, botID);
   Allocater.initialize(bot, botID);
+  Session.initialize(bot);
   Judge.initialize(bot, botID);
 }
 

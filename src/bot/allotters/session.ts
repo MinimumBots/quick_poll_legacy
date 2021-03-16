@@ -52,6 +52,10 @@ export namespace Session {
     }
 
     sessions.set(id, data);
+
+    request.react(cancelEmoji)
+      .catch(() => undefined);
+
     return data;
   }
 
