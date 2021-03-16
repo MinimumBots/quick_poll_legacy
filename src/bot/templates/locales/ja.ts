@@ -240,7 +240,7 @@ export const ja: LocaleStructure = {
     }),
     unavailableExclusive: () => ({
       color: DefaultColors.errors,
-      title: `⚠️ DM内では${COMMAND_PREFIX}expollコマンドを使用できません`,
+      title: `⚠️ DMチャンネル内では${COMMAND_PREFIX}expollコマンドを使用できません`,
       description: supportServerLink
     }),
     ungivenMessageID: () => ({

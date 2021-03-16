@@ -7,7 +7,7 @@ import {
   PermissionString,
 } from 'discord.js';
 
-import { ASSUMING_DM_PERMISSIONS, COMMAND_PREFIX } from '../../constants';
+import { ASSUMING_DM_PERMISSIONS, COMMAND_MAX_CHOICES, COMMAND_PREFIX, COMMAND_QUESTION_MAX } from '../../constants';
 import { Locales } from '../templates/locale';
 import { Allocater, RequestData } from '../allotters/allocater';
 import CommandError from './error';
@@ -62,28 +62,27 @@ export namespace Poll {
 
   function validateAuthorPermissions(
     data: RequestData, query: Query, permissions: Readonly<Permissions>
-  ): boolean {
+  ): void {
     const requirePermissions = sumRequireAuthoerPermissions(query, permissions);
     const missingPermissions = permissions.missing(requirePermissions);
     if (missingPermissions.length)
       throw new CommandError(
         'lackYourPermissions', data.lang, missingPermissions
       );
-
-    return true;
   }
 
   function validateMyPermissions(
     data: RequestData, query: Query, permissions: Readonly<Permissions>
-  ): boolean {
+  ): void {
+    if (query.exclusive && data.request.channel.type === 'dm')
+      throw new CommandError('unavailableExclusive', data.lang);
+
     const requirePermissions = sumRequireMyPermissions(query);
     const missingPermissions = permissions.missing(requirePermissions);
     if (missingPermissions.length)
       throw new CommandError(
         'lackPermissions', data.lang, missingPermissions
       );
-
-    return true;
   }
 
   function validatePermissions(
@@ -100,10 +99,10 @@ export namespace Poll {
       : channel.permissionsFor(request.author);
     if (!myPermissions || !authorPermissions) return false;
 
-    return (
-      validateMyPermissions(data, query, myPermissions)
-      && validateAuthorPermissions(data, query, authorPermissions)
-    );
+    validateMyPermissions(data, query, myPermissions);
+    validateAuthorPermissions(data, query, authorPermissions);
+ 
+    return true;
   }
 
   function isLocalGuildEmoji(guild: Guild | null, emoji: string): boolean {
@@ -120,7 +119,23 @@ export namespace Poll {
   const emojiRegex
     = new RegExp(`^(${twemojiRegex.toString().slice(1, -2)}|<a?:.+?:\\d+>)$`);
 
-  const twoChoiceEmojis = ['⭕', '❌'];
+  function safePushChoiceEmoji(
+    data: RequestData, emojis: string[], newEmoji: string
+  ): number {
+    if (emojis.includes(newEmoji))
+      throw new CommandError('duplicateEmojis', data.lang);
+
+    return emojis.push(newEmoji);
+  }
+
+  function safePushChoiceText(
+    data: RequestData, texts: (string | null)[], newtext: string | null
+  ): number {
+    if (newtext && newtext.length > COMMAND_QUESTION_MAX)
+      throw new CommandError('tooLongQuestion', data.lang);
+
+    return texts.push(newtext);
+  }
 
   function generateChoices(data: RequestData): Choice[] {
     const emojis: string[] = [], texts: (string | null)[] = [];
@@ -128,19 +143,22 @@ export namespace Poll {
 
     data.args.forEach(arg => {
       if (emojiRegex.test(arg)) {
-        const length = emojis.push(arg);
-        if (texts.length < length - 1) texts.push(null);
+        const length = safePushChoiceEmoji(data, emojis, arg);
+        if (texts.length < length - 1) safePushChoiceText(data, texts, null);
 
         external ||= !isLocalGuildEmoji(data.request.guild, arg);
       }
       else {
-        const length = texts.push(arg);
-        if (emojis.length < length) emojis.push(defaultEmojis[length - 1]);
+        const length = safePushChoiceText(data, texts, arg);
+        if (emojis.length < length)
+          safePushChoiceEmoji(data, emojis, defaultEmojis[length - 1]);
       }
     });
 
     return emojis.map((emoji, i) => ({ emoji, text: texts[i], external }));
   }
+
+  const twoChoiceEmojis = ['⭕', '❌'];
 
   function generateTwoChoices(): Choice[] {
     return twoChoiceEmojis.map(emoji => (
@@ -148,11 +166,14 @@ export namespace Poll {
     ));
   }
 
-  const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
-
   function parseChoices(data: RequestData): Choice[] {
-    if (!data.args.length) return generateTwoChoices();
-    return generateChoices(data);
+    const choices
+      = data.args.length ? generateChoices(data) : generateTwoChoices();
+
+    if (choices.length > COMMAND_MAX_CHOICES)
+      throw new CommandError('tooManyOptions', data.lang);
+
+    return choices;
   }
 
   function parseQuestion(data: RequestData): string | null {
@@ -177,6 +198,8 @@ export namespace Poll {
 
     return mentions;
   }
+
+  const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 
   function parseAttachedImage(data: RequestData): string | null {
     return data.request.attachments.find(
@@ -262,7 +285,10 @@ export namespace Poll {
   function respondLoading(data: RequestData, query: Query): Promise<Message> {
     return data.request.channel.send(
       query.mentions.join(' '),
-      { embed: Locales[data.lang].loadings.poll() }
+      {
+        embed: Locales[data.lang].loadings.poll(),
+        files: query.imageURL ? [query.imageURL] : [],
+      }
     );
   }
 
