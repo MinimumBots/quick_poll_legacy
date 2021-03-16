@@ -12,7 +12,7 @@ import {
 } from '../../../constants';
 
 const supportServerLink = `[ご質問・不具合報告](${SUPPORT_SERVER_URL})`;
-const botDocumentURL = `${BOT_DOCUMENT_URL}/ja/`;
+const botDocumentURL = `${BOT_DOCUMENT_URL}ja/`;
 
 export const ja: LocaleStructure = {
   permissionNames: {
