@@ -5,7 +5,7 @@ export type PermissionNameTemplate = {
 };
 
 export type LoadingTemplate = {
-  poll(): MessageEmbedOptions;
+  poll(exclusive: boolean): MessageEmbedOptions;
 };
 
 export type SuccesseTemplate = {
@@ -20,6 +20,7 @@ export type SuccesseTemplate = {
     selectors    : string[],
     choices      : string[],
     imageName    : string | null,
+    channelID    : string,
     messageID    : string,
   ): MessageEmbedOptions;
   graphpoll(

@@ -49,8 +49,8 @@ export const ja: LocaleStructure = {
     MANAGE_EMOJIS        : '絵文字の管理',
   },
   loadings: {
-    poll: () => ({
-      color: DefaultColors.loadings,
+    poll: exclusive => ({
+      color: exclusive ? COLORS.EXPOLL : COLORS.POLL,
       title: '⌛ アンケート生成中...'
     })
   },
@@ -97,7 +97,7 @@ export const ja: LocaleStructure = {
       ]
     }),
     poll: (
-      exclusive, authorIconURL, authorName, question, selectors, choices, imageName, messageID
+      exclusive, authorIconURL, authorName, question, selectors, choices, imageName, channelID, messageID
     ) => ({
       color: exclusive ? COLORS.EXPOLL : COLORS.POLL,
       author: {
@@ -112,7 +112,7 @@ export const ja: LocaleStructure = {
       },
       fields: [{
         name: '\u200B',
-        value: `[📊](${botDocumentURL}sumpoll) `
+        value: `[📊](${botDocumentURL}sumpoll?channel_id=${channelID}&message_id=${messageID}) `
           + `\`${COMMAND_PREFIX}sumpoll ${messageID}\``
       }],
       footer: {

@@ -261,6 +261,7 @@ export namespace Poll {
           selectors,
           choices.map(choice => choice.text ?? ''),
           query.imageURL ? basename(query.imageURL) : null,
+          response.channel.id,
           response.id,
         )
       }
@@ -286,7 +287,7 @@ export namespace Poll {
     return data.request.channel.send(
       query.mentions.join(' '),
       {
-        embed: Locales[data.lang].loadings.poll(),
+        embed: Locales[data.lang].loadings.poll(query.exclusive),
         files: query.imageURL ? [query.imageURL] : [],
       }
     );
