@@ -3,7 +3,7 @@ FROM node:14
 WORKDIR /app/quick_poll
 
 COPY package*.json ./
-RUN npm ci
+RUN [ "npm", "ci", "--production" ]
 
 COPY . .
 
