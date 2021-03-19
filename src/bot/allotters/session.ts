@@ -46,9 +46,7 @@ export namespace Session {
       user    : request.author,
       request : request,
       response: response,
-      timeout : request.client.setTimeout(
-        () => close(id), COMMAND_EDITABLE_TIME
-      ),
+      timeout : setTimeout(() => close(id), COMMAND_EDITABLE_TIME),
     }
 
     sessions.set(id, data);
