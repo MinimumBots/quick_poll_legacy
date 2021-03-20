@@ -29,7 +29,7 @@ export namespace Judge {
   async function parse(
     vote: MessageReaction, user: User | PartialUser, botID: Snowflake
   ): Promise<MessageReaction[]> {
-    if (user.id === botID) return [];
+    if (user.bot) return [];
 
     const poll = await Utils.fetchMessage(vote.message);
     if (!poll) return [];
