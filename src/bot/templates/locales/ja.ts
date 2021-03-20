@@ -112,7 +112,7 @@ export const ja: LocaleStructure = {
       },
       fields: [{
         name: '\u200B',
-        value: `[📊](${botDocumentURL}sumpoll?channel_id=${channelID}&message_id=${messageID}) `
+        value: `[📊](${botDocumentURL}sumpoll.html?channel_id=${channelID}&message_id=${messageID}) `
           + `\`${COMMAND_PREFIX}sumpoll ${messageID}\``
       }],
       footer: {
