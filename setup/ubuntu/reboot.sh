@@ -10,6 +10,9 @@ Description=Reboot the system.
 [Service]
 Type=simple
 ExecStart=/usr/bin/systemctl --force reboot
+
+[Install]
+WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/daily_reboots.service
 echo "----------------------------------------------------------------"
 
