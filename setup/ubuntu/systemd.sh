@@ -3,7 +3,7 @@
 CURRENT_PATH=`pwd`
 DOCKER_COMPOSE_PATH=`which docker-compose`
 
-echo "# Add BOT to service."
+echo "# Register the BOT to systemd."
 echo "----------------------------------------------------------------"
 echo "[Unit]
 Description=Quick Poll, a quick voting bot for Discord.
@@ -16,7 +16,8 @@ ExecStart=$DOCKER_COMPOSE_PATH up --no-recreate
 ExecStop=$DOCKER_COMPOSE_PATH stop
 
 [Install]
-WantedBy=network-online.target" | sudo tee /etc/systemd/system/quick_poll.service
+WantedBy=network-online.target
+" | sudo tee /etc/systemd/system/quick_poll.service
 echo "----------------------------------------------------------------"
 
 echo "# Enable the service."
