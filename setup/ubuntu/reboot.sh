@@ -19,11 +19,12 @@ echo "----------------------------------------------------------------"
 echo "# Register daily reboots timer to systemd."
 echo "----------------------------------------------------------------"
 echo "[Unit]
-Description=Reboot the system at 4 o'clock daily.
+Description=Reboot the system at 19 o'clock daily.
 
 [Timer]
 Unit=daily_reboots.service
-OnCalendar=*-*-* 4:00:00
+OnCalendar=*-*-* 19:00:00
+# The set time is UTC.
 
 [Install]
 WantedBy=timers.target
