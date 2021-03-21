@@ -21,6 +21,8 @@ echo "----------------------------------------------------------------"
 
 echo "# Enable the service."
 echo "----------------------------------------------------------------"
+sudo systemctl enable systemd-networkd
+sudo systemctl enable systemd-networkd-wait-online
 sudo systemctl daemon-reload
 sudo systemctl enable quick_poll
 echo "----------------------------------------------------------------"
