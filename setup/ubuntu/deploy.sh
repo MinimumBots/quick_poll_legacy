@@ -7,7 +7,7 @@ echo "----------------------------------------------------------------"
 
 echo "# Build a image of Quick Poll."
 echo "----------------------------------------------------------------"
-docker-compose build --no-cache
+sudo docker-compose build --no-cache
 echo "----------------------------------------------------------------"
 
 echo "# Stop the service of Quick Poll."
@@ -16,7 +16,7 @@ echo "----------------------------------------------------------------"
 
 echo "# Recreate the container of Quick Poll."
 echo "----------------------------------------------------------------"
-docker-compose up --no-start
+sudo docker-compose up --no-start
 echo "----------------------------------------------------------------"
 
 echo "# Restart the service of Quick Poll."
@@ -26,5 +26,5 @@ echo "----------------------------------------------------------------"
 
 echo "# Remove an unused images of Docker."
 echo "----------------------------------------------------------------"
-docker image prune -f
+sudo docker image prune -f
 echo "----------------------------------------------------------------"
