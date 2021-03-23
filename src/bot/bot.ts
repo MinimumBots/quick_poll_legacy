@@ -1,6 +1,11 @@
 import { Client, Snowflake } from 'discord.js';
 
-import { BOT_INTENTS, PRESENCE_UPDATE_INTERVAL } from '../constants';
+import {
+  BOT_INTENTS,
+  MESSAGE_CACHE_LIFETIME,
+  MESSAGE_SWEEP_INTERVAL,
+  PRESENCE_UPDATE_INTERVAL,
+} from '../constants';
 import { Utils } from './utils';
 
 import { Admin } from './listeners/admin';
@@ -10,8 +15,8 @@ import { Judge } from './listeners/judge';
 import { Session } from './allotters/session';
 
 const bot = new Client({
-  messageCacheLifetime: 60 * 60,
-  messageSweepInterval: 60 * 10,
+  messageCacheLifetime: MESSAGE_CACHE_LIFETIME,
+  messageSweepInterval: MESSAGE_SWEEP_INTERVAL,
   messageEditHistoryMaxSize: 0,
   partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
   restTimeOffset: 100,
