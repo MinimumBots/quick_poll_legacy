@@ -1,6 +1,5 @@
 import {
   Intents,
-  DMChannel,
   NewsChannel,
   TextChannel,
   PermissionString,
@@ -51,21 +50,10 @@ export const DEFAULT_BOT_PERMISSIONS: PermissionString[]
     'USE_EXTERNAL_EMOJIS',
     'MANAGE_WEBHOOKS',
   );
-export const ASSUMING_DM_PERMISSIONS: PermissionString[] = [
-  'ADD_REACTIONS',
-  'VIEW_CHANNEL',
-  'SEND_MESSAGES',
-  'EMBED_LINKS',
-  'ATTACH_FILES',
-  'READ_MESSAGE_HISTORY',
-  'MENTION_EVERYONE',
-  'USE_EXTERNAL_EMOJIS',
-];
 
 export const DEFAULT_LANG: Lang = 'ja';
 
-export type USABLE_CHANNEL = DMChannel | TextChannel | NewsChannel;
-export type USABLE_GUILD_CHANNEL = TextChannel | NewsChannel;
+export type USABLE_CHANNEL = TextChannel | NewsChannel;
 
 export const PRESENCE_UPDATE_INTERVAL = 60 * 1000;
 export const COMMAND_EDITABLE_TIME = 5 * 60 * 1000;

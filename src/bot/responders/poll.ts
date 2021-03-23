@@ -7,7 +7,11 @@ import {
   PermissionString,
 } from 'discord.js';
 
-import { ASSUMING_DM_PERMISSIONS, COMMAND_MAX_CHOICES, COMMAND_PREFIX, COMMAND_QUESTION_MAX } from '../../constants';
+import {
+  COMMAND_MAX_CHOICES,
+  COMMAND_PREFIX,
+  COMMAND_QUESTION_MAX,
+} from '../../constants';
 import { Locales } from '../templates/locale';
 import { Allocater, RequestData } from '../allotters/allocater';
 import CommandError from './error';
@@ -74,9 +78,6 @@ export namespace Poll {
   function validateMyPermissions(
     data: RequestData, query: Query, permissions: Readonly<Permissions>
   ): void {
-    if (query.exclusive && data.request.channel.type === 'dm')
-      throw new CommandError('unavailableExclusive', data.lang);
-
     const requirePermissions = sumRequireMyPermissions(query);
     const missingPermissions = permissions.missing(requirePermissions);
     if (missingPermissions.length)
@@ -90,13 +91,10 @@ export namespace Poll {
   ): boolean {
     const request = data.request;
     const channel = request.channel;
+    if (channel.type === 'dm') return false;
 
-    const myPermissions = channel.type === 'dm'
-      ? new Permissions(ASSUMING_DM_PERMISSIONS)
-      : channel.permissionsFor(data.botID);
-    const authorPermissions = channel.type === 'dm'
-      ? new Permissions(ASSUMING_DM_PERMISSIONS)
-      : channel.permissionsFor(request.author);
+    const myPermissions = channel.permissionsFor(data.botID);
+    const authorPermissions = channel.permissionsFor(request.author);
     if (!myPermissions || !authorPermissions) return false;
 
     validateMyPermissions(data, query, myPermissions);

@@ -39,10 +39,7 @@ export namespace Decrypter {
   }
 
   function hasPermissions(channel: USABLE_CHANNEL, botID: Snowflake): boolean {
-    return !!(
-      channel.type === 'dm'
-      || channel.permissionsFor(botID)?.any(MINIMUM_BOT_PERMISSIONS)
-    );
+    return !!(channel.permissionsFor(botID)?.any(MINIMUM_BOT_PERMISSIONS));
   }
 
   function isMatch(message: Message): boolean {
@@ -57,6 +54,7 @@ export namespace Decrypter {
   function accept(message: Message, botID: Snowflake): boolean {
     return (
       isMatch(message)
+      && message.channel.type !== 'dm'
       && hasPermissions(message.channel, botID)
       && isUnderRate(message.author, message.guild)
     );

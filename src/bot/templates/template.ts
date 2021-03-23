@@ -51,24 +51,22 @@ export type SuccesseTemplate = {
 };
 
 export type ErrorTemplate = {
-  unknown()             : MessageEmbedOptions;
+  unknown()          : MessageEmbedOptions;
   lackPermissions    (permissions: PermissionString[]): MessageEmbedOptions;
   lackYourPermissions(permissions: PermissionString[]): MessageEmbedOptions;
-  duplicateChannels()   : MessageEmbedOptions;
-  unusableChannel()     : MessageEmbedOptions;
-  unavailableChannel()  : MessageEmbedOptions;
-  unusableRole()        : MessageEmbedOptions;
-  ungivenQuestion()     : MessageEmbedOptions;
-  tooManyOptions()      : MessageEmbedOptions;
-  tooLongQuestion()     : MessageEmbedOptions;
-  tooLongOption()       : MessageEmbedOptions;
-  duplicateEmojis()     : MessageEmbedOptions;
-  unusableEmoji()       : MessageEmbedOptions;
-  unavailableExclusive(): MessageEmbedOptions;
-  ungivenMessageID()    : MessageEmbedOptions;
-  notFoundChannel()     : MessageEmbedOptions;
-  notFoundPoll()        : MessageEmbedOptions;
-  missingFormatPoll()   : MessageEmbedOptions;
+  duplicateChannels(): MessageEmbedOptions;
+  unusableChannel()  : MessageEmbedOptions;
+  unusableRole()     : MessageEmbedOptions;
+  ungivenQuestion()  : MessageEmbedOptions;
+  tooManyOptions()   : MessageEmbedOptions;
+  tooLongQuestion()  : MessageEmbedOptions;
+  tooLongOption()    : MessageEmbedOptions;
+  duplicateEmojis()  : MessageEmbedOptions;
+  unusableEmoji()    : MessageEmbedOptions;
+  ungivenMessageID() : MessageEmbedOptions;
+  notFoundChannel()  : MessageEmbedOptions;
+  notFoundPoll()     : MessageEmbedOptions;
+  missingFormatPoll(): MessageEmbedOptions;
 };
 
 export type ReportTemplate = {

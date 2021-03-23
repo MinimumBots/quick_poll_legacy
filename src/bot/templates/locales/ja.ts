@@ -196,11 +196,6 @@ export const ja: LocaleStructure = {
       description: 'アンケートを送信できるのは同じサーバーのチャンネルのみです。\n\n'
         + supportServerLink
     }),
-    unavailableChannel: () => ({
-      color: DefaultColors.errors,
-      title: '⚠️ DM内ではアンケートを送信するチャンネルは指定できません',
-      description: supportServerLink
-    }),
     unusableRole: () => ({
       color: DefaultColors.errors,
       title: '⚠️ 使用できないロールが指定されています',
@@ -238,11 +233,6 @@ export const ja: LocaleStructure = {
         + `●\`${ja.permissionNames.USE_EXTERNAL_EMOJIS}\`権限がこのBOTにない\n`
         + '●絵文字があるサーバーにこのBOTが導入されていない\n\n'
         + supportServerLink
-    }),
-    unavailableExclusive: () => ({
-      color: DefaultColors.errors,
-      title: `⚠️ DMチャンネル内では${COMMAND_PREFIX}expollコマンドを使用できません`,
-      description: supportServerLink
     }),
     ungivenMessageID: () => ({
       color: DefaultColors.errors,
