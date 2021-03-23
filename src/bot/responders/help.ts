@@ -11,10 +11,10 @@ export namespace Help{
   }
 
   function entryResponder(botID: Snowflake): void {
-    Allocater.responders.set(
+    Allocater.entryResponder(
       `<@${botID}>`,  data => respond(data)
     );
-    Allocater.responders.set(
+    Allocater.entryResponder(
       `<@!${botID}>`, data => respond(data)
     );
   }

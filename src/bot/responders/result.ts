@@ -229,10 +229,10 @@ export namespace Result {
   }
 
   export function initialize() {
-    Allocater.responders.set(
+    Allocater.entryResponder(
       `${COMMAND_PREFIX}sumpoll`, data => respond(data, false)
     );
-    Allocater.responders.set(
+    Allocater.entryResponder(
       `${COMMAND_PREFIX}endpoll`, data => respond(data, true)
     );
   }

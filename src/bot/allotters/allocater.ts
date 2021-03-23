@@ -9,19 +9,19 @@ import { Preferences } from '../preferences';
 import { Lang } from '../templates/locale';
 import { Poll } from '../responders/poll';
 import { Result } from '../responders/result';
+import { Decrypter } from '../listeners/decrypter';
 
 export interface RequestData {
   botID   : Snowflake,
   request : Message,
-  prefix  : string,
+  header  : string,
   args    : string[],
   response: Message | null,
   lang    : Lang,
 }
 
+export type Header = string;
 export type Responder = (data: RequestData) => Promise<Message | null>;
-
-export type CommandArgs = string[];
 
 export namespace Allocater {
   export function initialize(bot: Client, botID: Snowflake): void {
@@ -30,20 +30,30 @@ export namespace Allocater {
     Result.initialize();
   }
 
-  export const responders: Collection<string, Responder> = new Collection;
+  type Responders = Collection<Header, Responder>;
+  const responders: Responders = new Collection;
+
+  export function entryResponder(
+    header: Header, responder: Responder
+  ): Responders {
+    Decrypter.entryHeader(header);
+    return responders.set(header, responder);
+  }
+
+  type CommandArgs = string[];
 
   export function submit(
-    request: Message, prefix: string, args: CommandArgs, botID: Snowflake
+    request: Message, header: Header, args: CommandArgs, botID: Snowflake
   ): void {
-    const responder = responders.get(prefix);
+    const responder = responders.get(header);
     if (responder)
-      respond(request, responder, prefix, args, botID)
+      respond(request, responder, header, args, botID)
         .catch(console.error);
   }
 
   async function respond(
     request: Message, responder: Responder,
-    prefix: string, args: CommandArgs, botID: Snowflake
+    header: string, args: CommandArgs, botID: Snowflake
   ): Promise<void> {
     const session  = Session.get(request.id);
     const response = session?.response ?? null;
@@ -51,7 +61,7 @@ export namespace Allocater {
 
     try {
       const newResponse = await responder({
-        botID, request, prefix, args, response, lang
+        botID, request, header, args, response, lang
       });
       if (!newResponse) return;
 

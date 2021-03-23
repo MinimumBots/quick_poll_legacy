@@ -325,10 +325,10 @@ export namespace Poll {
   }
   
   export function initialize(): void {
-    Allocater.responders.set(
+    Allocater.entryResponder(
       `${COMMAND_PREFIX}poll`,   data => respond(data, false)
     );
-    Allocater.responders.set(
+    Allocater.entryResponder(
       `${COMMAND_PREFIX}expoll`, data => respond(data, true)
     );
   }
