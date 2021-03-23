@@ -262,7 +262,7 @@ export const ja: LocaleStructure = {
       description: `実行コマンド\n\`\`\`${executedCommand}\`\`\``,
       get fields() {
         return traceTexts.map((text, i) => ({
-          name: `バックトレース${i}`,
+          name: `バックトレース${i + 1}`,
           value: `\`\`\`${text}\`\`\``
         }));
       }

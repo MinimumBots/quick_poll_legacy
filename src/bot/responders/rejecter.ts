@@ -29,12 +29,12 @@ export namespace Rejecter {
     exception: unknown, request: Message
   ): Promise<Message> {
     const lang = await Preferences.fetchLang(request.author, request.guild);
-    const template = Locales[lang].errors.unknown();
+    const embed = Locales[lang].errors.unknown();
 
     report(exception, request)
       .catch(console.error);
 
-    return await request.channel.send(template);
+    return await request.channel.send({ embed });
   }
 
   function destroy(exception: unknown): void {
@@ -43,14 +43,15 @@ export namespace Rejecter {
 
   async function report(exception: unknown, request: Message): Promise<void> {
     const stacks = renderStacks(exception);
-    const template = Locales[DEFAULT_LANG].reports.error(
+    const embed = Locales[DEFAULT_LANG].reports.error(
       request.content, stacks
     );
     const users = await Promise.all(
       BOT_OWNER_IDS.map(userID => request.client.users.fetch(userID))
     );
+    const dmChannels = await Promise.all(users.map(user => user.createDM()));
 
-    await Promise.all(users.map(user => user.dmChannel?.send(template)));
+    await Promise.all(dmChannels.map(channel => channel.send({ embed })));
   }
 
   function renderStacks(exception: unknown): string[] {
@@ -61,6 +62,6 @@ export namespace Rejecter {
     else
       stack = String(exception);
 
-    return Utils.partingText(stack, 1024, '```', '```');
+    return Utils.partingText(stack, 1024, '', '');
   }
 }
