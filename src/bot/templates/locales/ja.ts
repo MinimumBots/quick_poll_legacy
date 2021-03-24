@@ -253,6 +253,11 @@ export const ja: LocaleStructure = {
       color: DefaultColors.errors,
       title: '⚠️ 指定されたアンケートはフォーマットが正しくありません',
       description: supportServerLink
+    }),
+    unavailableExport: () => ({
+      color: DefaultColors.errors,
+      title: `⚠️ ${COMMAND_PREFIX}csvpollはコマンド編集で使用できません`,
+      description: supportServerLink
     })
   },
   reports: {

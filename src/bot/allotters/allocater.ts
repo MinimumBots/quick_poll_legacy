@@ -10,6 +10,7 @@ import { Lang } from '../templates/locale';
 import { Poll } from '../responders/poll';
 import { Result } from '../responders/result';
 import { Decrypter } from '../listeners/decrypter';
+import { Export } from '../responders/export';
 
 export interface RequestData {
   botID   : Snowflake,
@@ -21,15 +22,16 @@ export interface RequestData {
 }
 
 export type Header = string;
-export type Responder = (data: RequestData) => Promise<Message | null>;
 
 export namespace Allocater {
   export function initialize(bot: Client, botID: Snowflake): void {
     Help.initialize(bot, botID);
     Poll.initialize();
     Result.initialize();
+    Export.initialize();
   }
 
+  type Responder = (data: RequestData) => Promise<Message | null>;
   type Responders = Collection<Header, Responder>;
   const responders: Responders = new Collection;
 

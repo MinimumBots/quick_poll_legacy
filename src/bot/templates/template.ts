@@ -67,6 +67,7 @@ export type ErrorTemplate = {
   notFoundChannel()  : MessageEmbedOptions;
   notFoundPoll()     : MessageEmbedOptions;
   missingFormatPoll(): MessageEmbedOptions;
+  unavailableExport(): MessageEmbedOptions;
 };
 
 export type ReportTemplate = {
