@@ -5,23 +5,12 @@ import { Allocater, RequestData } from '../allotters/allocater';
 import { Lang, Locales } from '../templates/locale';
 
 export namespace Help{
-  export function initialize(bot: Client, botID: Snowflake): void {
-    entryResponder(botID);
-    generateInviteURL(bot);
-  }
-
-  function entryResponder(botID: Snowflake): void {
-    Allocater.entryResponder(
-      `<@${botID}>`,  data => respond(data)
-    );
-    Allocater.entryResponder(
-      `<@!${botID}>`, data => respond(data)
-    );
-  }
-
   let botInviteURL = '';
 
-  function generateInviteURL(bot: Client): void {
+  export function initialize(bot: Client, botID: Snowflake): void {
+    Allocater.entryResponder(`<@${botID}>`,  data => respond(data));
+    Allocater.entryResponder(`<@!${botID}>`, data => respond(data));
+
     bot.generateInvite({ permissions: DEFAULT_BOT_PERMISSIONS })
       .then(url => botInviteURL = url)
       .catch(console.error);
