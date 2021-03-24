@@ -74,6 +74,21 @@
         </div>
       </div>
     </div>
+
+    <div class="mb-5">
+      <h3>/csvpollコマンド</h3>
+      <p>
+        <code class="bg-dark mx-1 my-0 p-1 rounded">/poll</code>
+        <code class="bg-dark mx-1 my-0 p-1 rounded">/expoll</code>
+        で作成したアンケートを集計し、CSVデータで出力します。
+      </p>
+      <div class="input-group">
+        <input type="text" id="display_csvpoll" class="form-control" readonly />
+        <div class="input-group-append">
+          <button type="button" id="copy_csvpoll" class="btn btn-warning">コピー</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <footer class="footer mt-5 py-4 bg-info">
@@ -89,17 +104,20 @@
   <script type="text/javascript">
     const displaySumpoll = document.getElementById('display_sumpoll');
     const displayEndpoll = document.getElementById('display_endpoll');
+    const displayCsvpoll = document.getElementById('display_csvpoll');
 
     const matchChannelID = location.search.match(/channel_id=(\d+)/);
     const matchMessageID = location.search.match(/message_id=(\d+)/);
     const channelID = matchChannelID ? matchChannelID[1] : '';
     const messageID = matchMessageID ? matchMessageID[1] : '';
 
-    displaySumpoll.value = `/sumpoll ${channelID}-${messageID}`;
-    displayEndpoll.value = `/endpoll ${channelID}-${messageID}`;
+    displaySumpoll.value = `/sumpoll ${channelID ? channelID + '-' : ''}${messageID}`;
+    displayEndpoll.value = `/endpoll ${channelID ? channelID + '-' : ''}${messageID}`;
+    displayCsvpoll.value = `/csvpoll ${channelID ? channelID + '-' : ''}${messageID}`;
 
     const copySumpoll = document.getElementById('copy_sumpoll');
     const copyEndpoll = document.getElementById('copy_endpoll');
+    const copyCsvpoll = document.getElementById('copy_csvpoll');
 
     function onCopySumpoll() {
       displaySumpoll.select();
@@ -111,8 +129,14 @@
       document.execCommand('Copy');
     }
 
+    function onCopyCsvpoll() {
+      displayCsvpoll.select();
+      document.execCommand('Copy');
+    }
+
     copySumpoll.addEventListener('click', onCopySumpoll);
     copyEndpoll.addEventListener('click', onCopyEndpoll);
+    copyCsvpoll.addEventListener('click', onCopyCsvpoll);
   </script>
 </body>
 </html>
