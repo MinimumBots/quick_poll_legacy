@@ -12,7 +12,7 @@ import { Result } from '../responders/result';
 import { Decrypter } from '../listeners/decrypter';
 import { Export } from '../responders/export';
 
-export interface RequestData {
+export interface RequestChunk {
   botID   : Snowflake,
   request : Message,
   header  : string,
@@ -31,7 +31,7 @@ export namespace Allocater {
     Export.initialize();
   }
 
-  type Responder = (data: RequestData) => Promise<Message | null>;
+  type Responder = (chunk: RequestChunk) => Promise<Message | null>;
   type Responders = Collection<Header, Responder>;
   const responders: Responders = new Collection;
 

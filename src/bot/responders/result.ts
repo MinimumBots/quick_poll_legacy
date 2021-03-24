@@ -7,12 +7,55 @@ import {
 } from 'discord.js';
 
 import { COLORS, COMMAND_PREFIX, USABLE_CHANNEL } from '../../constants';
-import { Allocater, RequestData } from '../allotters/allocater';
+import { Allocater, RequestChunk } from '../allotters/allocater';
 import { Locales } from '../templates/locale';
 import CommandError from './error';
 import { Help } from './help';
 
 export namespace Result {
+  export function initialize() {
+    Allocater.entryResponder(
+      `${COMMAND_PREFIX}sumpoll`, chunk => respond(chunk, false)
+    );
+    Allocater.entryResponder(
+      `${COMMAND_PREFIX}endpoll`, chunk => respond(chunk, true)
+    );
+  }
+
+  async function respond(
+    chunk: RequestChunk, endpoll: boolean
+  ): Promise<Message | null> {
+    if (!chunk.args.length) return respondHelp(chunk);
+
+    try {
+      const query = await parse(chunk, endpoll);
+      if (query.endpoll) endPoll(chunk, query.poll);
+      return respondResult(chunk, query);
+    }
+    catch (error: unknown) {
+      if (error instanceof CommandError) return respondError(chunk, error);
+      throw error;
+    }
+  }
+
+  function respondHelp(chunk: RequestChunk): Promise<Message> {
+    const options = { content: '', embed: Help.getEmbed(chunk.lang) };
+    const channel = chunk.request.channel;
+    const response = chunk.response;
+
+    return response ? response.edit(options) : channel.send(options);
+  }
+
+  function respondError(
+    chunk: RequestChunk, error: CommandError
+  ): Promise<Message> {
+    const options = { embed: error.embed };
+    const channel = chunk.request.channel;
+    const response = chunk.response;
+
+    return response ? response.edit(options) : channel.send(options);
+  }
+
   type Author = { iconURL: string, name: string };
   type Choice = {
     emoji: string, text: string | null, count: number, rate: number
@@ -28,55 +71,12 @@ export namespace Result {
     choices  : Choice[],
   }
 
-  export function initialize() {
-    Allocater.entryResponder(
-      `${COMMAND_PREFIX}sumpoll`, data => respond(data, false)
-    );
-    Allocater.entryResponder(
-      `${COMMAND_PREFIX}endpoll`, data => respond(data, true)
-    );
-  }
+  async function parse(chunk: RequestChunk, endpoll: boolean): Promise<Query> {
+    const [channelID, messageID] = parseIDs(chunk);
+    if (!messageID) throw new CommandError('ungivenMessageID', chunk.lang);
 
-  async function respond(
-    data: RequestData, endpoll: boolean
-  ): Promise<Message | null> {
-    if (!data.args.length) return respondHelp(data);
-
-    try {
-      const query = await parse(data, endpoll);
-      if (query.endpoll) endPoll(data, query.poll);
-      return respondResult(data, query);
-    }
-    catch (error: unknown) {
-      if (error instanceof CommandError) return respondError(data, error);
-      throw error;
-    }
-  }
-
-  function respondHelp(data: RequestData): Promise<Message> {
-    const options = { content: '', embed: Help.getEmbed(data.lang) };
-    const channel = data.request.channel;
-    const response = data.response;
-
-    return response ? response.edit(options) : channel.send(options);
-  }
-
-  function respondError(
-    data: RequestData, error: CommandError
-  ): Promise<Message> {
-    const options = { embed: error.embed };
-    const channel = data.request.channel;
-    const response = data.response;
-
-    return response ? response.edit(options) : channel.send(options);
-  }
-
-  async function parse(data: RequestData, endpoll: boolean): Promise<Query> {
-    const [channelID, messageID] = parseIDs(data);
-    if (!messageID) throw new CommandError('ungivenMessageID', data.lang);
-
-    const channel = getChannel(data.request, channelID);
-    if (!channel) throw new CommandError('notFoundChannel', data.lang);
+    const channel = getChannel(chunk.request, channelID);
+    if (!channel) throw new CommandError('notFoundChannel', chunk.lang);
 
     let poll: Message;
 
@@ -86,26 +86,27 @@ export namespace Result {
     catch (error: unknown) {
       if (error instanceof DiscordAPIError)
         if (error.httpStatus === 404)
-          throw new CommandError('notFoundPoll', data.lang);
+          throw new CommandError('notFoundPoll', chunk.lang);
 
       throw error;
     }
 
-    if (!isPoll(data, poll)) throw new CommandError('notFoundPoll', data.lang);
+    if (!isPoll(chunk, poll))
+      throw new CommandError('notFoundPoll', chunk.lang);
 
     return {
       poll    : poll,
       endpoll : endpoll,
-      author  : parseAuthor(data, poll),
+      author  : parseAuthor(chunk, poll),
       imageURL: parseImage(poll),
       mentions: parseMentions(poll),
-      question: parseQuestion(data, poll),
+      question: parseQuestion(chunk, poll),
       choices : await parseChoices(poll),
     };
   }
 
-  function parseIDs(data: RequestData): [string | null, string | null] {
-    const match = data.args[0].match(/^((\d+)-)?(\d+)$/);
+  function parseIDs(chunk: RequestChunk): [string | null, string | null] {
+    const match = chunk.args[0].match(/^((\d+)-)?(\d+)$/);
     if (!match) return [null, null];
 
     return [match[2], match[3]];
@@ -124,11 +125,11 @@ export namespace Result {
       return null;
   }
 
-  function isPoll(data: RequestData, poll: Message): boolean {
+  function isPoll(chunk: RequestChunk, poll: Message): boolean {
     const embed = poll.embeds[0];
 
     return !!(
-      poll.author.id === data.botID
+      poll.author.id === chunk.botID
       && embed?.color
       && [COLORS.POLL, COLORS.EXPOLL].includes(embed.color)
     );
@@ -161,9 +162,9 @@ export namespace Result {
     ));
   }
 
-  function parseQuestion(data: RequestData, poll: Message): string {
+  function parseQuestion(chunk: RequestChunk, poll: Message): string {
     const question = poll.embeds[0].title;
-    if (!question) throw new CommandError('missingFormatPoll', data.lang);
+    if (!question) throw new CommandError('missingFormatPoll', chunk.lang);
 
     return question;
   }
@@ -177,20 +178,20 @@ export namespace Result {
     return attachment ? attachment.url : null;
   }
 
-  function parseAuthor(data: RequestData, poll: Message): Author {
+  function parseAuthor(chunk: RequestChunk, poll: Message): Author {
     const author = poll.embeds[0].author;
     if (!author?.iconURL || !author?.name)
-      throw new CommandError('missingFormatPoll', data.lang);
+      throw new CommandError('missingFormatPoll', chunk.lang);
 
     return { iconURL: author.iconURL, name: author.name }
   }
 
-  function endPoll(data: RequestData, poll: Message): void {
+  function endPoll(chunk: RequestChunk, poll: Message): void {
     poll.reactions.removeAll()
       .catch(console.error);
 
     const embed = poll.embeds[0];
-    const template = Locales[data.lang].successes.endpoll();
+    const template = Locales[chunk.lang].successes.endpoll();
 
     if (template.color)  embed.setColor(template.color);
     if (template.footer) embed.setFooter(template.footer.text);
@@ -200,7 +201,7 @@ export namespace Result {
   }
 
   function respondResult(
-    data: RequestData, query: Query
+    chunk: RequestChunk, query: Query
   ): Promise<Message | null> {
     const choices = query.choices;
     const maxRate = choices.reduce(
@@ -218,7 +219,7 @@ export namespace Result {
 
     const options = {
       content: query.mentions.join(' '),
-      embed: Locales[data.lang].successes.graphpoll(
+      embed: Locales[chunk.lang].successes.graphpoll(
         query.poll.url,
         query.author.iconURL,
         query.author.name,
@@ -232,8 +233,8 @@ export namespace Result {
       )
     }
 
-    return data.response
-      ? data.response.edit(options)
-      : data.request.channel.send(options);
+    return chunk.response
+      ? chunk.response.edit(options)
+      : chunk.request.channel.send(options);
   }
 }

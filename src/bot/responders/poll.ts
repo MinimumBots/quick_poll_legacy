@@ -13,7 +13,7 @@ import {
   COMMAND_QUESTION_MAX,
 } from '../../constants';
 import { Locales } from '../templates/locale';
-import { Allocater, RequestData } from '../allotters/allocater';
+import { Allocater, RequestChunk } from '../allotters/allocater';
 import CommandError from './error';
 import { Help } from './help';
 
@@ -65,40 +65,40 @@ export namespace Poll {
   }
 
   function validateAuthorPermissions(
-    data: RequestData, query: Query, permissions: Readonly<Permissions>
+    chunk: RequestChunk, query: Query, permissions: Readonly<Permissions>
   ): void {
     const requirePermissions = sumRequireAuthoerPermissions(query, permissions);
     const missingPermissions = permissions.missing(requirePermissions);
     if (missingPermissions.length)
       throw new CommandError(
-        'lackYourPermissions', data.lang, missingPermissions
+        'lackYourPermissions', chunk.lang, missingPermissions
       );
   }
 
   function validateMyPermissions(
-    data: RequestData, query: Query, permissions: Readonly<Permissions>
+    chunk: RequestChunk, query: Query, permissions: Readonly<Permissions>
   ): void {
     const requirePermissions = sumRequireMyPermissions(query);
     const missingPermissions = permissions.missing(requirePermissions);
     if (missingPermissions.length)
       throw new CommandError(
-        'lackPermissions', data.lang, missingPermissions
+        'lackPermissions', chunk.lang, missingPermissions
       );
   }
 
   function validatePermissions(
-    data: RequestData, query: Query
+    chunk: RequestChunk, query: Query
   ): boolean {
-    const request = data.request;
+    const request = chunk.request;
     const channel = request.channel;
     if (channel.type === 'dm') return false;
 
-    const myPermissions = channel.permissionsFor(data.botID);
+    const myPermissions = channel.permissionsFor(chunk.botID);
     const authorPermissions = channel.permissionsFor(request.author);
     if (!myPermissions || !authorPermissions) return false;
 
-    validateMyPermissions(data, query, myPermissions);
-    validateAuthorPermissions(data, query, authorPermissions);
+    validateMyPermissions(chunk, query, myPermissions);
+    validateAuthorPermissions(chunk, query, authorPermissions);
  
     return true;
   }
@@ -118,38 +118,38 @@ export namespace Poll {
     = new RegExp(`^(${twemojiRegex.toString().slice(1, -2)}|<a?:.+?:\\d+>)$`);
 
   function safePushChoiceEmoji(
-    data: RequestData, emojis: string[], newEmoji: string
+    chunk: RequestChunk, emojis: string[], newEmoji: string
   ): number {
     if (emojis.includes(newEmoji))
-      throw new CommandError('duplicateEmojis', data.lang);
+      throw new CommandError('duplicateEmojis', chunk.lang);
 
     return emojis.push(newEmoji);
   }
 
   function safePushChoiceText(
-    data: RequestData, texts: (string | null)[], newtext: string | null
+    chunk: RequestChunk, texts: (string | null)[], newtext: string | null
   ): number {
     if (newtext && newtext.length > COMMAND_QUESTION_MAX)
-      throw new CommandError('tooLongQuestion', data.lang);
+      throw new CommandError('tooLongQuestion', chunk.lang);
 
     return texts.push(newtext);
   }
 
-  function generateChoices(data: RequestData): Choice[] {
+  function generateChoices(chunk: RequestChunk): Choice[] {
     const emojis: string[] = [], texts: (string | null)[] = [];
     let external = false;
 
-    data.args.forEach(arg => {
+    chunk.args.forEach(arg => {
       if (emojiRegex.test(arg)) {
-        const length = safePushChoiceEmoji(data, emojis, arg);
-        if (texts.length < length - 1) safePushChoiceText(data, texts, null);
+        const length = safePushChoiceEmoji(chunk, emojis, arg);
+        if (texts.length < length - 1) safePushChoiceText(chunk, texts, null);
 
-        external ||= !isLocalGuildEmoji(data.request.guild, arg);
+        external ||= !isLocalGuildEmoji(chunk.request.guild, arg);
       }
       else {
-        const length = safePushChoiceText(data, texts, arg);
+        const length = safePushChoiceText(chunk, texts, arg);
         if (emojis.length < length)
-          safePushChoiceEmoji(data, emojis, defaultEmojis[length - 1]);
+          safePushChoiceEmoji(chunk, emojis, defaultEmojis[length - 1]);
       }
     });
 
@@ -164,24 +164,24 @@ export namespace Poll {
     ));
   }
 
-  function parseChoices(data: RequestData): Choice[] {
+  function parseChoices(chunk: RequestChunk): Choice[] {
     const choices
-      = data.args.length ? generateChoices(data) : generateTwoChoices();
+      = chunk.args.length ? generateChoices(chunk) : generateTwoChoices();
 
     if (choices.length > COMMAND_MAX_CHOICES)
-      throw new CommandError('tooManyOptions', data.lang);
+      throw new CommandError('tooManyOptions', chunk.lang);
 
     return choices;
   }
 
-  function parseQuestion(data: RequestData): string | null {
-    return data.args.shift() ?? null;
+  function parseQuestion(chunk: RequestChunk): string | null {
+    return chunk.args.shift() ?? null;
   }
 
-  function parseMentions(data: RequestData): string[] {
+  function parseMentions(chunk: RequestChunk): string[] {
     const mentions: string[] = [];
 
-    for (const arg of data.args) {
+    for (const arg of chunk.args) {
       const matchMention = arg.match(/^(@everyone|@here|<@&\d+>)$/);
       const matchEvery   = arg.match(/^(?!\\)(everyone|here)$/);
       const matchNumber  = arg.match(/^(?!\\)(\d+)$/);
@@ -192,22 +192,22 @@ export namespace Poll {
       if (matchNumber)  mentions.push(`<@&${matchNumber[1]}>`);
     }
 
-    mentions.forEach(() => data.args.shift());
+    mentions.forEach(() => chunk.args.shift());
 
     return mentions;
   }
 
   const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 
-  function parseAttachedImage(data: RequestData): string | null {
-    return data.request.attachments.find(
+  function parseAttachedImage(chunk: RequestChunk): string | null {
+    return chunk.request.attachments.find(
       attachment => imageExtensions.includes(extname(attachment.url))
     )?.url ?? null;
   }
 
-  function parseAuthor(data: RequestData): Author {
-    const user = data.request.author;
-    const member = data.request.member;
+  function parseAuthor(chunk: RequestChunk): Author {
+    const user = chunk.request.author;
+    const member = chunk.request.member;
 
     return {
       iconURL: user.displayAvatarURL(),
@@ -215,34 +215,34 @@ export namespace Poll {
     };
   }
 
-  function parse(data: RequestData, exclusive: boolean): Query {
+  function parse(chunk: RequestChunk, exclusive: boolean): Query {
     const query = {
       exclusive: exclusive,
-      author   : parseAuthor(data),
-      imageURL : parseAttachedImage(data),
-      mentions : parseMentions(data),
-      question : parseQuestion(data),
-      choices  : parseChoices(data),
+      author   : parseAuthor(chunk),
+      imageURL : parseAttachedImage(chunk),
+      mentions : parseMentions(chunk),
+      question : parseQuestion(chunk),
+      choices  : parseChoices(chunk),
     };
 
     if (query.mentions.length && query.question === null)
-      throw new CommandError('ungivenQuestion', data.lang);
+      throw new CommandError('ungivenQuestion', chunk.lang);
 
     return query;
   }
 
   function respondError(
-    data: RequestData, error: CommandError
+    chunk: RequestChunk, error: CommandError
   ): Promise<Message> {
     const options = { embed: error.embed };
-    const channel = data.request.channel;
-    const response = data.response;
+    const channel = chunk.request.channel;
+    const response = chunk.response;
 
     return response ? response.edit(options) : channel.send(options);
   }
 
   function respondPoll(
-    data: RequestData, query: Query, response: Message
+    chunk: RequestChunk, query: Query, response: Message
   ): Promise<Message> {
     const choices = query.choices;
     const selectors: string[] = choices.some(choice => choice.text !== null)
@@ -251,7 +251,7 @@ export namespace Poll {
     return response.edit(
       query.mentions.join(' '),
       {
-        embed: Locales[data.lang].successes.poll(
+        embed: Locales[chunk.lang].successes.poll(
           query.exclusive,
           query.author.iconURL,
           query.author.name,
@@ -267,7 +267,7 @@ export namespace Poll {
   }
 
   async function attachSelectors(
-    data: RequestData, query: Query, response: Message
+    chunk: RequestChunk, query: Query, response: Message
   ): Promise<void> {
     try {
       await Promise.all(
@@ -277,24 +277,24 @@ export namespace Poll {
     catch (exception: unknown) {
       if (exception instanceof DiscordAPIError)
         if (exception.httpStatus === 400)
-          throw new CommandError('unusableEmoji', data.lang);
+          throw new CommandError('unusableEmoji', chunk.lang);
     }
   }
 
-  function respondLoading(data: RequestData, query: Query): Promise<Message> {
-    return data.request.channel.send(
+  function respondLoading(chunk: RequestChunk, query: Query): Promise<Message> {
+    return chunk.request.channel.send(
       query.mentions.join(' '),
       {
-        embed: Locales[data.lang].loadings.poll(query.exclusive),
+        embed: Locales[chunk.lang].loadings.poll(query.exclusive),
         files: query.imageURL ? [query.imageURL] : [],
       }
     );
   }
 
-  function respondHelp(data: RequestData): Promise<Message> {
-    const options = { content: '', embed: Help.getEmbed(data.lang) };
-    const channel = data.request.channel;
-    const response = data.response;
+  function respondHelp(chunk: RequestChunk): Promise<Message> {
+    const options = { content: '', embed: Help.getEmbed(chunk.lang) };
+    const channel = chunk.request.channel;
+    const response = chunk.response;
 
     return response ? response.edit(options) : channel.send(options);
   }
@@ -305,31 +305,31 @@ export namespace Poll {
   }
 
   async function respond(
-    data: RequestData, exclusive: boolean
+    chunk: RequestChunk, exclusive: boolean
   ): Promise<Message | null> {
-    if (data.response) clearSelectors(data.response);
-    if (!data.args.length) return respondHelp(data);
+    if (chunk.response) clearSelectors(chunk.response);
+    if (!chunk.args.length) return respondHelp(chunk);
 
     try {
-      const query = parse(data, exclusive);
-      if (!validatePermissions(data, query)) return null;
+      const query = parse(chunk, exclusive);
+      if (!validatePermissions(chunk, query)) return null;
 
-      data.response ??= await respondLoading(data, query);
-      await attachSelectors(data, query, data.response);
-      return respondPoll(data, query, data.response);
+      chunk.response ??= await respondLoading(chunk, query);
+      await attachSelectors(chunk, query, chunk.response);
+      return respondPoll(chunk, query, chunk.response);
     }
     catch (error: unknown) {
-      if (error instanceof CommandError) return respondError(data, error);
+      if (error instanceof CommandError) return respondError(chunk, error);
       throw error;
     }
   }
   
   export function initialize(): void {
     Allocater.entryResponder(
-      `${COMMAND_PREFIX}poll`,   data => respond(data, false)
+      `${COMMAND_PREFIX}poll`,   chunk => respond(chunk, false)
     );
     Allocater.entryResponder(
-      `${COMMAND_PREFIX}expoll`, data => respond(data, true)
+      `${COMMAND_PREFIX}expoll`, chunk => respond(chunk, true)
     );
   }
 }

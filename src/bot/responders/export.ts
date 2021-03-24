@@ -11,13 +11,15 @@ import {
 } from 'discord.js';
 
 import { COLORS, COMMAND_PREFIX, USABLE_CHANNEL } from '../../constants';
-import { Allocater, RequestData } from '../allotters/allocater';
+import { Allocater, RequestChunk } from '../allotters/allocater';
 import CommandError from './error';
 import { Help } from './help';
 
 export namespace Export {
   export function initialize(): void {
-    Allocater.entryResponder(`${COMMAND_PREFIX}csvpoll`, data => respond(data));
+    Allocater.entryResponder(
+      `${COMMAND_PREFIX}csvpoll`, chunk => respond(chunk)
+    );
   }
 
   type Choice = {
@@ -34,54 +36,55 @@ export namespace Export {
     votes: Votes,
   }
 
-  async function respond(data: RequestData): Promise<Message | null> {
-    if (!data.args.length) return respondHelp(data);
+  async function respond(chunk: RequestChunk): Promise<Message | null> {
+    if (!chunk.args.length) return respondHelp(chunk);
 
     try {
-      if (data.response) throw new CommandError('unavailableExport', data.lang);
+      if (chunk.response)
+        throw new CommandError('unavailableExport', chunk.lang);
       if (!validatePermissions) return null;
 
-      const query = await parse(data);
+      const query = await parse(chunk);
       const csv = generateCSV(query);
-      return respondCSV(data, query, csv);
+      return respondCSV(chunk, query, csv);
     }
     catch (error: unknown) {
-      if (error instanceof CommandError) return respondError(data, error);
+      if (error instanceof CommandError) return respondError(chunk, error);
       throw error;
     }
   }
 
-  function validatePermissions(data: RequestData): boolean {
-    const channel = data.request.channel;
+  function validatePermissions(chunk: RequestChunk): boolean {
+    const channel = chunk.request.channel;
     if (channel.type === 'dm') return false;
 
-    const permissions = channel.permissionsFor(data.botID);
+    const permissions = channel.permissionsFor(chunk.botID);
     if (!permissions) return false;
 
     const missings = permissions.missing('ATTACH_FILES');
 
     if (missings.length)
-      throw new CommandError('lackPermissions', data.lang, missings);
+      throw new CommandError('lackPermissions', chunk.lang, missings);
 
     return true;
   }
 
-  function respondHelp(data: RequestData): Promise<Message> {
-    return data.request.channel.send({ embed: Help.getEmbed(data.lang) });
+  function respondHelp(chunk: RequestChunk): Promise<Message> {
+    return chunk.request.channel.send({ embed: Help.getEmbed(chunk.lang) });
   }
 
   function respondError(
-    data: RequestData, error: CommandError
+    chunk: RequestChunk, error: CommandError
   ): Promise<Message> {
-    return data.request.channel.send({ embed: error.embed });
+    return chunk.request.channel.send({ embed: error.embed });
   }
 
-  async function parse(data: RequestData): Promise<Query> {
-    const [channelID, messageID] = parseIDs(data);
-    if (!messageID) throw new CommandError('ungivenMessageID', data.lang);
+  async function parse(chunk: RequestChunk): Promise<Query> {
+    const [channelID, messageID] = parseIDs(chunk);
+    if (!messageID) throw new CommandError('ungivenMessageID', chunk.lang);
 
-    const channel = getChannel(data.request, channelID);
-    if (!channel) throw new CommandError('notFoundChannel', data.lang);
+    const channel = getChannel(chunk.request, channelID);
+    if (!channel) throw new CommandError('notFoundChannel', chunk.lang);
 
     let poll: Message;
 
@@ -91,12 +94,13 @@ export namespace Export {
     catch (error: unknown) {
       if (error instanceof DiscordAPIError)
         if (error.httpStatus === 404)
-          throw new CommandError('notFoundPoll', data.lang);
+          throw new CommandError('notFoundPoll', chunk.lang);
 
       throw error;
     }
 
-    if (!isPoll(data, poll)) throw new CommandError('notFoundPoll', data.lang);
+    if (!isPoll(chunk, poll))
+      throw new CommandError('notFoundPoll', chunk.lang);
 
     const choices = await parseChoices(poll);
 
@@ -107,8 +111,8 @@ export namespace Export {
     };
   }
 
-  function parseIDs(data: RequestData): [string | null, string | null] {
-    const match = data.args[0].match(/^((\d+)-)?(\d+)$/);
+  function parseIDs(chunk: RequestChunk): [string | null, string | null] {
+    const match = chunk.args[0].match(/^((\d+)-)?(\d+)$/);
     if (!match) return [null, null];
 
     return [match[2], match[3]];
@@ -127,11 +131,11 @@ export namespace Export {
       return null;
   }
 
-  function isPoll(data: RequestData, poll: Message): boolean {
+  function isPoll(chunk: RequestChunk, poll: Message): boolean {
     const embed = poll.embeds[0];
 
     return !!(
-      poll.author.id === data.botID
+      poll.author.id === chunk.botID
       && embed?.color
       && [COLORS.POLL, COLORS.EXPOLL].includes(embed.color)
     );
@@ -206,9 +210,9 @@ export namespace Export {
   }
 
   function respondCSV(
-    data: RequestData, query: Query, csv: Buffer
+    chunk: RequestChunk, query: Query, csv: Buffer
   ): Promise<Message> {
-    return data.request.channel.send(
+    return chunk.request.channel.send(
       { files: [{ attachment: csv, name: `${query.poll.id}.csv` }] }
     );
   }
