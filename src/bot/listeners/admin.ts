@@ -20,7 +20,7 @@ export namespace Admin {
   function evaluate(message: Message): void {
     if (message.channel.type !== 'dm') return;
 
-    const match = message.content.match(/^\/admin ```\n?(.+?)\n?```$/m);
+    const match = message.content.match(/^\/eval\s*?```\s*?(.+?)\s*?```$/m);
     if (!match) return;
 
     let log: string;
@@ -41,7 +41,7 @@ export namespace Admin {
   function respondLog(channel: DMChannel, log: string): void {
     const logs = Utils.partingText(log, 2000, '```', '```');
 
-    Promise.all(logs.map(channel.send))
+    Promise.all(logs.map(log => channel.send(log)))
       .catch(console.error);
   }
 }
