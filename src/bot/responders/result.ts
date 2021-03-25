@@ -23,13 +23,14 @@ export namespace Result {
   }
 
   async function respond(
-    chunk: RequestChunk, endpoll: boolean
+    chunk: RequestChunk, isEnd: boolean
   ): Promise<Message | null> {
     if (!chunk.args.length) return respondHelp(chunk);
+    if (!validate(chunk, isEnd)) return null;
 
     try {
-      const query = await parse(chunk, endpoll);
-      if (query.endpoll) endPoll(chunk, query.poll);
+      const query = await parse(chunk, isEnd);
+      if (query.isEnd) endPoll(chunk, query.poll);
       return respondResult(chunk, query);
     }
     catch (error: unknown) {
@@ -56,6 +57,23 @@ export namespace Result {
     return response ? response.edit(options) : channel.send(options);
   }
 
+  function validate(chunk: RequestChunk, isEnd: boolean): boolean {
+    const channel = chunk.request.channel;
+    if (channel.type === 'dm') return false;
+
+    if (!isEnd) return true;
+
+    const permissions = channel.permissionsFor(chunk.botID);
+    if (!permissions) return false;
+
+    const missings = permissions.missing('MANAGE_MESSAGES');
+
+    if (missings.length)
+      throw new CommandError('lackPermissions', chunk.lang, missings);
+
+    return true;
+  }
+
   type Author = { iconURL: string, name: string };
   type Choice = {
     emoji: string, text: string | null, count: number, rate: number
@@ -63,7 +81,7 @@ export namespace Result {
 
   interface Query {
     poll     : Message,
-    endpoll  : boolean,
+    isEnd  : boolean,
     author   : Author,
     imageURL : string | null,
     mentions : string[],
@@ -71,7 +89,7 @@ export namespace Result {
     choices  : Choice[],
   }
 
-  async function parse(chunk: RequestChunk, endpoll: boolean): Promise<Query> {
+  async function parse(chunk: RequestChunk, isEnd: boolean): Promise<Query> {
     const [channelID, messageID] = parseIDs(chunk);
     if (!messageID) throw new CommandError('ungivenMessageID', chunk.lang);
 
@@ -96,7 +114,7 @@ export namespace Result {
 
     return {
       poll    : poll,
-      endpoll : endpoll,
+      isEnd   : isEnd,
       author  : parseAuthor(chunk, poll),
       imageURL: parseImage(poll),
       mentions: parseMentions(poll),
@@ -135,6 +153,30 @@ export namespace Result {
     );
   }
 
+  function parseAuthor(chunk: RequestChunk, poll: Message): Author {
+    const author = poll.embeds[0].author;
+    if (!author?.iconURL || !author?.name)
+      throw new CommandError('missingFormatPoll', chunk.lang);
+
+    return { iconURL: author.iconURL, name: author.name }
+  }
+
+  function parseImage(poll: Message): string | null {
+    const attachment = poll.attachments.first();
+    return attachment ? attachment.url : null;
+  }
+
+  function parseMentions(poll: Message): string[] {
+    return poll.content.split(' ');
+  }
+
+  function parseQuestion(chunk: RequestChunk, poll: Message): string {
+    const question = poll.embeds[0].title;
+    if (!question) throw new CommandError('missingFormatPoll', chunk.lang);
+
+    return question;
+  }
+
   async function parseChoices(poll: Message): Promise<Choice[]> {
     const reactions = await Promise.all(
       poll.reactions.cache.map(reaction => reaction.fetch())
@@ -160,30 +202,6 @@ export namespace Result {
         rate: rates[i],
       }
     ));
-  }
-
-  function parseQuestion(chunk: RequestChunk, poll: Message): string {
-    const question = poll.embeds[0].title;
-    if (!question) throw new CommandError('missingFormatPoll', chunk.lang);
-
-    return question;
-  }
-
-  function parseMentions(poll: Message): string[] {
-    return poll.content.split(' ');
-  }
-
-  function parseImage(poll: Message): string | null {
-    const attachment = poll.attachments.first();
-    return attachment ? attachment.url : null;
-  }
-
-  function parseAuthor(chunk: RequestChunk, poll: Message): Author {
-    const author = poll.embeds[0].author;
-    if (!author?.iconURL || !author?.name)
-      throw new CommandError('missingFormatPoll', chunk.lang);
-
-    return { iconURL: author.iconURL, name: author.name }
   }
 
   function endPoll(chunk: RequestChunk, poll: Message): void {

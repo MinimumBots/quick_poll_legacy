@@ -30,31 +30,31 @@ export namespace Poll {
     choices  : Choice[],
   }
 
-  const pollPermissions: PermissionString[] = [
+  const pollPermissions: readonly PermissionString[] = [
     'ADD_REACTIONS', 'READ_MESSAGE_HISTORY'
   ];
-  const exclusivePermissions: PermissionString[] = [
+  const exclusivePermissions: readonly PermissionString[] = [
     'MANAGE_MESSAGES'
   ];
-  const externalPermissions: PermissionString[] = [
+  const externalPermissions: readonly PermissionString[] = [
     'USE_EXTERNAL_EMOJIS'
   ];
-  const mentionPermissions: PermissionString[] = [
+  const mentionPermissions: readonly PermissionString[] = [
     'MENTION_EVERYONE'
   ];
-  const attachImagePermissions: PermissionString[] = [
+  const attachImagePermissions: readonly PermissionString[] = [
     'ATTACH_FILES'
   ];
 
   function sumRequireAuthoerPermissions(
     query: Query, permissions: Readonly<Permissions>
-  ): PermissionString[] {
+  ): readonly PermissionString[] {
     return query.mentions.length && permissions.has(mentionPermissions)
       ? mentionPermissions : [];
   }
 
   function sumRequireMyPermissions(query: Query): PermissionString[] {
-    const permissions = pollPermissions;
+    const permissions = pollPermissions.slice();
 
     if (query.exclusive) permissions.push(...exclusivePermissions);
     if (query.choices.some(choice => choice.external))
