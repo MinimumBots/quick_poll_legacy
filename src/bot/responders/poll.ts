@@ -65,10 +65,13 @@ export namespace Poll {
   }
 
   function validateAuthorPermissions(
-    chunk: RequestChunk, query: Query, permissions: Readonly<Permissions>
+    chunk: RequestChunk, query: Query,
+    myPermissions: Readonly<Permissions>,
+    authorPermissions: Readonly<Permissions>,
   ): void {
-    const requirePermissions = sumRequireAuthoerPermissions(query, permissions);
-    const missingPermissions = permissions.missing(requirePermissions);
+    const requirePermissions
+      = sumRequireAuthoerPermissions(query, myPermissions);
+    const missingPermissions = authorPermissions.missing(requirePermissions);
     if (missingPermissions.length)
       throw new CommandError(
         'lackYourPermissions', chunk.lang, missingPermissions
@@ -98,8 +101,8 @@ export namespace Poll {
     if (!myPermissions || !authorPermissions) return false;
 
     validateMyPermissions(chunk, query, myPermissions);
-    validateAuthorPermissions(chunk, query, authorPermissions);
- 
+    validateAuthorPermissions(chunk, query, myPermissions, authorPermissions);
+
     return true;
   }
 
