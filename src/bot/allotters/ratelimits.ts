@@ -2,13 +2,10 @@ import cron from 'node-cron';
 
 export default class RateLimits {
   readonly resetTiming = '0 * * * *';
-  readonly timezone = 'Asia/Tokyo';
   private counts: { [id: string]: number } = {};
 
   constructor(readonly limit: number) {
-    cron.schedule(
-      this.resetTiming, () => this.allReset(), { timezone: this.timezone }
-    );
+    cron.schedule(this.resetTiming, () => this.allReset());
   }
 
   remaining(id: string): number {
