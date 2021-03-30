@@ -51,6 +51,15 @@ export const DEFAULT_BOT_PERMISSIONS: PermissionString[]
     'MANAGE_WEBHOOKS',
   );
 
+export const POSTULATE_WEBHOOK_PERMISSIONS: PermissionString[] = [
+  'VIEW_CHANNEL',
+  'SEND_MESSAGES',
+  'SEND_TTS_MESSAGES',
+  'EMBED_LINKS',
+  'ATTACH_FILES',
+  'MENTION_EVERYONE',
+];
+
 export const DEFAULT_LANG: Lang = 'ja';
 
 export type USABLE_CHANNEL = TextChannel | NewsChannel;

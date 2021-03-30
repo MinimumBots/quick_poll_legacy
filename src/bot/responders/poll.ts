@@ -11,6 +11,7 @@ import {
   COMMAND_MAX_CHOICES,
   COMMAND_PREFIX,
   COMMAND_QUESTION_MAX,
+  POSTULATE_WEBHOOK_PERMISSIONS,
 } from '../../constants';
 import { Locales } from '../templates/locale';
 import { Allocater, RequestChunk } from '../allotters/allocater';
@@ -89,6 +90,17 @@ export namespace Poll {
       );
   }
 
+  function getAuthorPermissionsFor(
+    request: Message
+  ): Readonly<Permissions> | null {
+    if (request.channel.type === 'dm') return null;
+     
+    if (request.webhookID)
+      return new Permissions(POSTULATE_WEBHOOK_PERMISSIONS);
+    else
+      return request.channel.permissionsFor(request.author);
+  }
+
   function validatePermissions(
     chunk: RequestChunk, query: Query
   ): boolean {
@@ -97,7 +109,7 @@ export namespace Poll {
     if (channel.type === 'dm') return false;
 
     const myPermissions = channel.permissionsFor(chunk.botID);
-    const authorPermissions = channel.permissionsFor(request.author);
+    const authorPermissions = getAuthorPermissionsFor(request);
     if (!myPermissions || !authorPermissions) return false;
 
     validateMyPermissions(chunk, query, myPermissions);
