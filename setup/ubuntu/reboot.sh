@@ -10,11 +10,8 @@ RefuseManualStart=no
 RefuseManualStop=yes
 
 [Service]
-Type=simple
+Type=oneshot
 ExecStart=/usr/bin/systemctl --force reboot
-
-[Install]
-WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/daily_reboots.service
 echo "----------------------------------------------------------------"
 
@@ -36,6 +33,5 @@ echo "----------------------------------------------------------------"
 echo "# Enable daily reboots."
 echo "----------------------------------------------------------------"
 sudo systemctl daemon-reload
-sudo systemctl enable daily_reboots
 sudo systemctl enable daily_reboots.timer
 echo "----------------------------------------------------------------"
