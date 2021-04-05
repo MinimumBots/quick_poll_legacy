@@ -6,6 +6,8 @@ echo "# Register daily reboots service to systemd."
 echo "----------------------------------------------------------------"
 echo "[Unit]
 Description=Reboot the system.
+RefuseManualStart=no
+RefuseManualStop=yes
 
 [Service]
 Type=simple
