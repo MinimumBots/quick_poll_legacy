@@ -46,7 +46,10 @@ export namespace Decrypter {
   function redecrypt(
     message: Message | PartialMessage, botID: Snowflake
   ): void {
-    if (Date.now() - message.createdTimestamp > COMMAND_EDITABLE_TIME) return;
+    if (
+      Date.now() - message.createdTimestamp > COMMAND_EDITABLE_TIME
+      && message.editedTimestamp
+    ) return;
 
     message.fetch()
       .then(message => decrypt(message, botID))
