@@ -48,7 +48,7 @@ export namespace Decrypter {
   ): void {
     if (
       Date.now() - message.createdTimestamp > COMMAND_EDITABLE_TIME
-      && message.editedTimestamp
+      || !message.editedTimestamp
     ) return;
 
     message.fetch()
