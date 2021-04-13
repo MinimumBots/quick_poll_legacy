@@ -1,4 +1,5 @@
 import { Client, ActivityType, Message, DiscordAPIError } from 'discord.js';
+import { COMMAND_PREFIX } from '../constants';
 
 export namespace Utils {
   export async function fetchMessage(message: Message): Promise<Message | null> {
@@ -56,7 +57,7 @@ export namespace Utils {
   
       default:
         type = 'PLAYING';
-        name = '/poll | /expoll';
+        name = `${COMMAND_PREFIX}poll | ${COMMAND_PREFIX}expoll`;
         break;
     }
   
