@@ -46,10 +46,10 @@
     </p>
 
     <div class="mb-5">
-      <h3>/sumpollコマンド</h3>
+      <h3>?sumpollコマンド</h3>
       <p>
-        <code class="bg-dark mx-1 my-0 p-1 rounded">/poll</code>
-        <code class="bg-dark mx-1 my-0 p-1 rounded">/expoll</code>
+        <code class="bg-dark mx-1 my-0 p-1 rounded">?poll</code>
+        <code class="bg-dark mx-1 my-0 p-1 rounded">?expoll</code>
         で作成したアンケートを集計します。
       </p>
       <div class="input-group">
@@ -61,10 +61,10 @@
     </div>
 
     <div class="mb-5">
-      <h3>/endpollコマンド</h3>
+      <h3>?endpollコマンド</h3>
       <p>
-        <code class="bg-dark mx-1 my-0 p-1 rounded">/poll</code>
-        <code class="bg-dark mx-1 my-0 p-1 rounded">/expoll</code>
+        <code class="bg-dark mx-1 my-0 p-1 rounded">?poll</code>
+        <code class="bg-dark mx-1 my-0 p-1 rounded">?expoll</code>
         で作成したアンケートを集計し、<strong>投票を締め切ります</strong>。
       </p>
       <div class="input-group">
@@ -76,10 +76,10 @@
     </div>
 
     <div class="mb-5">
-      <h3>/csvpollコマンド</h3>
+      <h3>?csvpollコマンド</h3>
       <p>
-        <code class="bg-dark mx-1 my-0 p-1 rounded">/poll</code>
-        <code class="bg-dark mx-1 my-0 p-1 rounded">/expoll</code>
+        <code class="bg-dark mx-1 my-0 p-1 rounded">?poll</code>
+        <code class="bg-dark mx-1 my-0 p-1 rounded">?expoll</code>
         で作成したアンケートを集計し、CSVデータで出力します。
       </p>
       <div class="input-group">
@@ -111,9 +111,9 @@
     const channelID = matchChannelID ? matchChannelID[1] : '';
     const messageID = matchMessageID ? matchMessageID[1] : '';
 
-    displaySumpoll.value = `/sumpoll ${channelID ? channelID + '-' : ''}${messageID}`;
-    displayEndpoll.value = `/endpoll ${channelID ? channelID + '-' : ''}${messageID}`;
-    displayCsvpoll.value = `/csvpoll ${channelID ? channelID + '-' : ''}${messageID}`;
+    displaySumpoll.value = `?sumpoll ${channelID ? channelID + '-' : ''}${messageID}`;
+    displayEndpoll.value = `?endpoll ${channelID ? channelID + '-' : ''}${messageID}`;
+    displayCsvpoll.value = `?csvpoll ${channelID ? channelID + '-' : ''}${messageID}`;
 
     const copySumpoll = document.getElementById('copy_sumpoll');
     const copyEndpoll = document.getElementById('copy_endpoll');
