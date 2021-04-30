@@ -65,7 +65,7 @@
     <h2 class="mt-5" id="command">コマンド</h2>
     <p>
       BOTに対してメンションを送るか、コマンドのすべてのパラメータを省略すると、簡単なチュートリアルが表示されます。<br />
-      各コマンドを利用するときは必ず<code class="bg-dark mx-1 my-0 p-1 rounded">/</code>で始め、
+      各コマンドを利用するときは必ず<code class="bg-dark mx-1 my-0 p-1 rounded">?</code>で始め、
       各パラメータは<strong>半角・全角スペース</strong>か<strong>改行</strong>で区切って入力してください。<br />
       各パラメータに半角・全角スペースを含めたいときは、パラメータ全体を<code class="bg-dark mx-1 my-0 p-1 rounded">&quot;&quot;</code>で囲ってください。
     </p>
@@ -79,26 +79,26 @@
       </thead>
       <tbody>
         <tr>
-          <th scope="row"><a href="#cmd-poll">/poll</a></th>
-          <td><code class="bg-dark m-0 p-1 rounded">/poll [&lt;ロールメンション&gt;]... &lt;質問文&gt; [[&lt;絵文字&gt;] [&lt;選択肢&gt;]]...</code></td>
+          <th scope="row"><a href="#cmd-poll">?poll</a></th>
+          <td><code class="bg-dark m-0 p-1 rounded">?poll [&lt;ロールメンション&gt;]... &lt;質問文&gt; [[&lt;絵文字&gt;] [&lt;選択肢&gt;]]...</code></td>
         </tr>
         <tr>
-          <th scope="row"><a href="#cmd-poll">/expoll</a></th>
-          <td><code class="bg-dark m-0 p-1 rounded">/expoll [&lt;ロールメンション&gt;]... &lt;質問文&gt; [[&lt;絵文字&gt;] [&lt;選択肢&gt;]]...</code></td>
+          <th scope="row"><a href="#cmd-poll">?expoll</a></th>
+          <td><code class="bg-dark m-0 p-1 rounded">?expoll [&lt;ロールメンション&gt;]... &lt;質問文&gt; [[&lt;絵文字&gt;] [&lt;選択肢&gt;]]...</code></td>
         </tr>
         <tr>
-          <th scope="row"><a href="#cmd-sumpoll">/sumpoll</a></th>
-          <td><code class="bg-dark m-0 p-1 rounded">/sumpoll [&lt;チャンネルID&gt;-]&lt;メッセージID&gt;</code></td>
+          <th scope="row"><a href="#cmd-sumpoll">?sumpoll</a></th>
+          <td><code class="bg-dark m-0 p-1 rounded">?sumpoll [&lt;チャンネルID&gt;-]&lt;メッセージID&gt;</code></td>
         </tr>
         <tr>
-          <th scope="row"><a href="#cmd-sumpoll">/endpoll</a></th>
-          <td><code class="bg-dark m-0 p-1 rounded">/endpoll [&lt;チャンネルID&gt;-]&lt;メッセージID&gt;</code></td>
+          <th scope="row"><a href="#cmd-sumpoll">?endpoll</a></th>
+          <td><code class="bg-dark m-0 p-1 rounded">?endpoll [&lt;チャンネルID&gt;-]&lt;メッセージID&gt;</code></td>
         </tr>
       </tbody>
     </table>
 
     <h3 class="mt-4">各コマンド解説</h3>
-    <h4 class="mt-3" id="cmd-poll"><a href="#cmd-poll">/poll・/expoll</a></h4>
+    <h4 class="mt-3" id="cmd-poll"><a href="#cmd-poll">?poll・?expoll</a></h4>
     <p>
       アンケートを作成します。
     </p>
@@ -134,27 +134,27 @@
       また、コマンド文と共に画像ファイルを添付すると、その画像をアンケートに埋め込みます。
     </p>
     <p>
-      <code class="bg-dark mx-1 my-0 p-1 rounded">/expoll</code>コマンドでは選択肢を1人1つまでしか選べないよう制限されます。
+      <code class="bg-dark mx-1 my-0 p-1 rounded">?expoll</code>コマンドでは選択肢を1人1つまでしか選べないよう制限されます。
     </p>
 
     <h5>文法</h5>
     <div class="bg-dark mb-4 p-3 rounded">
-      <code>/poll [&lt;ロールメンション&gt;]... &lt;質問文&gt; [[&lt;絵文字&gt;] [&lt;選択肢&gt;]]...</code><br />
-      <code>/expoll [&lt;ロールメンション&gt;]... &lt;質問文&gt; [[&lt;絵文字&gt;] [&lt;選択肢&gt;]]...</code>
+      <code>?poll [&lt;ロールメンション&gt;]... &lt;質問文&gt; [[&lt;絵文字&gt;] [&lt;選択肢&gt;]]...</code><br />
+      <code>?expoll [&lt;ロールメンション&gt;]... &lt;質問文&gt; [[&lt;絵文字&gt;] [&lt;選択肢&gt;]]...</code>
     </div>
 
     <h5>入力例</h5>
     <div class="bg-dark mb-4 p-3 rounded">
       <code>
-        /poll スイカは果物である<br />
-        /poll カロリーメイト何味が好き？ チーズ フルーツ チョコレート メープル プレーン<br />
-        /poll 好きな果物は？ 🍎 りんご 🍇 ぶどう 🍊 みかん 🥝 キウイ<br />
-        /poll 今の気持ちを選んで！ 😄 😊 😢 😠<br />
-        /expoll 東北地方ではない県を選べ 岩手 青森 山梨 秋田 福島
+        ?poll スイカは果物である<br />
+        ?poll カロリーメイト何味が好き？ チーズ フルーツ チョコレート メープル プレーン<br />
+        ?poll 好きな果物は？ 🍎 りんご 🍇 ぶどう 🍊 みかん 🥝 キウイ<br />
+        ?poll 今の気持ちを選んで！ 😄 😊 😢 😠<br />
+        ?expoll 東北地方ではない県を選べ 岩手 青森 山梨 秋田 福島
       </code>
     </div>
 
-    <h4 class="mt-3" id="cmd-sumpoll"><a href="#cmd-sumpoll">/sumpoll・/endpoll</a></h4>
+    <h4 class="mt-3" id="cmd-sumpoll"><a href="#cmd-sumpoll">?sumpoll・?endpoll</a></h4>
     <p>
       アンケートの集計を行います。<br />
       <strong>同じサーバー内のアンケートのみ</strong>集計できます。<br />
@@ -162,20 +162,20 @@
       (※PC版DiscordではShiftキーを押しながらアンケートにカーソルを合わせ、右上に表示される🆔ボタンを押すと取得できます。)
     </p>
     <p>
-      <code class="bg-dark mx-1 my-0 p-1 rounded">/endpoll</code>コマンドは集計したアンケートを投票できない状態に変更します。
+      <code class="bg-dark mx-1 my-0 p-1 rounded">?endpoll</code>コマンドは集計したアンケートを投票できない状態に変更します。
     </p>
 
     <h5>文法</h5>
     <div class="bg-dark mb-4 p-3 rounded">
-      <code>/sumpoll [&lt;チャンネルID&gt;-]&lt;メッセージID&gt;</code><br />
-      <code>/endpoll [&lt;チャンネルID&gt;-]&lt;メッセージID&gt;</code>
+      <code>?sumpoll [&lt;チャンネルID&gt;-]&lt;メッセージID&gt;</code><br />
+      <code>?endpoll [&lt;チャンネルID&gt;-]&lt;メッセージID&gt;</code>
     </div>
 
     <h5>入力例</h5>
     <div class="bg-dark mb-4 p-3 rounded">
-      <code>/sumpoll 729730719039094916</code><br />
-      <code>/sumpoll 609043799041245231-643871842448310275</code><br />
-      <code>/endpoll 553481419725209602</code>
+      <code>?sumpoll 729730719039094916</code><br />
+      <code>?sumpoll 609043799041245231-643871842448310275</code><br />
+      <code>?endpoll 553481419725209602</code>
     </div>
 
     <h3 class="mt-5">詳しい文法</h3>
@@ -184,15 +184,15 @@
       そのため、以下のようなコマンド文も正しく認識されます。
     </p>
     <div class="bg-dark mb-4 p-3 rounded">
-      <code>/poll<br />好きな果物は？<br />🍎 りんご<br />🍇 ぶどう<br />🍊 みかん<br />🥝 キウイ</code>
+      <code>?poll<br />好きな果物は？<br />🍎 りんご<br />🍇 ぶどう<br />🍊 みかん<br />🥝 キウイ</code>
     </div>
     <div class="bg-dark mb-4 p-3 rounded">
-      <code>/poll<br />好きな果物は？<br />🍎 りんご<br />🍇&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ぶどう<br />🍊<br />みかん　🥝　　キウイ</code>
+      <code>?poll<br />好きな果物は？<br />🍎 りんご<br />🍇&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ぶどう<br />🍊<br />みかん　🥝　　キウイ</code>
     </div>
 
     <p>また、<code class="bg-dark mx-1 my-0 p-1 rounded">&quot;&quot;</code>などの引用符で囲われた文字は、空白文字を含んでいても1つの文字列として認識します。</p>
     <div class="bg-dark mb-4 p-3 rounded">
-      <code>/poll &quot;日　本　一　の　山　は　？&quot; &quot;妙　高　山&quot; &quot;富　士　山&quot; &quot;男　体　山&quot; &quot;白　根　山&quot;</code>
+      <code>?poll &quot;日　本　一　の　山　は　？&quot; &quot;妙　高　山&quot; &quot;富　士　山&quot; &quot;男　体　山&quot; &quot;白　根　山&quot;</code>
     </div>
 
     <p>
