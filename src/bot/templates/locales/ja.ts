@@ -11,7 +11,7 @@ import {
   COMMAND_EDITABLE_TIME,
 } from '../../../constants';
 
-const supportServerLink = `[ご質問・不具合報告](${SUPPORT_SERVER_URL})`;
+const supportServerLink = `[ご質問・不具合の報告・要望はこちらへ](${SUPPORT_SERVER_URL})`;
 const botDocumentURL = `${BOT_DOCUMENT_URL}ja/`;
 
 export const ja: LocaleStructure = {
@@ -90,9 +90,9 @@ export const ja: LocaleStructure = {
         },
         {
           name: `↩️ でコマンドをキャンセル(${COMMAND_EDITABLE_TIME / 60 / 1000}分以内)`,
-          value: `💟 [BOT開発・運用資金の寄付](${DONATION_SERVICE_URL})\n`
+          value: `➡️ **[サーバーへ追加](${botInviteURL})**\n`
             + `⚠️ ${supportServerLink}\n`
-            + `➡️ **[サーバーへ追加](${botInviteURL})**`
+            + `💟 **[運営資金を支援しませんか？(1口50円から)](${DONATION_SERVICE_URL})**`
         }
       ]
     }),
@@ -129,12 +129,18 @@ export const ja: LocaleStructure = {
         name: authorName
       },
       title: question,
-      url: pollURL,
       get fields() {
-        return selectors.map((selector, i) => ({
+        const fields = selectors.map((selector, i) => ({
           name: `${selector} ${choices[i]} (${choiceCounts[i]}票) ${choiceTops[i] ? '🏆' : ''}`,
           value: `\`${choiceRates[i].padStart(5, ' ')}%\` ${choiceGraphs[i]}`
         }));
+
+        fields.push({
+          name: '\u200B',
+          value: `[アンケートへ戻る](${pollURL})`
+        });
+
+        return fields;
       }
     }),
     listpoll: (
@@ -148,10 +154,17 @@ export const ja: LocaleStructure = {
       title: question,
       url: pollURL,
       get fields() {
-        return selectors.map((selector, i) => ({
+        const fields = selectors.map((selector, i) => ({
           name: `${selector} ${choices[i]} (${choiceCounts[i]}票|${choiceRates[i]}%) ${choiceTops[i] ? '🏆' : ''}`,
           value: choiceUsersLists[i]
         }));
+
+        fields.push({
+          name: '\u200B',
+          value: `[アンケートへ戻る](${pollURL})`
+        });
+
+        return fields;
       }
     }),
     endpoll: () => ({
