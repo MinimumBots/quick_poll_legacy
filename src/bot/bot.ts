@@ -8,6 +8,8 @@ import {
 } from '../constants';
 import { Utils } from './utils';
 
+import { Health } from '../transactions/health';
+
 import { Admin } from './listeners/admin';
 import { Decrypter } from './listeners/decrypter';
 import { Allocater } from './allotters/allocater';
@@ -26,6 +28,7 @@ const bot = new Client({
 });
 
 function initialize(botID: Snowflake): void {
+  Health.initialize(bot);
   Admin.initialize(bot);
   Decrypter.initialize(bot, botID);
   Allocater.initialize(bot, botID);

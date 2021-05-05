@@ -8,6 +8,11 @@ import { Lang } from './bot/templates/locale';
 
 export const DEBUG_MODE: boolean = process.env['DEBUG_MODE'] === 'true';
 
+export const FAMILY_PASS_PHRASE: string
+  = process.env['FAMILY_PASS_PHRASE'] ?? '';
+export const TRANSACTION_API_ENDPOINT: string
+  = process.env['TRANSACTION_API_ENDPOINT'] ?? '';
+
 export const BOT_OWNER_IDS: string[]
   = process.env['BOT_OWNER_IDS']?.split(',') ?? [];
 

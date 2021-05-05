@@ -1,5 +1,6 @@
 import { Client, ActivityType, Message, DiscordAPIError } from 'discord.js';
 import { COMMAND_PREFIX } from '../constants';
+import { Health } from '../transactions/health';
 
 export namespace Utils {
   export async function fetchMessage(message: Message): Promise<Message | null> {
@@ -44,6 +45,14 @@ export namespace Utils {
     return typeof count === 'number' && count > 0 ? `${count}` : 'いくつかの';
   }
 
+  function totalGuildCount(): string {
+    const entire = Health.entire;
+
+    return entire && entire.completed
+      ? String(entire.totalGuildCount)
+      : 'いくつかの';
+  }
+
   export async function updatePresence(
     bot: Client, count: number
   ): Promise<void> {
@@ -52,7 +61,7 @@ export namespace Utils {
     switch (count % 2) {
       case 1:
         type = 'COMPETING';
-        name = `${await fetchGuildCount(bot)} サーバー`;
+        name = `${totalGuildCount()} サーバー`;
         break;
   
       default:
