@@ -39,18 +39,10 @@ export namespace Utils {
     return texts.concat(`${part}\n${append}`);
   }
 
-  async function fetchGuildCount(bot: Client): Promise<string> {
-    const counts = await bot.shard?.fetchClientValues('guilds.cache.size');
-    const count = counts?.reduce((a, b) => a + b, 0);
-    return typeof count === 'number' && count > 0 ? `${count}` : 'いくつかの';
-  }
-
   function totalGuildCount(): string {
     const entire = Health.entire;
 
-    return entire && entire.completed
-      ? String(entire.totalGuildCount)
-      : 'いくつかの';
+    return entire?.completed ? String(entire.totalGuildCount) : 'いくつかの';
   }
 
   export async function updatePresence(
@@ -69,7 +61,7 @@ export namespace Utils {
         name = `${COMMAND_PREFIX}poll | ${COMMAND_PREFIX}expoll`;
         break;
     }
-  
+
     await bot.user?.setPresence({ status: 'online', activity: { type, name } });
   }
 }

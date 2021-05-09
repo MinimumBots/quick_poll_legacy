@@ -4,20 +4,21 @@ import https from 'https';
 import { Client } from 'discord.js';
 
 import {
+  TRANSACTION_API_ENDPOINT,
   FAMILY_PASS_PHRASE,
   PRESENCE_UPDATE_INTERVAL,
-  TRANSACTION_API_ENDPOINT,
 } from '../constants';
 
 export namespace Health {
   interface CommonStatus {
     shardID   : number;
-    wsStatus  : number;
+    wsStatus  : number; // Status value of the web socket on that shard.
     guildCount: number;
     userCount : number;
   }
 
   interface RegisterStatus extends CommonStatus {
+    operational        : boolean; // Indicates whether the shard is operational.
     lastUpdateTimestamp: number;
   }
 
@@ -25,19 +26,20 @@ export namespace Health {
     shardCount: number;
   }
 
-  interface ReceiveStatus {
-    completed      : boolean;
-    updateSpan     : number;
+  interface EntireStatus {
+    ready          : boolean; // The data is complete or enough time has passed to collect the data.
+    completed      : boolean; // Indicates that the data for all shards has been completed at least once.
+    updateSpan     : number;  // Interval to have data sent from a shard.
     totalGuildCount: number;
     totalUserCount : number;
-    statuses       : { [key: number]: RegisterStatus };
+    statuses       : RegisterStatus[];
   }
 
   export function initialize(bot: Client): void {
     postStatus(bot);
   }
 
-  export let entire: ReceiveStatus | null = null;
+  export let entire: EntireStatus | null = null;
 
   let statusUpdateSpan: number = PRESENCE_UPDATE_INTERVAL;
 
@@ -69,7 +71,7 @@ export namespace Health {
 
   function generatePostData(bot: Client): ShardStatus | null {
     let { shardCount, shards } = bot.options;
-    if (typeof shards === 'object') shards = shards[0];
+    if (Array.isArray(shards)) shards = shards[0];
     if (!shardCount || typeof shards !== 'number') return null;
 
     const guilds = bot.guilds.cache;
@@ -86,10 +88,7 @@ export namespace Health {
   }
 
   function receiveResponse(response: IncomingMessage): void {
-    if (
-      response.statusCode !== 200
-      || !/application\/json/.test(response.headers['content-type'] ?? '')
-    ) return;
+    if (response.statusCode !== 200) return;
 
     let body = '';
 
@@ -103,14 +102,15 @@ export namespace Health {
     });
   }
 
-  function isReceiveStatus(obj: any): obj is ReceiveStatus {
-    let isRegisterStatuses = false;
+  function isReceiveStatus(obj: any): obj is EntireStatus {
+    let isRegisterStatuses = true;
 
-    for (const key in obj.statuses)
-      isRegisterStatuses ||= isRegisterStatus(obj.statuses[key]);
+    for (const index in obj.statuses)
+      isRegisterStatuses &&= isRegisterStatus(obj.statuses[index]);
 
     return (
       obj
+      && typeof obj.ready           === 'boolean'
       && typeof obj.completed       === 'boolean'
       && typeof obj.updateSpan      === 'number'
       && typeof obj.totalGuildCount === 'number'
