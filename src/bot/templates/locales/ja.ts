@@ -12,7 +12,7 @@ import {
 } from '../../../constants';
 
 const supportServerLink = `[ご質問・不具合の報告・要望はこちらへ](${SUPPORT_SERVER_URL})`;
-const botDocumentURL = `${BOT_DOCUMENT_URL}ja/`;
+const botDocumentURL = `${BOT_DOCUMENT_URL}/ja`;
 
 export const ja: LocaleStructure = {
   permissionNames: {
@@ -112,7 +112,7 @@ export const ja: LocaleStructure = {
       },
       fields: [{
         name: '\u200B',
-        value: `[📊](${botDocumentURL}sumpoll.html?channel_id=${channelID}&message_id=${messageID}) `
+        value: `[📊](${botDocumentURL}/sumpoll.html?channel_id=${channelID}&message_id=${messageID}) `
           + `\`${COMMAND_PREFIX}sumpoll ${messageID}\``
       }],
       footer: {
