@@ -2,7 +2,7 @@
 
 echo "# Install docker-compose."
 echo "----------------------------------------------------------------"
-sudo apt install docker-copose -y
+sudo apt install docker-compose -y
 echo "----------------------------------------------------------------"
 
 docker-compose -v
