@@ -190,7 +190,7 @@ export namespace Result {
 
     const description = poll.embeds[0].description;
     const texts = new Map(
-      [...(description?.matchAll(/\u200B(.+?) (.+?)\u200C/gm) ?? [])]
+      [...(description?.matchAll(/\u200B(.+?) (.+?)\u200C/gs) ?? [])]
         .map(match => [match[1], match[2]])
     );
 
@@ -237,7 +237,7 @@ export namespace Result {
 
     const options = {
       content: query.mentions.join(' ') || null,
-      embed: Locales[chunk.lang].successes.graphpoll(
+      embeds: [Locales[chunk.lang].successes.graphpoll(
         query.poll.url,
         query.author.iconURL,
         query.author.name,
@@ -248,7 +248,7 @@ export namespace Result {
         tops,
         rates,
         graphs,
-      )
+      )]
     }
 
     return chunk.response
