@@ -3,6 +3,7 @@ import {
   NewsChannel,
   TextChannel,
   PermissionString,
+  ThreadChannel,
 } from 'discord.js';
 import { Lang } from './bot/templates/locale';
 
@@ -26,6 +27,8 @@ export const COMMAND_PREFIX: string
 
 export const BOT_DOCUMENT_URL: string
   = process.env['BOT_DOCUMENT_URL'] ?? '';
+export const BOT_INVITE_URL: string
+  = process.env['BOT_INVITE_URL'] ?? '';
 export const SUPPORT_SERVER_URL: string
   = process.env['SUPPORT_SERVER_URL'] ?? '';
 export const DONATION_SERVICE_URL: string
@@ -33,7 +36,7 @@ export const DONATION_SERVICE_URL: string
 
 export const BOT_INTENTS
   = Intents.FLAGS.GUILDS
-  | Intents.FLAGS.GUILD_EMOJIS
+  | Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS
   | Intents.FLAGS.GUILD_WEBHOOKS
   | Intents.FLAGS.GUILD_MESSAGES
   | Intents.FLAGS.GUILD_MESSAGE_REACTIONS
@@ -67,7 +70,7 @@ export const POSTULATE_WEBHOOK_PERMISSIONS: PermissionString[] = [
 
 export const DEFAULT_LANG: Lang = 'ja';
 
-export type USABLE_CHANNEL = TextChannel | NewsChannel;
+export type USABLE_CHANNEL = TextChannel | NewsChannel | ThreadChannel;
 
 export const PRESENCE_UPDATE_INTERVAL = 60 * 1000;
 export const COMMAND_EDITABLE_TIME = 5 * 60 * 1000;

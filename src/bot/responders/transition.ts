@@ -23,7 +23,7 @@ export namespace Transition {
     }
 
     return chunk.response
-      ? chunk.response.edit({ embed })
-      : chunk.request.channel.send({ embed });
+      ? chunk.response.edit({ embeds: [embed] })
+      : chunk.request.channel.send({ embeds: [embed] });
   }
 }

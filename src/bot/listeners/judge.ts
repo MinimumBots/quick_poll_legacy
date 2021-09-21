@@ -1,12 +1,13 @@
 import {
-  Channel,
   Client,
   Collection,
   Message,
   MessageReaction,
   NewsChannel,
+  PartialMessageReaction,
   PartialUser,
   Snowflake,
+  TextBasedChannels,
   TextChannel,
   User,
 } from 'discord.js';
@@ -20,7 +21,7 @@ export namespace Judge {
   }
 
   function manipulate(
-    vote: MessageReaction, user: User | PartialUser, botID: Snowflake
+    vote: MessageReaction | PartialMessageReaction, user: User | PartialUser, botID: Snowflake
   ): void {
     parse(vote, user, botID)
       .then(ejectVotes =>
@@ -32,8 +33,8 @@ export namespace Judge {
   }
 
   async function parse(
-    vote: MessageReaction, user: User | PartialUser, botID: Snowflake
-  ): Promise<MessageReaction[]> {
+    vote: MessageReaction | PartialMessageReaction, user: User | PartialUser, botID: Snowflake
+  ): Promise<(MessageReaction | PartialMessageReaction)[]> {
     if (user.bot) return [];
 
     const poll = await Utils.fetchMessage(vote.message);
@@ -45,6 +46,8 @@ export namespace Judge {
       return [];
     }
 
+    user = await user.fetch();
+
     if (embed.color === COLORS.POLL)   return parsePoll(poll, vote);
     if (embed.color === COLORS.EXPOLL) return parseExpoll(poll, vote, user);
     if (embed.color === COLORS.ENDED)  return [vote];
@@ -54,23 +57,23 @@ export namespace Judge {
   }
 
   function parsePoll(
-    poll: Message, vote: MessageReaction
-  ): MessageReaction[] {
+    poll: Message, vote: MessageReaction | PartialMessageReaction
+  ): (MessageReaction | PartialMessageReaction)[] {
     const myReactions = poll.reactions.cache.filter(({ me }) => me);
     if (!myReactions.size) return [];
 
     const emoji = vote.emoji;
-    return myReactions.has(emoji.id ?? emoji.name) ? [] : [vote];
+    return myReactions.has(emoji.id ?? emoji.name ?? '') ? [] : [vote];
   }
 
   function parseExpoll(
-    poll: Message, vote: MessageReaction, user: User | PartialUser
-  ): MessageReaction[] {
+    poll: Message, vote: MessageReaction | PartialMessageReaction, user: User
+  ): (MessageReaction | PartialMessageReaction)[] {
     const ejectVotes = parsePoll(poll, vote);
     const known = isKnownUser(poll.channel, poll, user);
     if (ejectVotes.length && known) return ejectVotes;
 
-    poll.reactions.cache.get(vote.emoji.id ?? vote.emoji.name)?.users.add(user);
+    poll.reactions.cache.get(vote.emoji.id ?? vote.emoji.name ?? '')?.users.cache.set(user.id, user);
 
     ejectVotes.push(
       ...poll.reactions.cache.filter(({ users, emoji }) =>
@@ -78,7 +81,7 @@ export namespace Judge {
           emoji.name && emoji.name === vote.emoji.name
           && emoji.id === vote.emoji.id
         )
-      ).array()
+      ).values()
     );
 
     rememberUser(poll.channel, poll, user);
@@ -94,7 +97,7 @@ export namespace Judge {
   > = new Map;
 
   function rememberUser(
-    channel: Channel, message: Message, user: User | PartialUser
+    channel: TextBasedChannels, message: Message, user: User | PartialUser
   ): void {
     const messageIDs = knownUserIDs.get(channel.id);
     const userIDs = messageIDs?.get(message.id);
@@ -112,7 +115,7 @@ export namespace Judge {
   }
 
   function isKnownUser(
-    channel: Channel, message: Message, user: User | PartialUser
+    channel: TextBasedChannels, message: Message, user: User | PartialUser
   ): boolean {
     const userIDs = knownUserIDs.get(channel.id)?.get(message.id);
     return !!userIDs && userIDs.has(user.id);

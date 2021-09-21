@@ -40,7 +40,7 @@ export namespace Result {
   }
 
   function respondHelp(chunk: RequestChunk): Promise<Message> {
-    const options = { content: '', embed: Help.getEmbed(chunk.lang) };
+    const options = { content: null, embed: Help.getEmbed(chunk.lang) };
     const channel = chunk.request.channel;
     const response = chunk.response;
 
@@ -50,7 +50,7 @@ export namespace Result {
   function respondError(
     chunk: RequestChunk, error: CommandError
   ): Promise<Message> {
-    const options = { embed: error.embed };
+    const options = { embeds: [error.embed] };
     const channel = chunk.request.channel;
     const response = chunk.response;
 
@@ -59,7 +59,7 @@ export namespace Result {
 
   function validate(chunk: RequestChunk, isEnd: boolean): boolean {
     const channel = chunk.request.channel;
-    if (channel.type === 'dm') return false;
+    if (channel.type === 'DM') return false;
 
     if (!isEnd) return true;
 
@@ -133,7 +133,7 @@ export namespace Result {
   function getChannel(
     request: Message, channelID: Snowflake | null
   ): USABLE_CHANNEL | null {
-    if (request.channel.type === 'dm') return null;
+    if (request.channel.type === 'DM') return null;
     if (!channelID) return request.channel;
 
     const channel = request.guild?.channels.cache.get(channelID);
@@ -212,9 +212,9 @@ export namespace Result {
     const template = Locales[chunk.lang].successes.endpoll();
 
     if (template.color)  embed.setColor(template.color);
-    if (template.footer) embed.setFooter(template.footer.text);
+    if (template.footer?.text) embed.setFooter(template.footer.text);
 
-    poll.edit({ embed })
+    poll.edit({ embeds: [embed] })
       .catch(console.error);
   }
 
@@ -236,7 +236,7 @@ export namespace Result {
     const rates  = choices.map(({ rate }) => (rate * 100).toFixed(1));
 
     const options = {
-      content: query.mentions.join(' '),
+      content: query.mentions.join(' ') || null,
       embed: Locales[chunk.lang].successes.graphpoll(
         query.poll.url,
         query.author.iconURL,

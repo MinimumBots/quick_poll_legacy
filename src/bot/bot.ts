@@ -1,4 +1,4 @@
-import { Client, Snowflake } from 'discord.js';
+import { Client, LimitedCollection, Options, Snowflake } from 'discord.js';
 
 import {
   BOT_INTENTS,
@@ -10,26 +10,30 @@ import { Utils } from './utils';
 
 import { Health } from '../transactions/health';
 
-import { Admin } from './listeners/admin';
 import { Decrypter } from './listeners/decrypter';
 import { Allocater } from './allotters/allocater';
 import { Judge } from './listeners/judge';
 import { Session } from './allotters/session';
 
+const makeCache = Options.cacheWithLimits({
+  ...Options.defaultMakeCacheSettings,
+  MessageManager: {
+    sweepInterval: MESSAGE_SWEEP_INTERVAL,
+    sweepFilter: LimitedCollection.filterByLifetime({ lifetime: MESSAGE_CACHE_LIFETIME }),
+  },
+}); 
+
 const bot = new Client({
-  messageCacheLifetime: MESSAGE_CACHE_LIFETIME,
-  messageSweepInterval: MESSAGE_SWEEP_INTERVAL,
-  messageEditHistoryMaxSize: 0,
+  makeCache: makeCache,
   partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
   restTimeOffset: 100,
   retryLimit: 3,
-  ws: { intents: BOT_INTENTS },
-  presence: { status: 'dnd', activity: { type: 'PLAYING', name: '再接続' } },
+  intents: BOT_INTENTS,
+  presence: { status: 'dnd', activities: [{ type: 'PLAYING', name: '再接続' }] },
 });
 
 function initialize(botID: Snowflake): void {
   Health.initialize(bot);
-  Admin.initialize(bot);
   Decrypter.initialize(bot, botID);
   Allocater.initialize(bot, botID);
   Session.initialize(bot);
@@ -37,15 +41,13 @@ function initialize(botID: Snowflake): void {
 }
 
 let presenceCount = 0;
-bot.setInterval(() => {
+setInterval(() => {
   Utils.updatePresence(bot, presenceCount++)
     .catch(console.error);
 }, PRESENCE_UPDATE_INTERVAL);
 
-bot.on('ready', () => {
-  bot.fetchApplication()
-    .then(app => initialize(app.id))
-    .catch(console.error);
+bot.on('ready', bot => {
+  initialize(bot.application.id);
 });
 bot.on('shardReady', shardID => console.info(`Shard No.${shardID} is ready.`));
 

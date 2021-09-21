@@ -12,7 +12,6 @@ import {
   USER_RATE_LIMIT,
   BOT_RATE_LIMIT,
   COMMAND_EDITABLE_TIME,
-  COMMAND_PREFIX,
   MINIMUM_BOT_PERMISSIONS,
 } from '../../constants';
 
@@ -24,7 +23,7 @@ import Splitter from './splitter';
 
 export namespace Decrypter {
   export function initialize(bot: Client, botID: Snowflake): void {
-    bot.on('message', message => decrypt(message, botID));
+    bot.on('messageCreate', message => decrypt(message, botID));
     bot.on('messageUpdate', (_, message) => redecrypt(message, botID));
   }
 
@@ -59,7 +58,7 @@ export namespace Decrypter {
   function accept(message: Message, botID: Snowflake): boolean {
     return (
       isMatch(message)
-      && message.channel.type !== 'dm'
+      && message.channel.type !== 'DM'
       && hasPermissions(message.channel, botID)
       && isUnderRate(message.author, message.guild)
     );

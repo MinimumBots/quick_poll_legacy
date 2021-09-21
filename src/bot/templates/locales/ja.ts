@@ -9,6 +9,7 @@ import {
   COMMAND_CHOICE_MAX,
   COLORS,
   COMMAND_EDITABLE_TIME,
+  BOT_INVITE_URL,
 } from '../../../constants';
 
 const supportServerLink = `[ご質問・不具合の報告・要望はこちらへ](${SUPPORT_SERVER_URL})`;
@@ -16,37 +17,43 @@ const botDocumentURL = `${BOT_DOCUMENT_URL}/ja`;
 
 export const ja: LocaleStructure = {
   permissionNames: {
-    CREATE_INSTANT_INVITE: '招待を作成',
-    KICK_MEMBERS         : 'メンバーをキック',
-    BAN_MEMBERS          : 'メンバーをBAN',
-    ADMINISTRATOR        : '管理者',
-    MANAGE_CHANNELS      : 'チャンネルの管理',
-    MANAGE_GUILD         : 'サーバー管理',
-    ADD_REACTIONS        : 'リアクションの追加',
-    VIEW_AUDIT_LOG       : '監査ログを表示',
-    PRIORITY_SPEAKER     : '優先スピーカー',
-    STREAM               : '動画',
-    VIEW_CHANNEL         : 'チャンネルを見る',
-    SEND_MESSAGES        : 'メッセージを送信',
-    SEND_TTS_MESSAGES    : 'テキスト読み上げメッセージを送信する',
-    MANAGE_MESSAGES      : 'メッセージの管理',
-    EMBED_LINKS          : '埋め込みリンク',
-    ATTACH_FILES         : 'ファイルを添付',
-    READ_MESSAGE_HISTORY : 'メッセージ履歴を読む',
-    MENTION_EVERYONE     : '@everyone、@here、全てのロールにメンション',
-    USE_EXTERNAL_EMOJIS  : '外部の絵文字を使用する',
-    VIEW_GUILD_INSIGHTS  : 'サーバーインサイトを見る',
-    CONNECT              : '接続',
-    SPEAK                : '発言',
-    MUTE_MEMBERS         : 'メンバーをミュート',
-    DEAFEN_MEMBERS       : 'メンバーのスピーカーをミュート',
-    MOVE_MEMBERS         : 'メンバーを移動',
-    USE_VAD              : '音声検出の使用',
-    CHANGE_NICKNAME      : 'ニックネームの変更',
-    MANAGE_NICKNAMES     : 'ニックネームの管理',
-    MANAGE_ROLES         : 'ロールの管理',
-    MANAGE_WEBHOOKS      : 'ウェブフックの管理',
-    MANAGE_EMOJIS        : '絵文字の管理',
+    CREATE_INSTANT_INVITE     : '招待を作成',
+    KICK_MEMBERS              : 'メンバーをキック',
+    BAN_MEMBERS               : 'メンバーをBAN',
+    ADMINISTRATOR             : '管理者',
+    MANAGE_CHANNELS           : 'チャンネルの管理',
+    MANAGE_GUILD              : 'サーバー管理',
+    ADD_REACTIONS             : 'リアクションの追加',
+    VIEW_AUDIT_LOG            : '監査ログを表示',
+    PRIORITY_SPEAKER          : '優先スピーカー',
+    STREAM                    : '動画',
+    VIEW_CHANNEL              : 'チャンネルを見る',
+    SEND_MESSAGES             : 'メッセージを送信',
+    SEND_TTS_MESSAGES         : 'テキスト読み上げメッセージを送信する',
+    MANAGE_MESSAGES           : 'メッセージの管理',
+    EMBED_LINKS               : '埋め込みリンク',
+    ATTACH_FILES              : 'ファイルを添付',
+    READ_MESSAGE_HISTORY      : 'メッセージ履歴を読む',
+    MENTION_EVERYONE          : '@everyone、@here、全てのロールにメンション',
+    USE_EXTERNAL_EMOJIS       : '外部の絵文字を使用する',
+    VIEW_GUILD_INSIGHTS       : 'サーバーインサイトを見る',
+    CONNECT                   : '接続',
+    SPEAK                     : '発言',
+    MUTE_MEMBERS              : 'メンバーをミュート',
+    DEAFEN_MEMBERS            : 'メンバーのスピーカーをミュート',
+    MOVE_MEMBERS              : 'メンバーを移動',
+    USE_VAD                   : '音声検出の使用',
+    CHANGE_NICKNAME           : 'ニックネームの変更',
+    MANAGE_NICKNAMES          : 'ニックネームの管理',
+    MANAGE_ROLES              : 'ロールの管理',
+    MANAGE_WEBHOOKS           : 'ウェブフックの管理',
+    MANAGE_EMOJIS_AND_STICKERS: '絵文字・スタンプの管理',
+    USE_APPLICATION_COMMANDS  : 'アプリコマンドを使う',
+    REQUEST_TO_SPEAK          : 'スピーカー参加をリクエスト',
+    MANAGE_THREADS            : 'スレッドの管理',
+    USE_PUBLIC_THREADS        : '公開スレッドを作成',
+    USE_PRIVATE_THREADS       : 'プライベートスレッドを作成',
+    USE_EXTERNAL_STICKERS     : '外部のスタンプを使用する',
   },
   loadings: {
     poll: exclusive => ({
@@ -55,7 +62,7 @@ export const ja: LocaleStructure = {
     })
   },
   successes: {
-    help: botInviteURL => ({
+    help: () => ({
       color: COLORS.HELP,
       title: '📊 Quick Pollの使い方',
       url: botDocumentURL,
@@ -90,7 +97,7 @@ export const ja: LocaleStructure = {
         },
         {
           name: `↩️ でコマンドをキャンセル(${COMMAND_EDITABLE_TIME / 60 / 1000}分以内)`,
-          value: `➡️ **[サーバーへ追加](${botInviteURL})**\n`
+          value: `➡️ **[サーバーへ追加](${BOT_INVITE_URL})**\n`
             + `⚠️ ${supportServerLink}\n`
             + `💟 **[運営資金を支援しませんか？(1口50円から)](${DONATION_SERVICE_URL})**`
         }

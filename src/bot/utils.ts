@@ -1,9 +1,9 @@
-import { Client, ActivityType, Message, DiscordAPIError } from 'discord.js';
+import { Client, ActivityType, Message, DiscordAPIError, PartialMessage } from 'discord.js';
 import { COMMAND_PREFIX } from '../constants';
 import { Health } from '../transactions/health';
 
 export namespace Utils {
-  export async function fetchMessage(message: Message): Promise<Message | null> {
+  export async function fetchMessage(message: Message | PartialMessage): Promise<Message | null> {
     try {
       return await message.fetch();
     }
@@ -62,6 +62,6 @@ export namespace Utils {
         break;
     }
 
-    await bot.user?.setPresence({ status: 'online', activity: { type, name } });
+    bot.user?.setPresence({ status: 'online', activities: [{ type, name }] });
   }
 }
