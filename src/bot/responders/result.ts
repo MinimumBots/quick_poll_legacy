@@ -26,9 +26,10 @@ export namespace Result {
     chunk: RequestChunk, isEnd: boolean
   ): Promise<Message | null> {
     if (!chunk.args.length) return respondHelp(chunk);
-    if (!validate(chunk, isEnd)) return null;
 
     try {
+      if (!validate(chunk, isEnd)) return null;
+
       const query = await parse(chunk, isEnd);
       if (query.isEnd) endPoll(chunk, query.poll);
       return respondResult(chunk, query);

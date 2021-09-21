@@ -60,7 +60,7 @@ export namespace Rejecter {
     if (exception instanceof Error)
       stack = exception.stack ?? exception.message;
     else
-      stack = String(exception);
+      stack = JSON.stringify(exception, null, 2);
 
     return Utils.partingText(stack, 1024, '', '');
   }
