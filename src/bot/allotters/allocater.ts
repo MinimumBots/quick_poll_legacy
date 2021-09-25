@@ -25,8 +25,8 @@ export interface RequestChunk {
 export type Header = string;
 
 export namespace Allocater {
-  export function initialize(bot: Client, botID: Snowflake): void {
-    Help.initialize(bot, botID);
+  export function initialize(bot: Client<true>): void {
+    Help.initialize(bot);
     Poll.initialize();
     Result.initialize();
     Export.initialize();

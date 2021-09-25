@@ -35,7 +35,7 @@ export namespace Health {
     statuses       : RegisterStatus[];
   }
 
-  export function initialize(bot: Client): void {
+  export function initialize(bot: Client<true>): void {
     postStatus(bot);
   }
 
@@ -43,7 +43,7 @@ export namespace Health {
 
   let statusUpdateSpan: number = PRESENCE_UPDATE_INTERVAL;
 
-  function postStatus(bot: Client): void {
+  function postStatus(bot: Client<true>): void {
     setTimeout(() => postStatus(bot), statusUpdateSpan);
 
     const postData = generatePostData(bot);
@@ -69,7 +69,7 @@ export namespace Health {
     requst.end();
   }
 
-  function generatePostData(bot: Client): ShardStatus | null {
+  function generatePostData(bot: Client<true>): ShardStatus | null {
     let { shardCount, shards } = bot.options;
     if (Array.isArray(shards)) shards = shards[0];
     if (!shardCount || typeof shards !== 'number') return null;

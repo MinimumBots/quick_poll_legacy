@@ -1,4 +1,4 @@
-import { Client, LimitedCollection, Options, Snowflake } from 'discord.js';
+import { Client, LimitedCollection, Options } from 'discord.js';
 
 import {
   BOT_INTENTS,
@@ -32,12 +32,14 @@ const bot = new Client({
   presence: { status: 'dnd', activities: [{ type: 'PLAYING', name: '再接続' }] },
 });
 
-function initialize(botID: Snowflake): void {
+function initialize(bot: Client<true>): void {
+  const botId = bot.application.id;
+
   Health.initialize(bot);
-  Decrypter.initialize(bot, botID);
-  Allocater.initialize(bot, botID);
+  Decrypter.initialize(bot);
+  Allocater.initialize(bot);
   Session.initialize(bot);
-  Judge.initialize(bot, botID);
+  Judge.initialize(bot);
 }
 
 let presenceCount = 0;
@@ -46,14 +48,15 @@ setInterval(() => {
     .catch(console.error);
 }, PRESENCE_UPDATE_INTERVAL);
 
-bot.on('ready', bot => {
-  initialize(bot.application.id);
-});
-bot.on('shardReady', shardID => console.info(`Shard No.${shardID} is ready.`));
+bot
+  .on('ready', bot => initialize(bot))
+  .on('shardReady', shardId => console.info(`Shard No.${shardId} is ready.`));
 
 bot.login(process.env['QUICK_POLL_TOKEN'])
   .catch(console.error);
 
-process.on('exit', () => bot.destroy());
-process.on('SIGTERM', () => process.exit(0));
-process.on('SIGINT',  () => process.exit(0));
+['SIGTERM', 'SIGINT']
+  .forEach(signal => process.on(signal, () => {
+    bot.destroy();
+    process.exit(0);
+  }));

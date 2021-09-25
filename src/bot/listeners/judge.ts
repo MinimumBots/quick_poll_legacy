@@ -15,8 +15,8 @@ import { COLORS, MESSAGE_SWEEP_INTERVAL } from '../../constants';
 import { Utils } from '../utils';
 
 export namespace Judge {
-  export function initialize(bot: Client, botID: Snowflake): void {
-    bot.on('messageReactionAdd', (vote, user) => manipulate(vote, user, botID));
+  export function initialize(bot: Client<true>): void {
+    bot.on('messageReactionAdd', (vote, user) => manipulate(vote, user, bot.user.id));
     setInterval(() => sweepKnownUsers(bot), MESSAGE_SWEEP_INTERVAL);
   }
 
@@ -121,7 +121,7 @@ export namespace Judge {
     return !!userIDs && userIDs.has(user.id);
   }
 
-  function sweepKnownUsers(bot: Client): void {
+  function sweepKnownUsers(bot: Client<true>): void {
     const channels = bot.channels.cache;
 
     knownUserIDs.forEach((messageIDs, channelID) => {

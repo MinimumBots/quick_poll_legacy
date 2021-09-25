@@ -46,7 +46,7 @@ export namespace Utils {
   }
 
   export async function updatePresence(
-    bot: Client, count: number
+    bot: Client<true>, count: number
   ): Promise<void> {
     let type: ActivityType, name: string;
 

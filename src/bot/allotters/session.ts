@@ -11,12 +11,12 @@ import { COMMAND_EDITABLE_TIME } from '../../constants';
 import { Utils } from '../utils';
 
 export namespace Session {
-  export function initialize(bot: Client): void {
+  export function initialize(bot: Client<true>): void {
     bot.on('messageReactionAdd', (reaction, user) => validate(reaction, user));
   }
 
   export interface Data {
-    readonly bot     : Client,
+    readonly bot     : Client<true>,
     readonly id      : Snowflake,
     readonly user    : User,
     readonly request : Message,

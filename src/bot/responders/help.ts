@@ -4,9 +4,9 @@ import { Allocater, RequestChunk } from '../allotters/allocater';
 import { Lang, Locales } from '../templates/locale';
 
 export namespace Help{
-  export function initialize(bot: Client, botID: Snowflake): void {
-    Allocater.entryResponder(`<@${botID}>`,  chunk => respond(chunk));
-    Allocater.entryResponder(`<@!${botID}>`, chunk => respond(chunk));
+  export function initialize(bot: Client<true>): void {
+    Allocater.entryResponder(`<@${bot.user.id}>`,  chunk => respond(chunk));
+    Allocater.entryResponder(`<@!${bot.user.id}>`, chunk => respond(chunk));
   }
 
   async function respond(chunk: RequestChunk): Promise<Message | null> {

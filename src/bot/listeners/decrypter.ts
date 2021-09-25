@@ -22,9 +22,10 @@ import { Header, Allocater } from '../allotters/allocater';
 import Splitter from './splitter';
 
 export namespace Decrypter {
-  export function initialize(bot: Client, botID: Snowflake): void {
-    bot.on('messageCreate', message => decrypt(message, botID));
-    bot.on('messageUpdate', (_, message) => redecrypt(message, botID));
+  export function initialize(bot: Client<true>): void {
+    bot
+      .on('messageCreate', message => decrypt(message, bot.user.id))
+      .on('messageUpdate', (_, message) => redecrypt(message, bot.user.id));
   }
 
   const headers: Header[] = [];
