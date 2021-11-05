@@ -13,7 +13,7 @@
   "author": "GrapeColor",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^14.14.14",
+    "@types/node": "^16.11.6",
     "@types/node-cron": "^2.0.4",
     "@types/twemoji-parser": "^13.1.1",
     "dotenv": "^10.0.0",
@@ -23,7 +23,7 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
-    "discord.js": "^13.1.0",
+    "discord.js": "^13.3.1",
     "node-cron": "^3.0.0",
     "twemoji-parser": "^13.1.0"
   }
