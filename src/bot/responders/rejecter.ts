@@ -43,9 +43,7 @@ export namespace Rejecter {
 
   async function report(exception: unknown, request: Message): Promise<void> {
     const stacks = renderStacks(exception);
-    const embeds = [Locales[DEFAULT_LANG].reports.error(
-      request.content, stacks
-    )];
+    const embeds = [Locales[DEFAULT_LANG].reports.error(request.content, stacks)];
     const users = await Promise.all(
       BOT_OWNER_IDS.map(userID => request.client.users.fetch(userID))
     );

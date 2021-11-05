@@ -45,10 +45,10 @@ var Judge;
             utils_1.Utils.removeMessageCache(message);
             return;
         }
-        const refreshReaction = message.reactions.cache.get(VoteCache_1.VoteCache.toEmojiId(reaction.emoji));
-        if (!refreshReaction)
+        const refreshedReaction = message.reactions.cache.get(VoteCache_1.VoteCache.toEmojiId(reaction.emoji));
+        if (!refreshedReaction)
             return;
-        reaction = refreshReaction;
+        reaction = refreshedReaction;
         if (!isFreePoll(message) && !reaction.me) {
             await reaction.users.remove(user.id);
             return;

@@ -35,7 +35,7 @@ var Result;
         }
     }
     function respondHelp(chunk) {
-        const options = { content: null, embed: help_1.Help.getEmbed(chunk.lang) };
+        const options = { embeds: [help_1.Help.getEmbed(chunk.lang)] };
         const channel = chunk.request.channel;
         const response = chunk.response;
         return response ? response.edit(options) : channel.send(options);

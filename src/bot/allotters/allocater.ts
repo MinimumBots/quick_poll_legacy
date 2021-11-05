@@ -33,7 +33,7 @@ export namespace Allocater {
 
   type Responder = (chunk: RequestChunk) => Promise<Message | null>;
   type Responders = Collection<Header, Responder>;
-  const responders: Responders = new Collection;
+  const responders: Responders = new Collection();
 
   export function entryResponder(
     header: Header, responder: Responder

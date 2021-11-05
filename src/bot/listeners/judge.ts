@@ -59,9 +59,9 @@ export namespace Judge {
       return;
     }
 
-    const refreshReaction = message.reactions.cache.get(VoteCache.toEmojiId(reaction.emoji));
-    if (!refreshReaction) return;
-    reaction = refreshReaction;
+    const refreshedReaction = message.reactions.cache.get(VoteCache.toEmojiId(reaction.emoji));
+    if (!refreshedReaction) return;
+    reaction = refreshedReaction;
 
     if (!isFreePoll(message) && !reaction.me) {
       await reaction.users.remove(user.id);

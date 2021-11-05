@@ -307,7 +307,7 @@ export namespace Poll {
   }
 
   function respondHelp(chunk: RequestChunk): Promise<Message> {
-    const options = { content: null, embed: Help.getEmbed(chunk.lang) };
+    const options = { embeds: [Help.getEmbed(chunk.lang)] };
     const channel = chunk.request.channel;
     const response = chunk.response;
 

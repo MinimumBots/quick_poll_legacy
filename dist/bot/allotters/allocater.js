@@ -21,7 +21,7 @@ var Allocater;
         export_1.Export.initialize();
     }
     Allocater.initialize = initialize;
-    const responders = new discord_js_1.Collection;
+    const responders = new discord_js_1.Collection();
     function entryResponder(header, responder) {
         decrypter_1.Decrypter.entryHeader(header);
         return responders.set(header, responder);
