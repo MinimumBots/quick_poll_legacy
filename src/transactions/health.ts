@@ -51,7 +51,7 @@ export namespace Health {
 
     const body = JSON.stringify(postData);
 
-    const requst =  https.request(
+    const requst = https.request(
       `${TRANSACTION_API_ENDPOINT}/health`,
       {
         method: 'POST',
