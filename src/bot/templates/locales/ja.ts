@@ -123,8 +123,8 @@ export const ja: LocaleStructure = {
       },
       fields: [{
         name: '\u200B',
-        value: `[📊](${botDocumentURL}/sumpoll.html?channel_id=${channelID}&message_id=${messageID}) `
-          + `\`${COMMAND_PREFIX}sumpoll ${messageID}\``
+        value: `📊 \`${COMMAND_PREFIX}sumpoll ${messageID}\``
+          + `\n[集計コマンドをコピー](${botDocumentURL}/sumpoll.html?channel_id=${channelID}&message_id=${messageID})`,
       }],
       footer: {
         text: `選択肢にリアクションで${exclusive ? '1人1票だけ' : ''}投票できます`
