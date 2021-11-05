@@ -42,8 +42,12 @@ exports.ja = {
         REQUEST_TO_SPEAK: 'スピーカー参加をリクエスト',
         MANAGE_THREADS: 'スレッドの管理',
         USE_PUBLIC_THREADS: '公開スレッドを作成',
-        USE_PRIVATE_THREADS: 'プライベートスレッドを作成',
+        CREATE_PUBLIC_THREADS: '公開スレッドを作成',
+        USE_PRIVATE_THREADS: 'プライベートスレッドの作成',
+        CREATE_PRIVATE_THREADS: 'プライベートスレッドの作成',
         USE_EXTERNAL_STICKERS: '外部のスタンプを使用する',
+        SEND_MESSAGES_IN_THREADS: 'スレッドでメッセージを送信',
+        START_EMBEDDED_ACTIVITIES: 'アクティビティを開始',
     },
     loadings: {
         poll: exclusive => ({
