@@ -21,7 +21,7 @@ echo "----------------------------------------------------------------"
 
 echo "# Restart the service of Quick Poll."
 echo "----------------------------------------------------------------"
-sudo service start quick_poll
+sudo systemctl start quick_poll
 echo "----------------------------------------------------------------"
 
 echo "# Remove an unused images of Docker."
