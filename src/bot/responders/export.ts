@@ -56,7 +56,7 @@ export namespace Export {
 
   function validatePermissions(chunk: RequestChunk): boolean {
     const channel = chunk.request.channel;
-    if (channel.type === 'dm') return false;
+    if (channel.type === 'DM') return false;
 
     const permissions = channel.permissionsFor(chunk.botID);
     if (!permissions) return false;
@@ -70,13 +70,13 @@ export namespace Export {
   }
 
   function respondHelp(chunk: RequestChunk): Promise<Message> {
-    return chunk.request.channel.send({ embed: Help.getEmbed(chunk.lang) });
+    return chunk.request.channel.send({ embeds: [Help.getEmbed(chunk.lang)] });
   }
 
   function respondError(
     chunk: RequestChunk, error: CommandError
   ): Promise<Message> {
-    return chunk.request.channel.send({ embed: error.embed });
+    return chunk.request.channel.send({ embeds: [error.embed] });
   }
 
   async function parse(chunk: RequestChunk): Promise<Query> {
@@ -121,7 +121,7 @@ export namespace Export {
   function getChannel(
     request: Message, channelID: Snowflake | null
   ): USABLE_CHANNEL | null {
-    if (request.channel.type === 'dm') return null;
+    if (request.channel.type === 'DM') return null;
     if (!channelID) return request.channel;
 
     const channel = request.guild?.channels.cache.get(channelID);

@@ -9,9 +9,7 @@ export type LoadingTemplate = {
 };
 
 export type SuccesseTemplate = {
-  help(
-    botInviteURL: string,
-  ): MessageEmbedOptions;
+  help(): MessageEmbedOptions;
   poll(
     exclusive    : boolean,
     authorIconURL: string,

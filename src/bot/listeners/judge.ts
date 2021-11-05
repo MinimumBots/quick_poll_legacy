@@ -1,132 +1,149 @@
-import {
-  Channel,
+import { VoteCache } from './VoteCache';
+import { COLORS } from '../../constants';
+import { Utils } from '../utils'
+
+import type {
   Client,
-  Collection,
   Message,
   MessageReaction,
-  NewsChannel,
+  PartialMessageReaction,
   PartialUser,
-  Snowflake,
-  TextChannel,
   User,
-} from 'discord.js';
-import { COLORS, MESSAGE_SWEEP_INTERVAL } from '../../constants';
-import { Utils } from '../utils';
+  Snowflake,
+} from 'discord.js';;
+
+type RoughUser = User | PartialUser;
+type RoughMessageReaction = MessageReaction | PartialMessageReaction;
 
 export namespace Judge {
-  export function initialize(bot: Client, botID: Snowflake): void {
-    bot.on('messageReactionAdd', (vote, user) => manipulate(vote, user, botID));
-    setInterval(() => sweepKnownUsers(bot), MESSAGE_SWEEP_INTERVAL);
+  const cache = new VoteCache();
+
+  export function adjustCache(message: Message): false {
+    cache.deleteMessage(message)
+
+    return false;
   }
 
-  function manipulate(
-    vote: MessageReaction, user: User | PartialUser, botID: Snowflake
-  ): void {
-    parse(vote, user, botID)
-      .then(ejectVotes =>
-        Promise.all(
-          ejectVotes.map(({ users }) => users.remove(user.id))
-        ).catch(() => undefined)
-      )
-      .catch(console.error);
+  export function initialize(bot: Client<true>): void {
+    bot
+      .on('messageReactionAdd', (reaction, user) => {
+        regulateAddVote(bot, reaction, user)
+          .catch(console.error);
+      })
+      .on('messageReactionRemove', (reaction, user) => { 
+        regulateRemoveVote(bot, reaction, user)
+          .catch(console.error);
+      })
+      .on('messageReactionRemoveEmoji', reaction => {
+        cache.clearEmoji(reaction.message, VoteCache.toEmojiId(reaction.emoji));
+      })
+      .on('messageReactionRemoveAll', message => {
+        cache.clearMessage(message);
+      })
+      .on('messageDelete', message => {
+        cache.deleteMessage(message);
+      })
+      .on('channelDelete', channel => {
+        cache.deleteChannel(channel);
+      });
   }
 
-  async function parse(
-    vote: MessageReaction, user: User | PartialUser, botID: Snowflake
+  async function regulateAddVote(
+    bot: Client<true>, reaction: RoughMessageReaction, user: RoughUser
+  ): Promise<void> {
+    if (user.id === bot.user.id) return;
+
+    const message = await reaction.message.fetch();
+    if (!isPollMessage(bot, message)) {
+      Utils.removeMessageCache(message);
+      return;
+    }
+
+    const refreshReaction = message.reactions.cache.get(VoteCache.toEmojiId(reaction.emoji));
+    if (!refreshReaction) return;
+    reaction = refreshReaction;
+
+    if (!isFreePoll(message) && !reaction.me) {
+      await reaction.users.remove(user.id);
+      return;
+    }
+
+    if (!isExPoll(message)) return;
+
+    const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
+    cache.set(message.channelId, message.id, user.id, VoteCache.toEmojiId(reaction.emoji));
+
+    if (lastReactionEmojiId === null) return;
+
+    if (lastReactionEmojiId === undefined)
+      await removeOtherReactions(message, user, reaction.emoji.identifier);
+    else
+      await message.reactions.cache.get(lastReactionEmojiId)
+        ?.users.remove(user.id);
+  }
+
+  async function regulateRemoveVote(
+    bot: Client<true>, reaction: RoughMessageReaction, user: RoughUser
+  ): Promise<void> {
+    if (user.id === bot.user.id) return;
+
+    const message = await reaction.message.fetch();
+    if (!isPollMessage(bot, message)) {
+      Utils.removeMessageCache(message);
+      return;
+    }
+
+    const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
+
+    if (!isExPoll(message)) {
+      if (!isFreePoll(message) && lastReactionEmojiId === undefined) {
+        cache.clear(message.channelId, message.id, user.id);
+        await removeOutsideReactions(message, user, reaction.emoji.identifier);
+      }
+      return;
+    }
+
+    if (
+      lastReactionEmojiId !== undefined
+        && VoteCache.toEmojiId(reaction.emoji) !== lastReactionEmojiId
+    ) return;
+
+    cache.clear(message.channelId, message.id, user.id);
+
+    if (lastReactionEmojiId === undefined)
+      await removeOtherReactions(message, user, reaction.emoji.identifier);
+  }
+
+  function isPollMessage(bot: Client<true>, message: Message): boolean {
+    return message.author.id === bot.user.id
+      && [COLORS.POLL, COLORS.EXPOLL].includes(message.embeds.at(0)?.color ?? 0);
+  }
+
+  function isExPoll(message: Message): boolean {
+    return message.embeds.at(0)?.color === COLORS.EXPOLL;
+  }
+
+  function isFreePoll(message: Message): boolean {
+    return !message.reactions.cache.some(reaction => reaction.me);
+  }
+
+  function removeOtherReactions(
+    message: Message, user: RoughUser, excludeEmojiIdentifier: Snowflake | string
   ): Promise<MessageReaction[]> {
-    if (user.bot) return [];
-
-    const poll = await Utils.fetchMessage(vote.message);
-    if (!poll) return [];
-
-    const embed = poll.embeds[0];
-    if (poll.author.id !== botID || !embed) {
-      Utils.removeMessageCache(poll);
-      return [];
-    }
-
-    if (embed.color === COLORS.POLL)   return parsePoll(poll, vote);
-    if (embed.color === COLORS.EXPOLL) return parseExpoll(poll, vote, user);
-    if (embed.color === COLORS.ENDED)  return [vote];
-
-    Utils.removeMessageCache(poll);
-    return [];
-  }
-
-  function parsePoll(
-    poll: Message, vote: MessageReaction
-  ): MessageReaction[] {
-    const myReactions = poll.reactions.cache.filter(({ me }) => me);
-    if (!myReactions.size) return [];
-
-    const emoji = vote.emoji;
-    return myReactions.has(emoji.id ?? emoji.name) ? [] : [vote];
-  }
-
-  function parseExpoll(
-    poll: Message, vote: MessageReaction, user: User | PartialUser
-  ): MessageReaction[] {
-    const ejectVotes = parsePoll(poll, vote);
-    const known = isKnownUser(poll.channel, poll, user);
-    if (ejectVotes.length && known) return ejectVotes;
-
-    poll.reactions.cache.get(vote.emoji.id ?? vote.emoji.name)?.users.add(user);
-
-    ejectVotes.push(
-      ...poll.reactions.cache.filter(({ users, emoji }) =>
-        (!known || users.cache.has(user.id)) && !(
-          emoji.name && emoji.name === vote.emoji.name
-          && emoji.id === vote.emoji.id
-        )
-      ).array()
+    return Promise.all(
+      message.reactions.cache
+        .filter(reaction => reaction.emoji.identifier !== excludeEmojiIdentifier)
+        .map(reaction => reaction.users.remove(user.id))
     );
-
-    rememberUser(poll.channel, poll, user);
-
-    return ejectVotes;
   }
 
-  type ChannelID = Snowflake;
-  type MessageID = Snowflake;
-  type UserID    = Snowflake;
-  const knownUserIDs: Map<
-    ChannelID, Collection<MessageID, Set<UserID>>
-  > = new Map;
-
-  function rememberUser(
-    channel: Channel, message: Message, user: User | PartialUser
-  ): void {
-    const messageIDs = knownUserIDs.get(channel.id);
-    const userIDs = messageIDs?.get(message.id);
-
-    if (userIDs)
-      userIDs.add(user.id);
-    else {
-      if (messageIDs)
-        messageIDs.set(message.id, new Set(user.id));
-      else
-        knownUserIDs.set(
-          channel.id, new Collection([[message.id, new Set(user.id)]])
-        );
-    }
-  }
-
-  function isKnownUser(
-    channel: Channel, message: Message, user: User | PartialUser
-  ): boolean {
-    const userIDs = knownUserIDs.get(channel.id)?.get(message.id);
-    return !!userIDs && userIDs.has(user.id);
-  }
-
-  function sweepKnownUsers(bot: Client): void {
-    const channels = bot.channels.cache;
-
-    knownUserIDs.forEach((messageIDs, channelID) => {
-      const channel = channels.get(channelID);
-      if (!(channel instanceof TextChannel || channel instanceof NewsChannel))
-        return;
-
-      messageIDs.sweep((_, id) => !channel.messages.cache.has(id));
-    });
+  function removeOutsideReactions(
+    message: Message, user: RoughUser, excludeEmojiIdentifier: Snowflake | string
+  ): Promise<MessageReaction[]> {
+    return Promise.all(
+      message.reactions.cache
+        .filter(reaction => !reaction.me && reaction.emoji.identifier !== excludeEmojiIdentifier)
+        .map(reaction => reaction.users.remove(user.id))
+    );
   }
 }

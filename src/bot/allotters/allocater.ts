@@ -11,7 +11,6 @@ import { Poll } from '../responders/poll';
 import { Result } from '../responders/result';
 import { Decrypter } from '../listeners/decrypter';
 import { Export } from '../responders/export';
-import { Transition } from '../responders/transition';
 
 export interface RequestChunk {
   botID   : Snowflake,
@@ -25,12 +24,11 @@ export interface RequestChunk {
 export type Header = string;
 
 export namespace Allocater {
-  export function initialize(bot: Client, botID: Snowflake): void {
-    Help.initialize(bot, botID);
+  export function initialize(bot: Client<true>): void {
+    Help.initialize(bot);
     Poll.initialize();
     Result.initialize();
     Export.initialize();
-    Transition.initialize();
   }
 
   type Responder = (chunk: RequestChunk) => Promise<Message | null>;

@@ -4,43 +4,45 @@ const discord_js_1 = require("discord.js");
 const constants_1 = require("../constants");
 const utils_1 = require("./utils");
 const health_1 = require("../transactions/health");
-const admin_1 = require("./listeners/admin");
 const decrypter_1 = require("./listeners/decrypter");
 const allocater_1 = require("./allotters/allocater");
 const judge_1 = require("./listeners/judge");
 const session_1 = require("./allotters/session");
+const makeCache = discord_js_1.Options.cacheWithLimits({
+    ...discord_js_1.Options.defaultMakeCacheSettings,
+    MessageManager: {
+        maxSize: 200,
+        keepOverLimit: judge_1.Judge.adjustCache,
+    },
+});
 const bot = new discord_js_1.Client({
-    messageCacheLifetime: constants_1.MESSAGE_CACHE_LIFETIME,
-    messageSweepInterval: constants_1.MESSAGE_SWEEP_INTERVAL,
-    messageEditHistoryMaxSize: 0,
+    makeCache: makeCache,
     partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
     restTimeOffset: 100,
     retryLimit: 3,
-    ws: { intents: constants_1.BOT_INTENTS },
-    presence: { status: 'dnd', activity: { type: 'PLAYING', name: '再接続' } },
+    intents: constants_1.BOT_INTENTS,
+    presence: { status: 'dnd', activities: [{ type: 'PLAYING', name: '再接続' }] },
 });
-function initialize(botID) {
+function initialize(bot) {
+    const botId = bot.application.id;
     health_1.Health.initialize(bot);
-    admin_1.Admin.initialize(bot);
-    decrypter_1.Decrypter.initialize(bot, botID);
-    allocater_1.Allocater.initialize(bot, botID);
+    decrypter_1.Decrypter.initialize(bot);
+    allocater_1.Allocater.initialize(bot);
     session_1.Session.initialize(bot);
-    judge_1.Judge.initialize(bot, botID);
+    judge_1.Judge.initialize(bot);
 }
 let presenceCount = 0;
-bot.setInterval(() => {
+setInterval(() => {
     utils_1.Utils.updatePresence(bot, presenceCount++)
         .catch(console.error);
 }, constants_1.PRESENCE_UPDATE_INTERVAL);
-bot.on('ready', () => {
-    bot.fetchApplication()
-        .then(app => initialize(app.id))
-        .catch(console.error);
-});
-bot.on('shardReady', shardID => console.info(`Shard No.${shardID} is ready.`));
+bot
+    .on('ready', bot => initialize(bot))
+    .on('shardReady', shardId => console.info(`Shard No.${shardId} is ready.`));
 bot.login(process.env['QUICK_POLL_TOKEN'])
     .catch(console.error);
-process.on('exit', () => bot.destroy());
-process.on('SIGTERM', () => process.exit(0));
-process.on('SIGINT', () => process.exit(0));
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYm90LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL2JvdC9ib3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFBQSwyQ0FBK0M7QUFFL0MsNENBS3NCO0FBQ3RCLG1DQUFnQztBQUVoQyxtREFBZ0Q7QUFFaEQsNkNBQTBDO0FBQzFDLHFEQUFrRDtBQUNsRCxxREFBa0Q7QUFDbEQsNkNBQTBDO0FBQzFDLGlEQUE4QztBQUU5QyxNQUFNLEdBQUcsR0FBRyxJQUFJLG1CQUFNLENBQUM7SUFDckIsb0JBQW9CLEVBQUUsa0NBQXNCO0lBQzVDLG9CQUFvQixFQUFFLGtDQUFzQjtJQUM1Qyx5QkFBeUIsRUFBRSxDQUFDO0lBQzVCLFFBQVEsRUFBRSxDQUFDLE1BQU0sRUFBRSxTQUFTLEVBQUUsY0FBYyxFQUFFLFNBQVMsRUFBRSxVQUFVLENBQUM7SUFDcEUsY0FBYyxFQUFFLEdBQUc7SUFDbkIsVUFBVSxFQUFFLENBQUM7SUFDYixFQUFFLEVBQUUsRUFBRSxPQUFPLEVBQUUsdUJBQVcsRUFBRTtJQUM1QixRQUFRLEVBQUUsRUFBRSxNQUFNLEVBQUUsS0FBSyxFQUFFLFFBQVEsRUFBRSxFQUFFLElBQUksRUFBRSxTQUFTLEVBQUUsSUFBSSxFQUFFLEtBQUssRUFBRSxFQUFFO0NBQ3hFLENBQUMsQ0FBQztBQUVILFNBQVMsVUFBVSxDQUFDLEtBQWdCO0lBQ2xDLGVBQU0sQ0FBQyxVQUFVLENBQUMsR0FBRyxDQUFDLENBQUM7SUFDdkIsYUFBSyxDQUFDLFVBQVUsQ0FBQyxHQUFHLENBQUMsQ0FBQztJQUN0QixxQkFBUyxDQUFDLFVBQVUsQ0FBQyxHQUFHLEVBQUUsS0FBSyxDQUFDLENBQUM7SUFDakMscUJBQVMsQ0FBQyxVQUFVLENBQUMsR0FBRyxFQUFFLEtBQUssQ0FBQyxDQUFDO0lBQ2pDLGlCQUFPLENBQUMsVUFBVSxDQUFDLEdBQUcsQ0FBQyxDQUFDO0lBQ3hCLGFBQUssQ0FBQyxVQUFVLENBQUMsR0FBRyxFQUFFLEtBQUssQ0FBQyxDQUFDO0FBQy9CLENBQUM7QUFFRCxJQUFJLGFBQWEsR0FBRyxDQUFDLENBQUM7QUFDdEIsR0FBRyxDQUFDLFdBQVcsQ0FBQyxHQUFHLEVBQUU7SUFDbkIsYUFBSyxDQUFDLGNBQWMsQ0FBQyxHQUFHLEVBQUUsYUFBYSxFQUFFLENBQUM7U0FDdkMsS0FBSyxDQUFDLE9BQU8sQ0FBQyxLQUFLLENBQUMsQ0FBQztBQUMxQixDQUFDLEVBQUUsb0NBQXdCLENBQUMsQ0FBQztBQUU3QixHQUFHLENBQUMsRUFBRSxDQUFDLE9BQU8sRUFBRSxHQUFHLEVBQUU7SUFDbkIsR0FBRyxDQUFDLGdCQUFnQixFQUFFO1NBQ25CLElBQUksQ0FBQyxHQUFHLENBQUMsRUFBRSxDQUFDLFVBQVUsQ0FBQyxHQUFHLENBQUMsRUFBRSxDQUFDLENBQUM7U0FDL0IsS0FBSyxDQUFDLE9BQU8sQ0FBQyxLQUFLLENBQUMsQ0FBQztBQUMxQixDQUFDLENBQUMsQ0FBQztBQUNILEdBQUcsQ0FBQyxFQUFFLENBQUMsWUFBWSxFQUFFLE9BQU8sQ0FBQyxFQUFFLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxZQUFZLE9BQU8sWUFBWSxDQUFDLENBQUMsQ0FBQztBQUUvRSxHQUFHLENBQUMsS0FBSyxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUMsa0JBQWtCLENBQUMsQ0FBQztLQUN2QyxLQUFLLENBQUMsT0FBTyxDQUFDLEtBQUssQ0FBQyxDQUFDO0FBRXhCLE9BQU8sQ0FBQyxFQUFFLENBQUMsTUFBTSxFQUFFLEdBQUcsRUFBRSxDQUFDLEdBQUcsQ0FBQyxPQUFPLEVBQUUsQ0FBQyxDQUFDO0FBQ3hDLE9BQU8sQ0FBQyxFQUFFLENBQUMsU0FBUyxFQUFFLEdBQUcsRUFBRSxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQztBQUM3QyxPQUFPLENBQUMsRUFBRSxDQUFDLFFBQVEsRUFBRyxHQUFHLEVBQUUsQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUMifQ==
+['SIGTERM', 'SIGINT']
+    .forEach(signal => process.on(signal, () => {
+    bot.destroy();
+    process.exit(0);
+}));

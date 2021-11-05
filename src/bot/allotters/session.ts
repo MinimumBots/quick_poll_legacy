@@ -2,6 +2,7 @@ import {
   Client,
   Message,
   MessageReaction,
+  PartialMessageReaction,
   PartialUser,
   Snowflake,
   User,
@@ -10,12 +11,12 @@ import { COMMAND_EDITABLE_TIME } from '../../constants';
 import { Utils } from '../utils';
 
 export namespace Session {
-  export function initialize(bot: Client): void {
+  export function initialize(bot: Client<true>): void {
     bot.on('messageReactionAdd', (reaction, user) => validate(reaction, user));
   }
 
   export interface Data {
-    readonly bot     : Client,
+    readonly bot     : Client<true>,
     readonly id      : Snowflake,
     readonly user    : User,
     readonly request : Message,
@@ -26,7 +27,7 @@ export namespace Session {
   const sessions: Map<Snowflake, Data> = new Map;
   const cancelEmoji = '↩️';
 
-  function validate(reaction: MessageReaction, user: User | PartialUser): void {
+  function validate(reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser): void {
     const data = sessions.get(reaction.message.id);
     if (!data) return;
 
@@ -61,7 +62,7 @@ export namespace Session {
     const data = sessions.get(id);
     if (!data) return;
 
-    data.bot.clearTimeout(data.timeout);
+    clearTimeout(data.timeout);
     data.response.delete()
       .catch(() => undefined);
 

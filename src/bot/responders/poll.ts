@@ -93,9 +93,9 @@ export namespace Poll {
   function getAuthorPermissionsFor(
     request: Message
   ): Readonly<Permissions> | null {
-    if (request.channel.type === 'dm') return null;
+    if (request.channel.type === 'DM') return null;
      
-    if (request.webhookID)
+    if (request.webhookId)
       return new Permissions(POSTULATE_WEBHOOK_PERMISSIONS);
     else
       return request.channel.permissionsFor(request.author);
@@ -106,7 +106,7 @@ export namespace Poll {
   ): boolean {
     const request = chunk.request;
     const channel = request.channel;
-    if (channel.type === 'dm') return false;
+    if (channel.type === 'DM') return false;
 
     const myPermissions = channel.permissionsFor(chunk.botID);
     const authorPermissions = getAuthorPermissionsFor(request);
@@ -249,7 +249,7 @@ export namespace Poll {
   function respondError(
     chunk: RequestChunk, error: CommandError
   ): Promise<Message> {
-    const options = { embed: error.embed };
+    const options = { embeds: [error.embed] };
     const channel = chunk.request.channel;
     const response = chunk.response;
 
@@ -264,9 +264,9 @@ export namespace Poll {
       ? choices.map(choice => choice.emoji) : [];
 
     return response.edit(
-      query.mentions.join(' '),
       {
-        embed: Locales[chunk.lang].successes.poll(
+        content: query.mentions.join(' ') || null,
+        embeds: [Locales[chunk.lang].successes.poll(
           query.exclusive,
           query.author.iconURL,
           query.author.name,
@@ -276,7 +276,7 @@ export namespace Poll {
           query.imageURL ? basename(query.imageURL) : null,
           response.channel.id,
           response.id,
-        )
+        )]
       }
     );
   }
@@ -298,16 +298,16 @@ export namespace Poll {
 
   function respondLoading(chunk: RequestChunk, query: Query): Promise<Message> {
     return chunk.request.channel.send(
-      query.mentions.join(' '),
       {
-        embed: Locales[chunk.lang].loadings.poll(query.exclusive),
+        content: query.mentions.join(' ') || null,
+        embeds: [Locales[chunk.lang].loadings.poll(query.exclusive)],
         files: query.imageURL ? [query.imageURL] : [],
       }
     );
   }
 
   function respondHelp(chunk: RequestChunk): Promise<Message> {
-    const options = { content: '', embed: Help.getEmbed(chunk.lang) };
+    const options = { content: null, embed: Help.getEmbed(chunk.lang) };
     const channel = chunk.request.channel;
     const response = chunk.response;
 

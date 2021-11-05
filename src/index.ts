@@ -12,6 +12,6 @@ manager.on('shardCreate', shard => {
 });
 
 console.info('Start spawning shards.');
-manager.spawn(undefined, undefined, -1)
+manager.spawn({ timeout: -1 })
   .then(() => console.info('All shards were successfully spawned.'))
   .catch(console.error);

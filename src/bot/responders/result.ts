@@ -26,9 +26,10 @@ export namespace Result {
     chunk: RequestChunk, isEnd: boolean
   ): Promise<Message | null> {
     if (!chunk.args.length) return respondHelp(chunk);
-    if (!validate(chunk, isEnd)) return null;
 
     try {
+      if (!validate(chunk, isEnd)) return null;
+
       const query = await parse(chunk, isEnd);
       if (query.isEnd) endPoll(chunk, query.poll);
       return respondResult(chunk, query);
@@ -40,7 +41,7 @@ export namespace Result {
   }
 
   function respondHelp(chunk: RequestChunk): Promise<Message> {
-    const options = { content: '', embed: Help.getEmbed(chunk.lang) };
+    const options = { content: null, embed: Help.getEmbed(chunk.lang) };
     const channel = chunk.request.channel;
     const response = chunk.response;
 
@@ -50,7 +51,7 @@ export namespace Result {
   function respondError(
     chunk: RequestChunk, error: CommandError
   ): Promise<Message> {
-    const options = { embed: error.embed };
+    const options = { embeds: [error.embed] };
     const channel = chunk.request.channel;
     const response = chunk.response;
 
@@ -59,7 +60,7 @@ export namespace Result {
 
   function validate(chunk: RequestChunk, isEnd: boolean): boolean {
     const channel = chunk.request.channel;
-    if (channel.type === 'dm') return false;
+    if (channel.type === 'DM') return false;
 
     if (!isEnd) return true;
 
@@ -133,7 +134,7 @@ export namespace Result {
   function getChannel(
     request: Message, channelID: Snowflake | null
   ): USABLE_CHANNEL | null {
-    if (request.channel.type === 'dm') return null;
+    if (request.channel.type === 'DM') return null;
     if (!channelID) return request.channel;
 
     const channel = request.guild?.channels.cache.get(channelID);
@@ -190,7 +191,7 @@ export namespace Result {
 
     const description = poll.embeds[0].description;
     const texts = new Map(
-      [...(description?.matchAll(/\u200B(.+?) (.+?)\u200C/gm) ?? [])]
+      [...(description?.matchAll(/\u200B(.+?) (.+?)\u200C/gs) ?? [])]
         .map(match => [match[1], match[2]])
     );
 
@@ -212,9 +213,9 @@ export namespace Result {
     const template = Locales[chunk.lang].successes.endpoll();
 
     if (template.color)  embed.setColor(template.color);
-    if (template.footer) embed.setFooter(template.footer.text);
+    if (template.footer?.text) embed.setFooter(template.footer.text);
 
-    poll.edit({ embed })
+    poll.edit({ embeds: [embed] })
       .catch(console.error);
   }
 
@@ -236,8 +237,8 @@ export namespace Result {
     const rates  = choices.map(({ rate }) => (rate * 100).toFixed(1));
 
     const options = {
-      content: query.mentions.join(' '),
-      embed: Locales[chunk.lang].successes.graphpoll(
+      content: query.mentions.join(' ') || null,
+      embeds: [Locales[chunk.lang].successes.graphpoll(
         query.poll.url,
         query.author.iconURL,
         query.author.name,
@@ -248,7 +249,7 @@ export namespace Result {
         tops,
         rates,
         graphs,
-      )
+      )]
     }
 
     return chunk.response

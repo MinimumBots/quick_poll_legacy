@@ -1,84 +1,111 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Judge = void 0;
-const discord_js_1 = require("discord.js");
+const VoteCache_1 = require("./VoteCache");
 const constants_1 = require("../../constants");
 const utils_1 = require("../utils");
+;
 var Judge;
 (function (Judge) {
-    function initialize(bot, botID) {
-        bot.on('messageReactionAdd', (vote, user) => manipulate(vote, user, botID));
-        setInterval(() => sweepKnownUsers(bot), constants_1.MESSAGE_SWEEP_INTERVAL);
+    const cache = new VoteCache_1.VoteCache();
+    function adjustCache(message) {
+        cache.deleteMessage(message);
+        return false;
     }
-    Judge.initialize = initialize;
-    function manipulate(vote, user, botID) {
-        parse(vote, user, botID)
-            .then(ejectVotes => Promise.all(ejectVotes.map(({ users }) => users.remove(user.id))).catch(() => undefined))
-            .catch(console.error);
-    }
-    async function parse(vote, user, botID) {
-        if (user.bot)
-            return [];
-        const poll = await utils_1.Utils.fetchMessage(vote.message);
-        if (!poll)
-            return [];
-        const embed = poll.embeds[0];
-        if (poll.author.id !== botID || !embed) {
-            utils_1.Utils.removeMessageCache(poll);
-            return [];
-        }
-        if (embed.color === constants_1.COLORS.POLL)
-            return parsePoll(poll, vote);
-        if (embed.color === constants_1.COLORS.EXPOLL)
-            return parseExpoll(poll, vote, user);
-        if (embed.color === constants_1.COLORS.ENDED)
-            return [vote];
-        utils_1.Utils.removeMessageCache(poll);
-        return [];
-    }
-    function parsePoll(poll, vote) {
-        const myReactions = poll.reactions.cache.filter(({ me }) => me);
-        if (!myReactions.size)
-            return [];
-        const emoji = vote.emoji;
-        return myReactions.has(emoji.id ?? emoji.name) ? [] : [vote];
-    }
-    function parseExpoll(poll, vote, user) {
-        const ejectVotes = parsePoll(poll, vote);
-        const known = isKnownUser(poll.channel, poll, user);
-        if (ejectVotes.length && known)
-            return ejectVotes;
-        poll.reactions.cache.get(vote.emoji.id ?? vote.emoji.name)?.users.add(user);
-        ejectVotes.push(...poll.reactions.cache.filter(({ users, emoji }) => (!known || users.cache.has(user.id)) && !(emoji.name && emoji.name === vote.emoji.name
-            && emoji.id === vote.emoji.id)).array());
-        rememberUser(poll.channel, poll, user);
-        return ejectVotes;
-    }
-    const knownUserIDs = new Map;
-    function rememberUser(channel, message, user) {
-        const messageIDs = knownUserIDs.get(channel.id);
-        const userIDs = messageIDs?.get(message.id);
-        if (userIDs)
-            userIDs.add(user.id);
-        else {
-            if (messageIDs)
-                messageIDs.set(message.id, new Set(user.id));
-            else
-                knownUserIDs.set(channel.id, new discord_js_1.Collection([[message.id, new Set(user.id)]]));
-        }
-    }
-    function isKnownUser(channel, message, user) {
-        const userIDs = knownUserIDs.get(channel.id)?.get(message.id);
-        return !!userIDs && userIDs.has(user.id);
-    }
-    function sweepKnownUsers(bot) {
-        const channels = bot.channels.cache;
-        knownUserIDs.forEach((messageIDs, channelID) => {
-            const channel = channels.get(channelID);
-            if (!(channel instanceof discord_js_1.TextChannel || channel instanceof discord_js_1.NewsChannel))
-                return;
-            messageIDs.sweep((_, id) => !channel.messages.cache.has(id));
+    Judge.adjustCache = adjustCache;
+    function initialize(bot) {
+        bot
+            .on('messageReactionAdd', (reaction, user) => {
+            regulateAddVote(bot, reaction, user)
+                .catch(console.error);
+        })
+            .on('messageReactionRemove', (reaction, user) => {
+            regulateRemoveVote(bot, reaction, user)
+                .catch(console.error);
+        })
+            .on('messageReactionRemoveEmoji', reaction => {
+            cache.clearEmoji(reaction.message, VoteCache_1.VoteCache.toEmojiId(reaction.emoji));
+        })
+            .on('messageReactionRemoveAll', message => {
+            cache.clearMessage(message);
+        })
+            .on('messageDelete', message => {
+            cache.deleteMessage(message);
+        })
+            .on('channelDelete', channel => {
+            cache.deleteChannel(channel);
         });
     }
+    Judge.initialize = initialize;
+    async function regulateAddVote(bot, reaction, user) {
+        if (user.id === bot.user.id)
+            return;
+        const message = await reaction.message.fetch();
+        if (!isPollMessage(bot, message)) {
+            utils_1.Utils.removeMessageCache(message);
+            return;
+        }
+        const refreshReaction = message.reactions.cache.get(VoteCache_1.VoteCache.toEmojiId(reaction.emoji));
+        if (!refreshReaction)
+            return;
+        reaction = refreshReaction;
+        if (!isFreePoll(message) && !reaction.me) {
+            await reaction.users.remove(user.id);
+            return;
+        }
+        if (!isExPoll(message))
+            return;
+        const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
+        cache.set(message.channelId, message.id, user.id, VoteCache_1.VoteCache.toEmojiId(reaction.emoji));
+        if (lastReactionEmojiId === null)
+            return;
+        if (lastReactionEmojiId === undefined)
+            await removeOtherReactions(message, user, reaction.emoji.identifier);
+        else
+            await message.reactions.cache.get(lastReactionEmojiId)
+                ?.users.remove(user.id);
+    }
+    async function regulateRemoveVote(bot, reaction, user) {
+        if (user.id === bot.user.id)
+            return;
+        const message = await reaction.message.fetch();
+        if (!isPollMessage(bot, message)) {
+            utils_1.Utils.removeMessageCache(message);
+            return;
+        }
+        const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
+        if (!isExPoll(message)) {
+            if (!isFreePoll(message) && lastReactionEmojiId === undefined) {
+                cache.clear(message.channelId, message.id, user.id);
+                await removeOutsideReactions(message, user, reaction.emoji.identifier);
+            }
+            return;
+        }
+        if (lastReactionEmojiId !== undefined
+            && VoteCache_1.VoteCache.toEmojiId(reaction.emoji) !== lastReactionEmojiId)
+            return;
+        cache.clear(message.channelId, message.id, user.id);
+        if (lastReactionEmojiId === undefined)
+            await removeOtherReactions(message, user, reaction.emoji.identifier);
+    }
+    function isPollMessage(bot, message) {
+        return message.author.id === bot.user.id
+            && [constants_1.COLORS.POLL, constants_1.COLORS.EXPOLL].includes(message.embeds.at(0)?.color ?? 0);
+    }
+    function isExPoll(message) {
+        return message.embeds.at(0)?.color === constants_1.COLORS.EXPOLL;
+    }
+    function isFreePoll(message) {
+        return !message.reactions.cache.some(reaction => reaction.me);
+    }
+    function removeOtherReactions(message, user, excludeEmojiIdentifier) {
+        return Promise.all(message.reactions.cache
+            .filter(reaction => reaction.emoji.identifier !== excludeEmojiIdentifier)
+            .map(reaction => reaction.users.remove(user.id)));
+    }
+    function removeOutsideReactions(message, user, excludeEmojiIdentifier) {
+        return Promise.all(message.reactions.cache
+            .filter(reaction => !reaction.me && reaction.emoji.identifier !== excludeEmojiIdentifier)
+            .map(reaction => reaction.users.remove(user.id)));
+    }
 })(Judge = exports.Judge || (exports.Judge = {}));
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoianVkZ2UuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvYm90L2xpc3RlbmVycy9qdWRnZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7QUFBQSwyQ0FXb0I7QUFDcEIsK0NBQWlFO0FBQ2pFLG9DQUFpQztBQUVqQyxJQUFpQixLQUFLLENBb0hyQjtBQXBIRCxXQUFpQixLQUFLO0lBQ3BCLFNBQWdCLFVBQVUsQ0FBQyxHQUFXLEVBQUUsS0FBZ0I7UUFDdEQsR0FBRyxDQUFDLEVBQUUsQ0FBQyxvQkFBb0IsRUFBRSxDQUFDLElBQUksRUFBRSxJQUFJLEVBQUUsRUFBRSxDQUFDLFVBQVUsQ0FBQyxJQUFJLEVBQUUsSUFBSSxFQUFFLEtBQUssQ0FBQyxDQUFDLENBQUM7UUFDNUUsV0FBVyxDQUFDLEdBQUcsRUFBRSxDQUFDLGVBQWUsQ0FBQyxHQUFHLENBQUMsRUFBRSxrQ0FBc0IsQ0FBQyxDQUFDO0lBQ2xFLENBQUM7SUFIZSxnQkFBVSxhQUd6QixDQUFBO0lBRUQsU0FBUyxVQUFVLENBQ2pCLElBQXFCLEVBQUUsSUFBd0IsRUFBRSxLQUFnQjtRQUVqRSxLQUFLLENBQUMsSUFBSSxFQUFFLElBQUksRUFBRSxLQUFLLENBQUM7YUFDckIsSUFBSSxDQUFDLFVBQVUsQ0FBQyxFQUFFLENBQ2pCLE9BQU8sQ0FBQyxHQUFHLENBQ1QsVUFBVSxDQUFDLEdBQUcsQ0FBQyxDQUFDLEVBQUUsS0FBSyxFQUFFLEVBQUUsRUFBRSxDQUFDLEtBQUssQ0FBQyxNQUFNLENBQUMsSUFBSSxDQUFDLEVBQUUsQ0FBQyxDQUFDLENBQ3JELENBQUMsS0FBSyxDQUFDLEdBQUcsRUFBRSxDQUFDLFNBQVMsQ0FBQyxDQUN6QjthQUNBLEtBQUssQ0FBQyxPQUFPLENBQUMsS0FBSyxDQUFDLENBQUM7SUFDMUIsQ0FBQztJQUVELEtBQUssVUFBVSxLQUFLLENBQ2xCLElBQXFCLEVBQUUsSUFBd0IsRUFBRSxLQUFnQjtRQUVqRSxJQUFJLElBQUksQ0FBQyxH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
