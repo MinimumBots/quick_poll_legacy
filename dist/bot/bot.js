@@ -11,8 +11,8 @@ const session_1 = require("./allotters/session");
 const makeCache = discord_js_1.Options.cacheWithLimits({
     ...discord_js_1.Options.defaultMakeCacheSettings,
     MessageManager: {
-        sweepInterval: constants_1.MESSAGE_SWEEP_INTERVAL,
-        sweepFilter: discord_js_1.LimitedCollection.filterByLifetime({ lifetime: constants_1.MESSAGE_CACHE_LIFETIME }),
+        maxSize: 200,
+        keepOverLimit: judge_1.Judge.adjustCache,
     },
 });
 const bot = new discord_js_1.Client({

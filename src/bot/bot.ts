@@ -1,11 +1,6 @@
-import { Client, LimitedCollection, Options } from 'discord.js';
+import { Client, Options } from 'discord.js';
 
-import {
-  BOT_INTENTS,
-  MESSAGE_CACHE_LIFETIME,
-  MESSAGE_SWEEP_INTERVAL,
-  PRESENCE_UPDATE_INTERVAL,
-} from '../constants';
+import { BOT_INTENTS, PRESENCE_UPDATE_INTERVAL } from '../constants';
 import { Utils } from './utils';
 
 import { Health } from '../transactions/health';
@@ -18,8 +13,8 @@ import { Session } from './allotters/session';
 const makeCache = Options.cacheWithLimits({
   ...Options.defaultMakeCacheSettings,
   MessageManager: {
-    sweepInterval: MESSAGE_SWEEP_INTERVAL,
-    sweepFilter: LimitedCollection.filterByLifetime({ lifetime: MESSAGE_CACHE_LIFETIME }),
+    maxSize: 200,
+    keepOverLimit: Judge.adjustCache,
   },
 }); 
 
