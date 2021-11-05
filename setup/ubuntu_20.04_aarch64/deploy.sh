@@ -11,7 +11,7 @@ sudo docker-compose build --no-cache
 echo "----------------------------------------------------------------"
 
 echo "# Stop the service of Quick Poll."
-sudo service quick_poll stop
+sudo systemctl stop quick_poll
 echo "----------------------------------------------------------------"
 
 echo "# Recreate the container of Quick Poll."
@@ -21,7 +21,7 @@ echo "----------------------------------------------------------------"
 
 echo "# Restart the service of Quick Poll."
 echo "----------------------------------------------------------------"
-sudo service quick_poll start
+sudo service start quick_poll
 echo "----------------------------------------------------------------"
 
 echo "# Remove an unused images of Docker."
