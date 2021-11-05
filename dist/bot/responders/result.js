@@ -101,7 +101,7 @@ var Result;
         if (!channelID)
             return request.channel;
         const channel = request.guild?.channels.cache.get(channelID);
-        if (channel instanceof discord_js_1.TextChannel || channel instanceof discord_js_1.NewsChannel)
+        if (channel?.isText() || channel?.isThread())
             return channel;
         else
             return null;

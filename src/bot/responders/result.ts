@@ -1,12 +1,13 @@
 import {
   DiscordAPIError,
+  GuildTextBasedChannel,
   Message,
   NewsChannel,
   Snowflake,
   TextChannel
 } from 'discord.js';
 
-import { COLORS, COMMAND_PREFIX, USABLE_CHANNEL } from '../../constants';
+import { COLORS, COMMAND_PREFIX } from '../../constants';
 import { Allocater, RequestChunk } from '../allotters/allocater';
 import { Locales } from '../templates/locale';
 import CommandError from './error';
@@ -133,12 +134,12 @@ export namespace Result {
 
   function getChannel(
     request: Message, channelID: Snowflake | null
-  ): USABLE_CHANNEL | null {
+  ): GuildTextBasedChannel | null {
     if (request.channel.type === 'DM') return null;
     if (!channelID) return request.channel;
 
     const channel = request.guild?.channels.cache.get(channelID);
-    if (channel instanceof TextChannel || channel instanceof NewsChannel)
+    if (channel?.isText() || channel?.isThread())
       return channel;
     else
       return null;

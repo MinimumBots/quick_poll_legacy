@@ -1,6 +1,7 @@
 import {
   Client,
   Guild,
+  GuildTextBasedChannel,
   Message,
   PartialMessage,
   Snowflake,
@@ -8,7 +9,6 @@ import {
 } from 'discord.js';
 
 import {
-  USABLE_CHANNEL,
   USER_RATE_LIMIT,
   BOT_RATE_LIMIT,
   COMMAND_EDITABLE_TIME,
@@ -72,7 +72,7 @@ export namespace Decrypter {
     );
   }
 
-  function hasPermissions(channel: USABLE_CHANNEL, botID: Snowflake): boolean {
+  function hasPermissions(channel: GuildTextBasedChannel, botID: Snowflake): boolean {
     return !!(channel.permissionsFor(botID)?.any(MINIMUM_BOT_PERMISSIONS));
   }
 

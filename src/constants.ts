@@ -70,8 +70,6 @@ export const POSTULATE_WEBHOOK_PERMISSIONS: PermissionString[] = [
 
 export const DEFAULT_LANG: Lang = 'ja';
 
-export type USABLE_CHANNEL = TextChannel | NewsChannel | ThreadChannel;
-
 export const PRESENCE_UPDATE_INTERVAL = 60 * 1000;
 export const COMMAND_EDITABLE_TIME = 5 * 60 * 1000;
 

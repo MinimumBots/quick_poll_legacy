@@ -1,7 +1,9 @@
 import {
+  BaseGuildTextChannel,
   Collection,
   DiscordAPIError,
   GuildEmoji,
+  GuildTextBasedChannel,
   Message,
   NewsChannel,
   ReactionEmoji,
@@ -10,7 +12,7 @@ import {
   User,
 } from 'discord.js';
 
-import { COLORS, COMMAND_PREFIX, USABLE_CHANNEL } from '../../constants';
+import { COLORS, COMMAND_PREFIX } from '../../constants';
 import { Allocater, RequestChunk } from '../allotters/allocater';
 import CommandError from './error';
 import { Help } from './help';
@@ -120,12 +122,12 @@ export namespace Export {
 
   function getChannel(
     request: Message, channelID: Snowflake | null
-  ): USABLE_CHANNEL | null {
+  ): GuildTextBasedChannel | null {
     if (request.channel.type === 'DM') return null;
     if (!channelID) return request.channel;
 
     const channel = request.guild?.channels.cache.get(channelID);
-    if (channel instanceof TextChannel || channel instanceof NewsChannel)
+    if (channel?.isText() || channel?.isThread())
       return channel;
     else
       return null;
