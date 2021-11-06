@@ -61,11 +61,11 @@ var Judge;
             return;
         const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
         cache.set(message.channelId, message.id, user.id, reactionEmojiId);
-        if (lastReactionEmojiId === null)
-            return;
-        if (lastReactionEmojiId === undefined)
-            await removeOtherReactions(message, user, reaction.emoji.identifier);
-        else
+        if (lastReactionEmojiId === undefined) {
+            // if (isCompletedReactions(message)) return;
+            await removeOtherReactions(message, user, reaction.emoji);
+        }
+        if (lastReactionEmojiId)
             await message.reactions.cache.get(lastReactionEmojiId)?.users.remove(user.id);
     }
     async function regulateRemoveVote(bot, reaction, user) {
@@ -76,20 +76,18 @@ var Judge;
             utils_1.Utils.removeMessageCache(message);
             return;
         }
-        const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
         if (!isExPoll(message)) {
-            if (!isFreePoll(message) && lastReactionEmojiId === undefined) {
-                cache.clear(message.channelId, message.id, user.id);
-                await removeOutsideReactions(message, reaction.emoji.identifier);
-            }
+            if (!isFreePoll(message))
+                await removeOutsideReactions(message, reaction.emoji);
             return;
         }
-        if (lastReactionEmojiId !== undefined
-            && VoteCache_1.VoteCache.toEmojiId(reaction.emoji) !== lastReactionEmojiId)
-            return;
-        cache.clear(message.channelId, message.id, user.id);
-        if (lastReactionEmojiId === undefined)
-            await removeOtherReactions(message, user, reaction.emoji.identifier);
+        const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
+        if (lastReactionEmojiId === undefined) {
+            cache.clear(message.channelId, message.id, user.id);
+            await removeOtherReactions(message, user, reaction.emoji);
+        }
+        else if (VoteCache_1.VoteCache.toEmojiId(reaction.emoji) === lastReactionEmojiId)
+            cache.clear(message.channelId, message.id, user.id);
     }
     function isPollMessage(bot, message) {
         return message.author.id === bot.user.id
@@ -101,10 +99,14 @@ var Judge;
     function isFreePoll(message) {
         return !message.reactions.cache.some(reaction => reaction.me);
     }
-    async function removeOtherReactions(message, user, excludeEmojiIdentifier) {
+    // MessageReaction needs to be modified on the discord.js side.
+    // function isCompletedReactions(message: Message): boolean {
+    //   return !message.reactions.cache.some(reaction => reaction.count !== reaction.users.cache.size);
+    // }
+    async function removeOtherReactions(message, user, excludeEmoji) {
         const reactions = message.reactions.cache
-            .filter(reaction => reaction.me && reaction.emoji.identifier !== excludeEmojiIdentifier);
-        const removedReactions = await removeOutsideReactions(message, excludeEmojiIdentifier);
+            .filter(reaction => reaction.me && reaction.emoji.identifier !== excludeEmoji.identifier);
+        const removedReactions = await removeOutsideReactions(message, excludeEmoji);
         for (const reaction of reactions.values()) {
             if (VoteCache_1.VoteCache.toEmojiId(reaction.emoji) === cache.get(message.channelId, message.id, user.id))
                 continue;
@@ -112,9 +114,9 @@ var Judge;
         }
         return removedReactions;
     }
-    function removeOutsideReactions(message, excludeEmojiIdentifier) {
+    function removeOutsideReactions(message, excludeEmoji) {
         return Promise.all(message.reactions.cache
-            .filter(reaction => !reaction.me && reaction.emoji.identifier !== excludeEmojiIdentifier)
+            .filter(reaction => !reaction.me && reaction.emoji.identifier !== excludeEmoji.identifier)
             .map(reaction => reaction.remove()));
     }
 })(Judge = exports.Judge || (exports.Judge = {}));
