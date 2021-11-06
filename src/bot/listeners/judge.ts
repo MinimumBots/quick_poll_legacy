@@ -101,7 +101,7 @@ export namespace Judge {
     if (!isExPoll(message)) {
       if (!isFreePoll(message) && lastReactionEmojiId === undefined) {
         cache.clear(message.channelId, message.id, user.id);
-        await removeOutsideReactions(message, user, reaction.emoji.identifier);
+        await removeOutsideReactions(message, reaction.emoji.identifier);
       }
       return;
     }
@@ -130,23 +130,30 @@ export namespace Judge {
     return !message.reactions.cache.some(reaction => reaction.me);
   }
 
-  function removeOtherReactions(
+  async function removeOtherReactions(
     message: Message, user: RoughUser, excludeEmojiIdentifier: Snowflake | string
   ): Promise<MessageReaction[]> {
-    return Promise.all(
-      message.reactions.cache
-        .filter(reaction => reaction.emoji.identifier !== excludeEmojiIdentifier)
-        .map(reaction => reaction.users.remove(user.id))
-    );
+    const reactions = message.reactions.cache
+      .filter(reaction => reaction.me && reaction.emoji.identifier !== excludeEmojiIdentifier);
+    const removedReactions = await removeOutsideReactions(message, excludeEmojiIdentifier);
+
+    for (const reaction of reactions.values()) {
+      if (VoteCache.toEmojiId(reaction.emoji) === cache.get(message.channelId, message.id, user.id))
+        continue;
+
+      removedReactions.push(await reaction.users.remove(user.id));
+    }
+
+    return removedReactions;
   }
 
   function removeOutsideReactions(
-    message: Message, user: RoughUser, excludeEmojiIdentifier: Snowflake | string
+    message: Message, excludeEmojiIdentifier: Snowflake | string
   ): Promise<MessageReaction[]> {
     return Promise.all(
       message.reactions.cache
         .filter(reaction => !reaction.me && reaction.emoji.identifier !== excludeEmojiIdentifier)
-        .map(reaction => reaction.users.remove(user.id))
+        .map(reaction => reaction.remove())
     );
   }
 }
