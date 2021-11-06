@@ -45,6 +45,9 @@ export namespace Judge {
       })
       .on('channelDelete', channel => {
         cache.deleteChannel(channel);
+      })
+      .on('guildDelete', guild => {
+        guild.channels.cache.each(channel => cache.deleteChannel(channel));
       });
   }
 
@@ -53,13 +56,14 @@ export namespace Judge {
   ): Promise<void> {
     if (user.id === bot.user.id) return;
 
-    const message = await reaction.message.fetch();
+    const message = await reaction.message.fetch(false);
     if (!isPollMessage(bot, message)) {
       Utils.removeMessageCache(message);
       return;
     }
 
-    const refreshedReaction = message.reactions.cache.get(VoteCache.toEmojiId(reaction.emoji));
+    const reactionEmojiId = VoteCache.toEmojiId(reaction.emoji);
+    const refreshedReaction = message.reactions.cache.get(reactionEmojiId);
     if (!refreshedReaction) return;
     reaction = refreshedReaction;
 
@@ -71,15 +75,14 @@ export namespace Judge {
     if (!isExPoll(message)) return;
 
     const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
-    cache.set(message.channelId, message.id, user.id, VoteCache.toEmojiId(reaction.emoji));
+    cache.set(message.channelId, message.id, user.id, reactionEmojiId);
 
     if (lastReactionEmojiId === null) return;
 
     if (lastReactionEmojiId === undefined)
       await removeOtherReactions(message, user, reaction.emoji.identifier);
     else
-      await message.reactions.cache.get(lastReactionEmojiId)
-        ?.users.remove(user.id);
+      await message.reactions.cache.get(lastReactionEmojiId)?.users.remove(user.id);
   }
 
   async function regulateRemoveVote(
@@ -87,7 +90,7 @@ export namespace Judge {
   ): Promise<void> {
     if (user.id === bot.user.id) return;
 
-    const message = await reaction.message.fetch();
+    const message = await reaction.message.fetch(false);
     if (!isPollMessage(bot, message)) {
       Utils.removeMessageCache(message);
       return;
