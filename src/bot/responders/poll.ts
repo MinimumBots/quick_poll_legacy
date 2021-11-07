@@ -274,7 +274,7 @@ export namespace Poll {
           selectors,
           choices.map(choice => choice.text ?? ''),
           query.imageURL ? basename(query.imageURL) : null,
-          response.channel.id,
+          response.channelId,
           response.id,
         )]
       }

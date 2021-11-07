@@ -181,7 +181,7 @@ var Poll;
             ? choices.map(choice => choice.emoji) : [];
         return response.edit({
             content: query.mentions.join(' ') || null,
-            embeds: [locale_1.Locales[chunk.lang].successes.poll(query.exclusive, query.author.iconURL, query.author.name, query.question ?? '', selectors, choices.map(choice => choice.text ?? ''), query.imageURL ? (0, path_1.basename)(query.imageURL) : null, response.channel.id, response.id)]
+            embeds: [locale_1.Locales[chunk.lang].successes.poll(query.exclusive, query.author.iconURL, query.author.name, query.question ?? '', selectors, choices.map(choice => choice.text ?? ''), query.imageURL ? (0, path_1.basename)(query.imageURL) : null, response.channelId, response.id)]
         });
     }
     async function attachSelectors(chunk, query, response) {
