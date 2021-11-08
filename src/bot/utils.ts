@@ -41,8 +41,9 @@ export namespace Utils {
 
   function totalGuildCount(): string {
     const entire = Health.entire;
+    const guildCount = String(entire?.totalGuildCount).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
 
-    return entire?.completed ? String(entire.totalGuildCount) : 'いくつかの';
+    return entire?.completed ? guildCount : 'いくつかの';
   }
 
   export async function updatePresence(

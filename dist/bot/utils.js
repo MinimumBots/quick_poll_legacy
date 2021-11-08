@@ -38,7 +38,8 @@ var Utils;
     Utils.partingText = partingText;
     function totalGuildCount() {
         const entire = health_1.Health.entire;
-        return entire?.completed ? String(entire.totalGuildCount) : 'いくつかの';
+        const guildCount = String(entire?.totalGuildCount).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+        return entire?.completed ? guildCount : 'いくつかの';
     }
     async function updatePresence(bot, count) {
         let type, name;
