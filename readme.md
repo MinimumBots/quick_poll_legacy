@@ -8,4 +8,4 @@ A quick poll bot for [Discord](https://discord.com/), based on Japanese.
 
 ## Manual
 Japanese manual for users who use BOT:  
-https://grapecolor.github.io/quick_poll/  
+https://quick-poll.vineder.com
