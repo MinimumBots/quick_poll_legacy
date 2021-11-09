@@ -27,7 +27,7 @@ var Judge;
             cache.clearEmoji(reaction.message, VoteCache_1.VoteCache.toEmojiId(reaction.emoji));
         })
             .on('messageReactionRemoveAll', message => {
-            cache.clearMessage(message);
+            cache.deleteMessage(message);
         })
             .on('messageDelete', message => {
             cache.deleteMessage(message);
@@ -46,6 +46,10 @@ var Judge;
         const message = await reaction.message.fetch(false);
         if (!isPollMessage(bot, message)) {
             utils_1.Utils.removeMessageCache(message);
+            return;
+        }
+        if (isEndPoll(message)) {
+            await message.reactions.removeAll();
             return;
         }
         const reactionEmojiId = VoteCache_1.VoteCache.toEmojiId(reaction.emoji);
@@ -76,6 +80,10 @@ var Judge;
             utils_1.Utils.removeMessageCache(message);
             return;
         }
+        if (isEndPoll(message)) {
+            await message.reactions.removeAll();
+            return;
+        }
         if (!isExPoll(message)) {
             if (!isFreePoll(message))
                 await removeOutsideReactions(message, reaction.emoji);
@@ -91,13 +99,16 @@ var Judge;
     }
     function isPollMessage(bot, message) {
         return message.author.id === bot.user.id
-            && [constants_1.COLORS.POLL, constants_1.COLORS.EXPOLL].includes(message.embeds.at(0)?.color ?? 0);
+            && [constants_1.COLORS.POLL, constants_1.COLORS.EXPOLL, constants_1.COLORS.ENDED].includes(message.embeds.at(0)?.color ?? 0);
     }
     function isExPoll(message) {
         return message.embeds.at(0)?.color === constants_1.COLORS.EXPOLL;
     }
     function isFreePoll(message) {
         return !message.reactions.cache.some(reaction => reaction.me);
+    }
+    function isEndPoll(message) {
+        return message.embeds.at(0)?.color === constants_1.COLORS.ENDED;
     }
     // MessageReaction needs to be modified on the discord.js side.
     // function isCompletedReactions(message: Message): boolean {

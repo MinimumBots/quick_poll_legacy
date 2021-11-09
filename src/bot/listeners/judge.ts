@@ -37,7 +37,7 @@ export namespace Judge {
         cache.clearEmoji(reaction.message, VoteCache.toEmojiId(reaction.emoji));
       })
       .on('messageReactionRemoveAll', message => {
-        cache.clearMessage(message);
+        cache.deleteMessage(message);
       })
       .on('messageDelete', message => {
         cache.deleteMessage(message);
@@ -58,6 +58,11 @@ export namespace Judge {
     const message = await reaction.message.fetch(false);
     if (!isPollMessage(bot, message)) {
       Utils.removeMessageCache(message);
+      return;
+    }
+
+    if (isEndPoll(message)) {
+      await message.reactions.removeAll();
       return;
     }
 
@@ -96,6 +101,11 @@ export namespace Judge {
       return;
     }
 
+    if (isEndPoll(message)) {
+      await message.reactions.removeAll();
+      return;
+    }
+
     if (!isExPoll(message)) {
       if (!isFreePoll(message)) await removeOutsideReactions(message, reaction.emoji);
       return;
@@ -113,7 +123,7 @@ export namespace Judge {
 
   function isPollMessage(bot: Client<true>, message: Message): boolean {
     return message.author.id === bot.user.id
-      && [COLORS.POLL, COLORS.EXPOLL].includes(message.embeds.at(0)?.color ?? 0);
+      && [COLORS.POLL, COLORS.EXPOLL, COLORS.ENDED].includes(message.embeds.at(0)?.color ?? 0);
   }
 
   function isExPoll(message: Message): boolean {
@@ -122,6 +132,10 @@ export namespace Judge {
 
   function isFreePoll(message: Message): boolean {
     return !message.reactions.cache.some(reaction => reaction.me);
+  }
+
+  function isEndPoll(message: Message): boolean {
+    return message.embeds.at(0)?.color === COLORS.ENDED;
   }
 
   // MessageReaction needs to be modified on the discord.js side.

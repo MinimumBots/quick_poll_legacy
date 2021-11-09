@@ -61,16 +61,6 @@ export class VoteCache {
     messages.set(message.id, users);
   }
 
-  clearMessage(message: Message | PartialMessage): void {
-    const messages = this.cache.get(message.channelId);
-    let users = messages?.get(message.id);
-
-    if (!messages || !users) return;
-
-    users = new Collection(users.map((_, userId) => [userId, null]));
-    messages.set(message.id, users);
-  }
-
   delete(channelId: ChannelId, messageId: MessageId, userId: UserId): boolean {
     return this.cache
       .get(channelId)

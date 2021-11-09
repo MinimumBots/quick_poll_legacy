@@ -41,14 +41,6 @@ class VoteCache {
         users = new discord_js_1.Collection(users.map((otherEmojiId, userId) => [userId, otherEmojiId === emojiId ? null : otherEmojiId]));
         messages.set(message.id, users);
     }
-    clearMessage(message) {
-        const messages = this.cache.get(message.channelId);
-        let users = messages?.get(message.id);
-        if (!messages || !users)
-            return;
-        users = new discord_js_1.Collection(users.map((_, userId) => [userId, null]));
-        messages.set(message.id, users);
-    }
     delete(channelId, messageId, userId) {
         return this.cache
             .get(channelId)
