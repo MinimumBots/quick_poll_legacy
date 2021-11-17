@@ -256,14 +256,16 @@ export namespace Poll {
     return response ? response.edit(options) : channel.send(options);
   }
 
-  function respondPoll(
+  async function respondPoll(
     chunk: RequestChunk, query: Query, response: Message
-  ): Promise<Message> {
+  ): Promise<Message | null> {
     const choices = query.choices;
     const selectors: string[] = choices.some(choice => choice.text !== null)
       ? choices.map(choice => choice.emoji) : [];
 
-    return response.edit(
+    if (!response.channel) return null;
+
+    return await response.edit(
       {
         content: query.mentions.join(' ') || null,
         embeds: [Locales[chunk.lang].successes.poll(

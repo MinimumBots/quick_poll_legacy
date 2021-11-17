@@ -175,11 +175,13 @@ var Poll;
         const response = chunk.response;
         return response ? response.edit(options) : channel.send(options);
     }
-    function respondPoll(chunk, query, response) {
+    async function respondPoll(chunk, query, response) {
         const choices = query.choices;
         const selectors = choices.some(choice => choice.text !== null)
             ? choices.map(choice => choice.emoji) : [];
-        return response.edit({
+        if (!response.channel)
+            return null;
+        return await response.edit({
             content: query.mentions.join(' ') || null,
             embeds: [locale_1.Locales[chunk.lang].successes.poll(query.exclusive, query.author.iconURL, query.author.name, query.question ?? '', selectors, choices.map(choice => choice.text ?? ''), query.imageURL ? (0, path_1.basename)(query.imageURL) : null, response.channelId, response.id)]
         });
