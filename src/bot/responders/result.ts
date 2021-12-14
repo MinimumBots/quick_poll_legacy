@@ -192,7 +192,7 @@ export namespace Result {
 
     const description = poll.embeds[0].description;
     const texts = new Map(
-      [...(description?.matchAll(/\u200B(.+?) (.+?)\u200C/gs) ?? [])]
+      [...(description?.matchAll(/\u200B(.+?) (.*?)\u200C/gs) ?? [])]
         .map(match => [match[1], match[2]])
     );
 

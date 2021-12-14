@@ -138,7 +138,7 @@ var Result;
         const total = counts.reduce((total, count) => total + count, 0);
         const rates = counts.map(count => count / (total || 1));
         const description = poll.embeds[0].description;
-        const texts = new Map([...(description?.matchAll(/\u200B(.+?) (.+?)\u200C/gs) ?? [])]
+        const texts = new Map([...(description?.matchAll(/\u200B(.+?) (.*?)\u200C/gs) ?? [])]
             .map(match => [match[1], match[2]]));
         return emojis.map((emoji, i) => ({
             emoji: emoji,
