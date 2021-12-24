@@ -66,7 +66,8 @@ var Judge;
         const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
         cache.set(message.channelId, message.id, user.id, reactionEmojiId);
         if (lastReactionEmojiId === undefined) {
-            // if (isCompletedReactions(message)) return;
+            if (isCompletedReactions(message))
+                return;
             await removeOtherReactions(message, user, reaction.emoji);
         }
         if (lastReactionEmojiId)
@@ -110,10 +111,9 @@ var Judge;
     function isEndPoll(message) {
         return message.embeds.at(0)?.color === constants_1.COLORS.ENDED;
     }
-    // MessageReaction needs to be modified on the discord.js side.
-    // function isCompletedReactions(message: Message): boolean {
-    //   return !message.reactions.cache.some(reaction => reaction.count !== reaction.users.cache.size);
-    // }
+    function isCompletedReactions(message) {
+        return !message.reactions.cache.some(reaction => reaction.count !== reaction.users.cache.size);
+    }
     async function removeOtherReactions(message, user, excludeEmoji) {
         const reactions = message.reactions.cache
             .filter(reaction => reaction.me && reaction.emoji.identifier !== excludeEmoji.identifier);

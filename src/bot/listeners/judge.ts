@@ -82,7 +82,7 @@ export namespace Judge {
     cache.set(message.channelId, message.id, user.id, reactionEmojiId);
 
     if (lastReactionEmojiId === undefined) {
-      // if (isCompletedReactions(message)) return;
+      if (isCompletedReactions(message)) return;
       await removeOtherReactions(message, user, reaction.emoji);
     }
 
@@ -138,10 +138,9 @@ export namespace Judge {
     return message.embeds.at(0)?.color === COLORS.ENDED;
   }
 
-  // MessageReaction needs to be modified on the discord.js side.
-  // function isCompletedReactions(message: Message): boolean {
-  //   return !message.reactions.cache.some(reaction => reaction.count !== reaction.users.cache.size);
-  // }
+  function isCompletedReactions(message: Message): boolean {
+    return !message.reactions.cache.some(reaction => reaction.count !== reaction.users.cache.size);
+  }
 
   async function removeOtherReactions(
     message: Message, user: RoughUser, excludeEmoji: Emoji

@@ -50,6 +50,7 @@ export const ja: LocaleStructure = {
     MANAGE_EMOJIS_AND_STICKERS: '絵文字・スタンプの管理',
     USE_APPLICATION_COMMANDS  : 'アプリコマンドを使う',
     REQUEST_TO_SPEAK          : 'スピーカー参加をリクエスト',
+    MANAGE_EVENTS             : 'イベントの管理',
     MANAGE_THREADS            : 'スレッドの管理',
     USE_PUBLIC_THREADS        : '公開スレッドを作成',
     CREATE_PUBLIC_THREADS     : '公開スレッドを作成',
@@ -58,6 +59,7 @@ export const ja: LocaleStructure = {
     USE_EXTERNAL_STICKERS     : '外部のスタンプを使用する',
     SEND_MESSAGES_IN_THREADS  : 'スレッドでメッセージを送信',
     START_EMBEDDED_ACTIVITIES : 'アクティビティを開始',
+    MODERATE_MEMBERS          : 'メンバーをタイムアウト',
   },
   loadings: {
     poll: exclusive => ({
