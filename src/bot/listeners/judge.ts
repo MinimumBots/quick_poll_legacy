@@ -10,7 +10,7 @@ import type {
   PartialUser,
   User,
   Emoji,
-} from 'discord.js';;
+} from 'discord.js';
 
 type RoughUser = User | PartialUser;
 type RoughMessageReaction = MessageReaction | PartialMessageReaction;
@@ -81,13 +81,16 @@ export namespace Judge {
     const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
     cache.set(message.channelId, message.id, user.id, reactionEmojiId);
 
-    if (lastReactionEmojiId === undefined) {
-      if (isCompletedReactions(message)) return;
-      await removeOtherReactions(message, user, reaction.emoji);
+    switch (lastReactionEmojiId) {
+      case undefined:
+        if (isTracedReactions(message)) break;
+      case reactionEmojiId:
+        await removeOtherReactions(message, user, reaction.emoji);
+      case null:
+        break;
+      default:
+        await message.reactions.cache.get(lastReactionEmojiId)?.users.remove(user.id);
     }
-
-    if (lastReactionEmojiId)
-      await message.reactions.cache.get(lastReactionEmojiId)?.users.remove(user.id);
   }
 
   async function regulateRemoveVote(
@@ -112,13 +115,17 @@ export namespace Judge {
     }
 
     const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
-    if (lastReactionEmojiId === undefined) {
-      cache.clear(message.channelId, message.id, user.id);
-      await removeOtherReactions(message, user, reaction.emoji);
-    }
-    else
-      if (VoteCache.toEmojiId(reaction.emoji) === lastReactionEmojiId)
+
+    switch (lastReactionEmojiId) {
+      case VoteCache.toEmojiId(reaction.emoji):
         cache.clear(message.channelId, message.id, user.id);
+      case null:
+        break;
+      case undefined:
+      default:
+        cache.clear(message.channelId, message.id, user.id);
+        await removeOtherReactions(message, user, reaction.emoji);
+    }
   }
 
   function isPollMessage(bot: Client<true>, message: Message): boolean {
@@ -138,7 +145,7 @@ export namespace Judge {
     return message.embeds.at(0)?.color === COLORS.ENDED;
   }
 
-  function isCompletedReactions(message: Message): boolean {
+  function isTracedReactions(message: Message): boolean {
     return !message.reactions.cache.some(reaction => reaction.count !== reaction.users.cache.size);
   }
 
@@ -146,17 +153,14 @@ export namespace Judge {
     message: Message, user: RoughUser, excludeEmoji: Emoji
   ): Promise<MessageReaction[]> {
     const reactions = message.reactions.cache
-      .filter(reaction => reaction.me && reaction.emoji.identifier !== excludeEmoji.identifier);
+      .filter(reaction => (
+        reaction.me && reaction.emoji.identifier !== excludeEmoji.identifier
+          || VoteCache.toEmojiId(reaction.emoji) === cache.get(message.channelId, message.id, user.id)
+      ));
     const removedReactions = await removeOutsideReactions(message, excludeEmoji);
+    const removingReactions = Promise.all(reactions.map(reaction => reaction.users.remove(user.id)));
 
-    for (const reaction of reactions.values()) {
-      if (VoteCache.toEmojiId(reaction.emoji) === cache.get(message.channelId, message.id, user.id))
-        continue;
-
-      removedReactions.push(await reaction.users.remove(user.id));
-    }
-
-    return removedReactions;
+    return removedReactions.concat(await removingReactions);
   }
 
   function removeOutsideReactions(

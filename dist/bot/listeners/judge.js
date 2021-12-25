@@ -4,7 +4,6 @@ exports.Judge = void 0;
 const VoteCache_1 = require("./VoteCache");
 const constants_1 = require("../../constants");
 const utils_1 = require("../utils");
-;
 var Judge;
 (function (Judge) {
     const cache = new VoteCache_1.VoteCache();
@@ -65,13 +64,17 @@ var Judge;
             return;
         const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
         cache.set(message.channelId, message.id, user.id, reactionEmojiId);
-        if (lastReactionEmojiId === undefined) {
-            if (isCompletedReactions(message))
-                return;
-            await removeOtherReactions(message, user, reaction.emoji);
+        switch (lastReactionEmojiId) {
+            case undefined:
+                if (isTracedReactions(message))
+                    break;
+            case reactionEmojiId:
+                await removeOtherReactions(message, user, reaction.emoji);
+            case null:
+                break;
+            default:
+                await message.reactions.cache.get(lastReactionEmojiId)?.users.remove(user.id);
         }
-        if (lastReactionEmojiId)
-            await message.reactions.cache.get(lastReactionEmojiId)?.users.remove(user.id);
     }
     async function regulateRemoveVote(bot, reaction, user) {
         if (user.id === bot.user.id)
@@ -91,12 +94,16 @@ var Judge;
             return;
         }
         const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
-        if (lastReactionEmojiId === undefined) {
-            cache.clear(message.channelId, message.id, user.id);
-            await removeOtherReactions(message, user, reaction.emoji);
+        switch (lastReactionEmojiId) {
+            case VoteCache_1.VoteCache.toEmojiId(reaction.emoji):
+                cache.clear(message.channelId, message.id, user.id);
+            case null:
+                break;
+            case undefined:
+            default:
+                cache.clear(message.channelId, message.id, user.id);
+                await removeOtherReactions(message, user, reaction.emoji);
         }
-        else if (VoteCache_1.VoteCache.toEmojiId(reaction.emoji) === lastReactionEmojiId)
-            cache.clear(message.channelId, message.id, user.id);
     }
     function isPollMessage(bot, message) {
         return message.author.id === bot.user.id
@@ -111,19 +118,16 @@ var Judge;
     function isEndPoll(message) {
         return message.embeds.at(0)?.color === constants_1.COLORS.ENDED;
     }
-    function isCompletedReactions(message) {
+    function isTracedReactions(message) {
         return !message.reactions.cache.some(reaction => reaction.count !== reaction.users.cache.size);
     }
     async function removeOtherReactions(message, user, excludeEmoji) {
         const reactions = message.reactions.cache
-            .filter(reaction => reaction.me && reaction.emoji.identifier !== excludeEmoji.identifier);
+            .filter(reaction => (reaction.me && reaction.emoji.identifier !== excludeEmoji.identifier
+            || VoteCache_1.VoteCache.toEmojiId(reaction.emoji) === cache.get(message.channelId, message.id, user.id)));
         const removedReactions = await removeOutsideReactions(message, excludeEmoji);
-        for (const reaction of reactions.values()) {
-            if (VoteCache_1.VoteCache.toEmojiId(reaction.emoji) === cache.get(message.channelId, message.id, user.id))
-                continue;
-            removedReactions.push(await reaction.users.remove(user.id));
-        }
-        return removedReactions;
+        const removingReactions = Promise.all(reactions.map(reaction => reaction.users.remove(user.id)));
+        return removedReactions.concat(await removingReactions);
     }
     function removeOutsideReactions(message, excludeEmoji) {
         return Promise.all(message.reactions.cache
