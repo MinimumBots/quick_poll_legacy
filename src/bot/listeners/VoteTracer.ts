@@ -11,22 +11,22 @@ type EmojisPerUserEntries      = Collection<UserId, EmojiId | null>;
 type UsersPerMessageEntries    = Collection<MessageId, EmojisPerUserEntries>;
 type MessagesPerChannelEntries = Collection<ChannelId, UsersPerMessageEntries>;
 
-export class VoteCache {
+export class VoteTracer {
   static toEmojiId(emoji: Emoji): EmojiId {
     return emoji.id ?? emoji.name ?? '';
   }
 
-  private cache: MessagesPerChannelEntries = new Collection();
+  private trace: MessagesPerChannelEntries = new Collection();
 
   get(channelId: ChannelId, messageId: MessageId, userId: UserId): EmojiId | null | undefined {
-    const messages = this.cache.get(channelId);
+    const messages = this.trace.get(channelId);
     const users = messages?.get(messageId);
 
     return users?.get(userId);
   }
 
   set(channelId: ChannelId, messageId: MessageId, userId: UserId, emojiId: EmojiId | null): this {
-    let messages = this.cache.get(channelId);
+    let messages = this.trace.get(channelId);
     let users = messages?.get(messageId);
 
     if (users)
@@ -38,7 +38,7 @@ export class VoteCache {
         messages.set(messageId, users);
       else {
         messages = new Collection([[messageId, users]]);
-        this.cache.set(channelId, messages);
+        this.trace.set(channelId, messages);
       }
     }
 
@@ -50,7 +50,7 @@ export class VoteCache {
   }
 
   clearEmoji(message: Message | PartialMessage, emojiId: EmojiId): void {
-    const messages = this.cache.get(message.channelId);
+    const messages = this.trace.get(message.channelId);
     let users = messages?.get(message.id);
 
     if (!messages || !users) return;
@@ -62,19 +62,19 @@ export class VoteCache {
   }
 
   delete(channelId: ChannelId, messageId: MessageId, userId: UserId): boolean {
-    return this.cache
+    return this.trace
       .get(channelId)
       ?.get(messageId)
       ?.delete(userId) ?? false;
   }
 
   deleteChannel(channel: Channel): boolean {
-    return this.cache
+    return this.trace
       .delete(channel.id);
   }
 
   deleteMessage(message: Message | PartialMessage): boolean {
-    return this.cache
+    return this.trace
       .get(message.channelId)
       ?.delete(message.id) ?? false;
   }

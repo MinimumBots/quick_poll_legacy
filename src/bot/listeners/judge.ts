@@ -1,4 +1,4 @@
-import { VoteCache } from './VoteCache';
+import { VoteTracer } from './VoteTracer';
 import { COLORS } from '../../constants';
 import { Utils } from '../utils'
 
@@ -16,10 +16,10 @@ type RoughUser = User | PartialUser;
 type RoughMessageReaction = MessageReaction | PartialMessageReaction;
 
 export namespace Judge {
-  const cache = new VoteCache();
+  const tracer = new VoteTracer();
 
   export function adjustCache(message: Message): false {
-    cache.deleteMessage(message)
+    tracer.deleteMessage(message)
     return false;
   }
 
@@ -34,19 +34,19 @@ export namespace Judge {
           .catch(console.error);
       })
       .on('messageReactionRemoveEmoji', reaction => {
-        cache.clearEmoji(reaction.message, VoteCache.toEmojiId(reaction.emoji));
+        tracer.clearEmoji(reaction.message, VoteTracer.toEmojiId(reaction.emoji));
       })
       .on('messageReactionRemoveAll', message => {
-        cache.deleteMessage(message);
+        tracer.deleteMessage(message);
       })
       .on('messageDelete', message => {
-        cache.deleteMessage(message);
+        tracer.deleteMessage(message);
       })
       .on('channelDelete', channel => {
-        cache.deleteChannel(channel);
+        tracer.deleteChannel(channel);
       })
       .on('guildDelete', guild => {
-        guild.channels.cache.each(channel => cache.deleteChannel(channel));
+        guild.channels.cache.each(channel => tracer.deleteChannel(channel));
       });
   }
 
@@ -66,7 +66,7 @@ export namespace Judge {
       return;
     }
 
-    const reactionEmojiId = VoteCache.toEmojiId(reaction.emoji);
+    const reactionEmojiId = VoteTracer.toEmojiId(reaction.emoji);
     const refreshedReaction = message.reactions.cache.get(reactionEmojiId);
     if (!refreshedReaction) return;
     reaction = refreshedReaction;
@@ -78,12 +78,12 @@ export namespace Judge {
 
     if (!isExPoll(message)) return;
 
-    const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
-    cache.set(message.channelId, message.id, user.id, reactionEmojiId);
+    const lastReactionEmojiId = tracer.get(message.channelId, message.id, user.id);
+    tracer.set(message.channelId, message.id, user.id, reactionEmojiId);
 
     switch (lastReactionEmojiId) {
       case undefined:
-        if (isTracedReactions(message)) break;
+        if (isGraspedReactions(message)) break;
       case reactionEmojiId:
         await removeOtherReactions(message, user, reaction.emoji);
       case null:
@@ -114,16 +114,16 @@ export namespace Judge {
       return;
     }
 
-    const lastReactionEmojiId = cache.get(message.channelId, message.id, user.id);
+    const lastReactionEmojiId = tracer.get(message.channelId, message.id, user.id);
 
     switch (lastReactionEmojiId) {
-      case VoteCache.toEmojiId(reaction.emoji):
-        cache.clear(message.channelId, message.id, user.id);
+      case VoteTracer.toEmojiId(reaction.emoji):
+        tracer.clear(message.channelId, message.id, user.id);
       case null:
         break;
       case undefined:
       default:
-        cache.clear(message.channelId, message.id, user.id);
+        tracer.clear(message.channelId, message.id, user.id);
         await removeOtherReactions(message, user, reaction.emoji);
     }
   }
@@ -145,7 +145,7 @@ export namespace Judge {
     return message.embeds.at(0)?.color === COLORS.ENDED;
   }
 
-  function isTracedReactions(message: Message): boolean {
+  function isGraspedReactions(message: Message): boolean {
     return !message.reactions.cache.some(reaction => reaction.count !== reaction.users.cache.size);
   }
 
@@ -155,7 +155,7 @@ export namespace Judge {
     const reactions = message.reactions.cache
       .filter(reaction => (
         reaction.me && reaction.emoji.identifier !== excludeEmoji.identifier
-          || VoteCache.toEmojiId(reaction.emoji) === cache.get(message.channelId, message.id, user.id)
+          || VoteTracer.toEmojiId(reaction.emoji) === tracer.get(message.channelId, message.id, user.id)
       ));
     const removedReactions = await removeOutsideReactions(message, excludeEmoji);
     const removingReactions = Promise.all(reactions.map(reaction => reaction.users.remove(user.id)));
