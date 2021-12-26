@@ -81,6 +81,7 @@ export namespace Judge {
     const lastReactionEmojiId = tracer.get(message.channelId, message.id, user.id);
     tracer.set(message.channelId, message.id, user.id, reactionEmojiId);
 
+    console.log(`add:${lastReactionEmojiId}`);
     switch (lastReactionEmojiId) {
       case undefined:
         if (isGraspedReactions(message)) break;
@@ -116,15 +117,15 @@ export namespace Judge {
 
     const lastReactionEmojiId = tracer.get(message.channelId, message.id, user.id);
 
+    console.log(`remove:${lastReactionEmojiId}`);
     switch (lastReactionEmojiId) {
-      case VoteTracer.toEmojiId(reaction.emoji):
-        tracer.clear(message.channelId, message.id, user.id);
-      case null:
-        break;
       case undefined:
-      default:
         tracer.clear(message.channelId, message.id, user.id);
         await removeOtherReactions(message, user, reaction.emoji);
+        break;
+      case VoteTracer.toEmojiId(reaction.emoji):
+        tracer.clear(message.channelId, message.id, user.id);
+      default:
     }
   }
 
