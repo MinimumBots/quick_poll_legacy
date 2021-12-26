@@ -12,8 +12,8 @@ import type {
   Emoji,
 } from 'discord.js';;
 
-type RoughUser = User | PartialUser;
-type RoughMessageReaction = MessageReaction | PartialMessageReaction;
+type UnionUser = User | PartialUser;
+type UnionMessageReaction = MessageReaction | PartialMessageReaction;
 
 export namespace Judge {
   const tracer = new VoteTracer();
@@ -51,7 +51,7 @@ export namespace Judge {
   }
 
   async function regulateAddVote(
-    bot: Client<true>, reaction: RoughMessageReaction, user: RoughUser
+    bot: Client<true>, reaction: UnionMessageReaction, user: UnionUser
   ): Promise<void> {
     if (user.id === bot.user.id) return;
 
@@ -91,7 +91,7 @@ export namespace Judge {
   }
 
   async function regulateRemoveVote(
-    bot: Client<true>, reaction: RoughMessageReaction, user: RoughUser
+    bot: Client<true>, reaction: UnionMessageReaction, user: UnionUser
   ): Promise<void> {
     if (user.id === bot.user.id) return;
 
@@ -143,7 +143,7 @@ export namespace Judge {
   }
 
   async function removeOtherReactions(
-    message: Message, user: RoughUser, excludeEmoji: Emoji
+    message: Message, user: UnionUser, excludeEmoji: Emoji
   ): Promise<MessageReaction[]> {
     const reactions = message.reactions.cache
       .filter(reaction => reaction.me && reaction.emoji.identifier !== excludeEmoji.identifier);
