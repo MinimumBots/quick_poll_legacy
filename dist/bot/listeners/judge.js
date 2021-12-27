@@ -4,7 +4,6 @@ exports.Judge = void 0;
 const VoteTracer_1 = require("./VoteTracer");
 const constants_1 = require("../../constants");
 const utils_1 = require("../utils");
-;
 var Judge;
 (function (Judge) {
     const tracer = new VoteTracer_1.VoteTracer();
@@ -43,15 +42,9 @@ var Judge;
     async function regulateAddVote(bot, reaction, user) {
         if (user.id === bot.user.id)
             return;
-        const message = await reaction.message.fetch(false);
-        if (!isPollMessage(bot, message)) {
-            utils_1.Utils.removeMessageCache(message);
+        const message = await refineMessage(reaction.message);
+        if (!message)
             return;
-        }
-        if (isEndPoll(message)) {
-            await message.reactions.removeAll();
-            return;
-        }
         const reactionEmojiId = VoteTracer_1.VoteTracer.toEmojiId(reaction.emoji);
         const refreshedReaction = message.reactions.cache.get(reactionEmojiId);
         if (!refreshedReaction)
@@ -65,38 +58,51 @@ var Judge;
             return;
         const lastReactionEmojiId = tracer.get(message.channelId, message.id, user.id);
         tracer.set(message.channelId, message.id, user.id, reactionEmojiId);
-        if (lastReactionEmojiId === undefined) {
-            if (isGraspedReactions(message))
-                return;
-            await removeOtherReactions(message, user, reaction.emoji);
+        switch (lastReactionEmojiId) {
+            case undefined:
+                if (isGraspedReactions(message))
+                    break;
+                await removeOtherReactions(message, user, reaction.emoji);
+            case null:
+                break;
+            default:
+                await message.reactions.cache.get(lastReactionEmojiId)?.users.remove(user.id);
         }
-        if (lastReactionEmojiId)
-            await message.reactions.cache.get(lastReactionEmojiId)?.users.remove(user.id);
     }
     async function regulateRemoveVote(bot, reaction, user) {
         if (user.id === bot.user.id)
             return;
-        const message = await reaction.message.fetch(false);
-        if (!isPollMessage(bot, message)) {
-            utils_1.Utils.removeMessageCache(message);
+        const message = await refineMessage(reaction.message);
+        if (!message)
             return;
-        }
-        if (isEndPoll(message)) {
-            await message.reactions.removeAll();
-            return;
-        }
         if (!isExPoll(message)) {
             if (!isFreePoll(message))
                 await removeOutsideReactions(message, reaction.emoji);
             return;
         }
         const lastReactionEmojiId = tracer.get(message.channelId, message.id, user.id);
-        if (lastReactionEmojiId === undefined) {
-            tracer.clear(message.channelId, message.id, user.id);
-            await removeOtherReactions(message, user, reaction.emoji);
+        switch (lastReactionEmojiId) {
+            case undefined:
+                tracer.clear(message.channelId, message.id, user.id);
+                await removeOtherReactions(message, user, reaction.emoji);
+            case null:
+                break;
+            case VoteTracer_1.VoteTracer.toEmojiId(reaction.emoji):
+                tracer.clear(message.channelId, message.id, user.id);
+            default:
         }
-        else if (VoteTracer_1.VoteTracer.toEmojiId(reaction.emoji) === lastReactionEmojiId)
-            tracer.clear(message.channelId, message.id, user.id);
+    }
+    async function refineMessage(message) {
+        message = await message.fetch(false);
+        if (!isPollMessage(message.client, message)) {
+            utils_1.Utils.removeMessageCache(message);
+            return null;
+        }
+        if (isEndPoll(message)) {
+            await message.reactions.removeAll();
+            return null;
+        }
+        return message;
     }
     function isPollMessage(bot, message) {
         return message.author.id === bot.user.id

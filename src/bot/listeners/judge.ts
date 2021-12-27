@@ -10,9 +10,11 @@ import type {
   PartialUser,
   User,
   Emoji,
-} from 'discord.js';;
+  PartialMessage,
+} from 'discord.js';
 
 type UnionUser = User | PartialUser;
+type UnionMessage = Message | PartialMessage;
 type UnionMessageReaction = MessageReaction | PartialMessageReaction;
 
 export namespace Judge {
@@ -55,16 +57,8 @@ export namespace Judge {
   ): Promise<void> {
     if (user.id === bot.user.id) return;
 
-    const message = await reaction.message.fetch(false);
-    if (!isPollMessage(bot, message)) {
-      Utils.removeMessageCache(message);
-      return;
-    }
-
-    if (isEndPoll(message)) {
-      await message.reactions.removeAll();
-      return;
-    }
+    const message = await refineMessage(reaction.message);
+    if (!message) return;
 
     const reactionEmojiId = VoteTracer.toEmojiId(reaction.emoji);
     const refreshedReaction = message.reactions.cache.get(reactionEmojiId);
@@ -81,13 +75,15 @@ export namespace Judge {
     const lastReactionEmojiId = tracer.get(message.channelId, message.id, user.id);
     tracer.set(message.channelId, message.id, user.id, reactionEmojiId);
 
-    if (lastReactionEmojiId === undefined) {
-      if (isGraspedReactions(message)) return;
-      await removeOtherReactions(message, user, reaction.emoji);
+    switch (lastReactionEmojiId) {
+      case undefined:
+        if (isGraspedReactions(message)) break;
+        await removeOtherReactions(message, user, reaction.emoji);
+      case null:
+        break;
+      default:
+        await message.reactions.cache.get(lastReactionEmojiId)?.users.remove(user.id);
     }
-
-    if (lastReactionEmojiId)
-      await message.reactions.cache.get(lastReactionEmojiId)?.users.remove(user.id);
   }
 
   async function regulateRemoveVote(
@@ -95,16 +91,8 @@ export namespace Judge {
   ): Promise<void> {
     if (user.id === bot.user.id) return;
 
-    const message = await reaction.message.fetch(false);
-    if (!isPollMessage(bot, message)) {
-      Utils.removeMessageCache(message);
-      return;
-    }
-
-    if (isEndPoll(message)) {
-      await message.reactions.removeAll();
-      return;
-    }
+    const message = await refineMessage(reaction.message);
+    if (!message) return;
 
     if (!isExPoll(message)) {
       if (!isFreePoll(message)) await removeOutsideReactions(message, reaction.emoji);
@@ -112,13 +100,33 @@ export namespace Judge {
     }
 
     const lastReactionEmojiId = tracer.get(message.channelId, message.id, user.id);
-    if (lastReactionEmojiId === undefined) {
-      tracer.clear(message.channelId, message.id, user.id);
-      await removeOtherReactions(message, user, reaction.emoji);
-    }
-    else
-      if (VoteTracer.toEmojiId(reaction.emoji) === lastReactionEmojiId)
+
+    switch (lastReactionEmojiId) {
+      case undefined:
         tracer.clear(message.channelId, message.id, user.id);
+        await removeOtherReactions(message, user, reaction.emoji);
+      case null:
+        break;
+      case VoteTracer.toEmojiId(reaction.emoji):
+        tracer.clear(message.channelId, message.id, user.id);
+      default:
+    }
+  }
+
+  async function refineMessage(message: UnionMessage): Promise<Message | null> {
+    message = await message.fetch(false);
+
+    if (!isPollMessage(message.client, message)) {
+      Utils.removeMessageCache(message);
+      return null;
+    }
+
+    if (isEndPoll(message)) {
+      await message.reactions.removeAll();
+      return null;
+    }
+
+    return message;
   }
 
   function isPollMessage(bot: Client<true>, message: Message): boolean {
