@@ -1,10 +1,4 @@
-import {
-  Intents,
-  NewsChannel,
-  TextChannel,
-  PermissionString,
-  ThreadChannel,
-} from 'discord.js';
+import { PermissionsString, IntentsBitField } from 'discord.js';
 import { Lang } from './bot/templates/locale';
 
 export const DEBUG_MODE: boolean = process.env['DEBUG_MODE'] === 'true';
@@ -35,37 +29,36 @@ export const DONATION_SERVICE_URL: string
   = process.env['DONATION_SERVICE_URL'] ?? '';
 
 export const BOT_INTENTS
-  = Intents.FLAGS.GUILDS
-  | Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS
-  | Intents.FLAGS.GUILD_WEBHOOKS
-  | Intents.FLAGS.GUILD_MESSAGES
-  | Intents.FLAGS.GUILD_MESSAGE_REACTIONS
-  | Intents.FLAGS.DIRECT_MESSAGES
-  | Intents.FLAGS.DIRECT_MESSAGE_REACTIONS;
+  = IntentsBitField.Flags.Guilds
+  | IntentsBitField.Flags.GuildEmojisAndStickers
+  | IntentsBitField.Flags.GuildWebhooks
+  | IntentsBitField.Flags.GuildMessages
+  | IntentsBitField.Flags.GuildMessageReactions
+  | IntentsBitField.Flags.MessageContent;
 
-export const MINIMUM_BOT_PERMISSIONS: PermissionString[] = [
-  'VIEW_CHANNEL',
-  'SEND_MESSAGES',
-  'EMBED_LINKS',
+export const MINIMUM_BOT_PERMISSIONS: PermissionsString[] = [
+  'ViewChannel',
+  'SendMessages',
+  'EmbedLinks',
 ];
-export const DEFAULT_BOT_PERMISSIONS: PermissionString[]
+export const DEFAULT_BOT_PERMISSIONS: PermissionsString[]
   = MINIMUM_BOT_PERMISSIONS.concat(
-    'ADD_REACTIONS',
-    'MANAGE_MESSAGES',
-    'ATTACH_FILES',
-    'READ_MESSAGE_HISTORY',
-    'MENTION_EVERYONE',
-    'USE_EXTERNAL_EMOJIS',
-    'MANAGE_WEBHOOKS',
+    'AddReactions',
+    'ManageMessages',
+    'AttachFiles',
+    'ReadMessageHistory',
+    'MentionEveryone',
+    'UseExternalEmojis',
+    'ManageWebhooks',
   );
 
-export const POSTULATE_WEBHOOK_PERMISSIONS: PermissionString[] = [
-  'VIEW_CHANNEL',
-  'SEND_MESSAGES',
-  'SEND_TTS_MESSAGES',
-  'EMBED_LINKS',
-  'ATTACH_FILES',
-  'MENTION_EVERYONE',
+export const POSTULATE_WEBHOOK_PERMISSIONS: PermissionsString[] = [
+  'ViewChannel',
+  'SendMessages',
+  'SendTTSMessages',
+  'EmbedLinks',
+  'AttachFiles',
+  'MentionEveryone',
 ];
 
 export const DEFAULT_LANG: Lang = 'ja';

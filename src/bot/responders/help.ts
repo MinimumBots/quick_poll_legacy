@@ -1,4 +1,4 @@
-import { Client, Message, MessageEmbedOptions, Snowflake } from 'discord.js';
+import { APIEmbed, Client, Message } from 'discord.js';
 
 import { Allocater, RequestChunk } from '../allotters/allocater';
 import { Lang, Locales } from '../templates/locale';
@@ -17,7 +17,7 @@ export namespace Help{
       : chunk.request.channel.send({ embeds: [getEmbed(chunk.lang)] });
   }
 
-  export function getEmbed(lang: Lang): MessageEmbedOptions {
+  export function getEmbed(lang: Lang): APIEmbed {
     return Locales[lang].successes.help();
   }
 }

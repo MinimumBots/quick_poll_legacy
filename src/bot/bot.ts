@@ -1,4 +1,4 @@
-import { Client, Options } from 'discord.js';
+import { ActivityType, Client, Options, Partials } from 'discord.js';
 
 import { BOT_INTENTS, PRESENCE_UPDATE_INTERVAL } from '../constants';
 import { Utils } from './utils';
@@ -11,7 +11,7 @@ import { Judge } from './listeners/judge';
 import { Session } from './allotters/session';
 
 const makeCache = Options.cacheWithLimits({
-  ...Options.defaultMakeCacheSettings,
+  ...Options.DefaultMakeCacheSettings,
   MessageManager: {
     maxSize: 200,
     keepOverLimit: Judge.adjustCache,
@@ -20,11 +20,20 @@ const makeCache = Options.cacheWithLimits({
 
 const bot = new Client({
   makeCache: makeCache,
-  partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
-  restTimeOffset: 100,
-  retryLimit: 3,
+  partials: [
+    Partials.User,
+    Partials.Channel,
+    Partials.GuildMember,
+    Partials.Message,
+    Partials.Reaction,
+    Partials.ThreadMember,
+    Partials.GuildScheduledEvent,
+  ],
+  rest: {
+    offset: 100,
+  },
   intents: BOT_INTENTS,
-  presence: { status: 'dnd', activities: [{ type: 'PLAYING', name: '再接続' }] },
+  presence: { status: 'dnd', activities: [{ type: ActivityType.Playing, name: '再接続' }] },
 });
 
 function initialize(bot: Client<true>): void {

@@ -1,14 +1,12 @@
 import {
-  BaseGuildTextChannel,
+  ChannelType,
   Collection,
   DiscordAPIError,
   GuildEmoji,
   GuildTextBasedChannel,
   Message,
-  NewsChannel,
   ReactionEmoji,
   Snowflake,
-  TextChannel,
   User,
 } from 'discord.js';
 
@@ -58,12 +56,12 @@ export namespace Export {
 
   function validatePermissions(chunk: RequestChunk): boolean {
     const channel = chunk.request.channel;
-    if (channel.type === 'DM') return false;
+    if (channel.type === ChannelType.DM) return false;
 
     const permissions = channel.permissionsFor(chunk.botID);
     if (!permissions) return false;
 
-    const missings = permissions.missing('ATTACH_FILES');
+    const missings = permissions.missing('AttachFiles');
 
     if (missings.length)
       throw new CommandError('lackPermissions', chunk.lang, missings);
@@ -95,7 +93,7 @@ export namespace Export {
     }
     catch (error: unknown) {
       if (error instanceof DiscordAPIError)
-        if (error.httpStatus === 404)
+        if (error.status === 404)
           throw new CommandError('notFoundPoll', chunk.lang);
 
       throw error;
@@ -123,11 +121,11 @@ export namespace Export {
   function getChannel(
     request: Message, channelID: Snowflake | null
   ): GuildTextBasedChannel | null {
-    if (request.channel.type === 'DM') return null;
+    if (request.channel.type === ChannelType.DM) return null;
     if (!channelID) return request.channel;
 
     const channel = request.guild?.channels.cache.get(channelID);
-    if (channel?.isText() || channel?.isThread())
+    if (channel?.isTextBased())
       return channel;
     else
       return null;

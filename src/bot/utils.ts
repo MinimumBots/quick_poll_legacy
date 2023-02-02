@@ -53,12 +53,12 @@ export namespace Utils {
 
     switch (count % 2) {
       case 1:
-        type = 'COMPETING';
+        type = ActivityType.Competing;
         name = `${totalGuildCount()} サーバー`;
         break;
   
       default:
-        type = 'PLAYING';
+        type = ActivityType.Playing;
         name = `${COMMAND_PREFIX}poll | ${COMMAND_PREFIX}expoll`;
         break;
     }
