@@ -8,6 +8,9 @@ export const FAMILY_PASS_PHRASE: string
 export const TRANSACTION_API_ENDPOINT: string
   = process.env['TRANSACTION_API_ENDPOINT'] ?? '';
 
+export const COUNTER_API_HOST_NAME: string
+  = process.env['COUNTER_API_HOST_NAME'] ?? '';
+
 export const BOT_OWNER_IDS: string[]
   = process.env['BOT_OWNER_IDS']?.split(',') ?? [];
 

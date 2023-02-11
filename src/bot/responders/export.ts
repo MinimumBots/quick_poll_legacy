@@ -11,6 +11,7 @@ import {
 } from 'discord.js';
 
 import { COLORS, COMMAND_PREFIX } from '../../constants';
+import { Counter } from '../../transactions/counter';
 import { Allocater, RequestChunk } from '../allotters/allocater';
 import CommandError from './error';
 import { Help } from './help';
@@ -44,6 +45,8 @@ export namespace Export {
         throw new CommandError('unavailableExport', chunk.lang);
       if (!validatePermissions) return null;
 
+      Counter.count('csvpoll');
+
       const query = await parse(chunk);
       const csv = generateCSV(query);
       return respondCSV(chunk, query, csv);
@@ -70,6 +73,8 @@ export namespace Export {
   }
 
   function respondHelp(chunk: RequestChunk): Promise<Message> {
+    Counter.count('help');
+
     return chunk.request.channel.send({ embeds: [Help.getEmbed(chunk.lang)] });
   }
 

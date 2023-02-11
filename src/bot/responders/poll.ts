@@ -18,6 +18,7 @@ import { Locales } from '../templates/locale';
 import { Allocater, RequestChunk } from '../allotters/allocater';
 import CommandError from './error';
 import { Help } from './help';
+import { Counter } from '../../transactions/counter';
 
 export namespace Poll {
   type Choice = { emoji: string, text: string | null, external: boolean };
@@ -315,6 +316,8 @@ export namespace Poll {
     const channel = chunk.request.channel;
     const response = chunk.response;
 
+    Counter.count('help');
+
     return response ? response.edit(options) : channel.send(options);
   }
 
@@ -332,6 +335,8 @@ export namespace Poll {
     try {
       const query = parse(chunk, exclusive);
       if (!validatePermissions(chunk, query)) return null;
+
+      Counter.count(exclusive ? 'expoll' : 'poll');
 
       chunk.response ??= await respondLoading(chunk, query);
       await attachSelectors(chunk, query, chunk.response);

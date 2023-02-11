@@ -8,6 +8,7 @@ import {
 } from 'discord.js';
 
 import { COLORS, COMMAND_PREFIX } from '../../constants';
+import { Counter } from '../../transactions/counter';
 import { Allocater, RequestChunk } from '../allotters/allocater';
 import { Locales } from '../templates/locale';
 import CommandError from './error';
@@ -31,6 +32,8 @@ export namespace Result {
     try {
       if (!validate(chunk, isEnd)) return null;
 
+      Counter.count(isEnd ? 'endpoll' : 'sumpoll');
+
       const query = await parse(chunk, isEnd);
       if (query.isEnd) endPoll(chunk, query.poll);
       return respondResult(chunk, query);
@@ -45,6 +48,8 @@ export namespace Result {
     const options = { embeds: [Help.getEmbed(chunk.lang)] };
     const channel = chunk.request.channel;
     const response = chunk.response;
+
+    Counter.count('help');
 
     return response ? response.edit(options) : channel.send(options);
   }
