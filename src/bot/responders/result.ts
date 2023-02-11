@@ -1,13 +1,14 @@
 import {
+  ChannelType,
   DiscordAPIError,
+  EmbedBuilder,
   GuildTextBasedChannel,
   Message,
-  NewsChannel,
   Snowflake,
-  TextChannel
 } from 'discord.js';
 
 import { COLORS, COMMAND_PREFIX } from '../../constants';
+import { Counter } from '../../transactions/counter';
 import { Allocater, RequestChunk } from '../allotters/allocater';
 import { Locales } from '../templates/locale';
 import CommandError from './error';
@@ -31,6 +32,8 @@ export namespace Result {
     try {
       if (!validate(chunk, isEnd)) return null;
 
+      Counter.count(isEnd ? 'endpoll' : 'sumpoll');
+
       const query = await parse(chunk, isEnd);
       if (query.isEnd) endPoll(chunk, query.poll);
       return respondResult(chunk, query);
@@ -45,6 +48,8 @@ export namespace Result {
     const options = { embeds: [Help.getEmbed(chunk.lang)] };
     const channel = chunk.request.channel;
     const response = chunk.response;
+
+    Counter.count('help');
 
     return response ? response.edit(options) : channel.send(options);
   }
@@ -61,14 +66,14 @@ export namespace Result {
 
   function validate(chunk: RequestChunk, isEnd: boolean): boolean {
     const channel = chunk.request.channel;
-    if (channel.type === 'DM') return false;
+    if (channel.type === ChannelType.DM) return false;
 
     if (!isEnd) return true;
 
     const permissions = channel.permissionsFor(chunk.botID);
     if (!permissions) return false;
 
-    const missings = permissions.missing('MANAGE_MESSAGES');
+    const missings = permissions.missing('ManageMessages');
 
     if (missings.length)
       throw new CommandError('lackPermissions', chunk.lang, missings);
@@ -105,7 +110,7 @@ export namespace Result {
     }
     catch (error: unknown) {
       if (error instanceof DiscordAPIError)
-        if (error.httpStatus === 404)
+        if (error.status === 404)
           throw new CommandError('notFoundPoll', chunk.lang);
 
       throw error;
@@ -135,11 +140,11 @@ export namespace Result {
   function getChannel(
     request: Message, channelID: Snowflake | null
   ): GuildTextBasedChannel | null {
-    if (request.channel.type === 'DM') return null;
+    if (request.channel.type === ChannelType.DM) return null;
     if (!channelID) return request.channel;
 
     const channel = request.guild?.channels.cache.get(channelID);
-    if (channel?.isText() || channel?.isThread())
+    if (channel?.isTextBased())
       return channel;
     else
       return null;
@@ -210,11 +215,11 @@ export namespace Result {
     poll.reactions.removeAll()
       .catch(console.error);
 
-    const embed = poll.embeds[0];
+    const embed = new EmbedBuilder(poll.embeds[0].toJSON());
     const template = Locales[chunk.lang].successes.endpoll();
 
     if (template.color)  embed.setColor(template.color);
-    if (template.footer?.text) embed.setFooter(template.footer.text);
+    if (template.footer?.text) embed.setFooter({ text: template.footer.text });
 
     poll.edit({ embeds: [embed] })
       .catch(console.error);
@@ -238,7 +243,7 @@ export namespace Result {
     const rates  = choices.map(({ rate }) => (rate * 100).toFixed(1));
 
     const options = {
-      content: query.mentions.join(' ') || null,
+      content: query.mentions.join(' ') || undefined,
       embeds: [Locales[chunk.lang].successes.graphpoll(
         query.poll.url,
         query.author.iconURL,

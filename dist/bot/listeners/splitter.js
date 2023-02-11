@@ -1,16 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Splitter {
-    constructor() {
-        this.maxChunks = 60;
-        this.quotePairs = {
-            '"': '"', "'": "'", '”': '”', '“': '”', '„': '”', "‘": "’", "‚": "’"
-        };
-        this.chunks = [];
-        this.chunk = '';
-        this.quote = '';
-        this.escape = false;
-    }
+    maxChunks = 60;
+    quotePairs = {
+        '"': '"', "'": "'", '”': '”', '“': '”', '„': '”', "‘": "’", "‚": "’"
+    };
+    chunks = [];
+    chunk = '';
+    quote = '';
+    escape = false;
     addCharacter(char) {
         this.chunk += char;
     }

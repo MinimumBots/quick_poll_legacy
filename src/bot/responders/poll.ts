@@ -1,10 +1,11 @@
 import { basename, extname } from 'path';
 import {
+  ChannelType,
   DiscordAPIError,
   Guild,
   Message,
-  Permissions,
-  PermissionString,
+  PermissionsBitField,
+  PermissionsString,
 } from 'discord.js';
 
 import {
@@ -17,6 +18,7 @@ import { Locales } from '../templates/locale';
 import { Allocater, RequestChunk } from '../allotters/allocater';
 import CommandError from './error';
 import { Help } from './help';
+import { Counter } from '../../transactions/counter';
 
 export namespace Poll {
   type Choice = { emoji: string, text: string | null, external: boolean };
@@ -31,30 +33,31 @@ export namespace Poll {
     choices  : Choice[],
   }
 
-  const pollPermissions: readonly PermissionString[] = [
-    'ADD_REACTIONS', 'READ_MESSAGE_HISTORY'
+  const pollPermissions: readonly PermissionsString[] = [
+    'AddReactions',
+    'ReadMessageHistory',
   ];
-  const exclusivePermissions: readonly PermissionString[] = [
-    'MANAGE_MESSAGES'
+  const exclusivePermissions: readonly PermissionsString[] = [
+    'ManageMessages',
   ];
-  const externalPermissions: readonly PermissionString[] = [
-    'USE_EXTERNAL_EMOJIS'
+  const externalPermissions: readonly PermissionsString[] = [
+    'UseExternalEmojis'
   ];
-  const mentionPermissions: readonly PermissionString[] = [
-    'MENTION_EVERYONE'
+  const mentionPermissions: readonly PermissionsString[] = [
+    'MentionEveryone'
   ];
-  const attachImagePermissions: readonly PermissionString[] = [
-    'ATTACH_FILES'
+  const attachImagePermissions: readonly PermissionsString[] = [
+    'AttachFiles'
   ];
 
   function sumRequireAuthoerPermissions(
-    query: Query, permissions: Readonly<Permissions>
-  ): readonly PermissionString[] {
+    query: Query, permissions: Readonly<PermissionsBitField>
+  ): readonly PermissionsString[] {
     return query.mentions.length && permissions.has(mentionPermissions)
       ? mentionPermissions : [];
   }
 
-  function sumRequireMyPermissions(query: Query): PermissionString[] {
+  function sumRequireMyPermissions(query: Query): PermissionsString[] {
     const permissions = pollPermissions.slice();
 
     if (query.exclusive) permissions.push(...exclusivePermissions);
@@ -67,8 +70,8 @@ export namespace Poll {
 
   function validateAuthorPermissions(
     chunk: RequestChunk, query: Query,
-    myPermissions: Readonly<Permissions>,
-    authorPermissions: Readonly<Permissions>,
+    myPermissions: Readonly<PermissionsBitField>,
+    authorPermissions: Readonly<PermissionsBitField>,
   ): void {
     const requirePermissions
       = sumRequireAuthoerPermissions(query, myPermissions);
@@ -80,7 +83,7 @@ export namespace Poll {
   }
 
   function validateMyPermissions(
-    chunk: RequestChunk, query: Query, permissions: Readonly<Permissions>
+    chunk: RequestChunk, query: Query, permissions: Readonly<PermissionsBitField>
   ): void {
     const requirePermissions = sumRequireMyPermissions(query);
     const missingPermissions = permissions.missing(requirePermissions);
@@ -92,11 +95,11 @@ export namespace Poll {
 
   function getAuthorPermissionsFor(
     request: Message
-  ): Readonly<Permissions> | null {
-    if (request.channel.type === 'DM') return null;
+  ): Readonly<PermissionsBitField> | null {
+    if (request.channel.type === ChannelType.DM) return null;
      
     if (request.webhookId)
-      return new Permissions(POSTULATE_WEBHOOK_PERMISSIONS);
+      return new PermissionsBitField(POSTULATE_WEBHOOK_PERMISSIONS);
     else
       return request.channel.permissionsFor(request.author);
   }
@@ -106,7 +109,7 @@ export namespace Poll {
   ): boolean {
     const request = chunk.request;
     const channel = request.channel;
-    if (channel.type === 'DM') return false;
+    if (channel.type === ChannelType.DM) return false;
 
     const myPermissions = channel.permissionsFor(chunk.botID);
     const authorPermissions = getAuthorPermissionsFor(request);
@@ -293,7 +296,7 @@ export namespace Poll {
     }
     catch (exception: unknown) {
       if (exception instanceof DiscordAPIError)
-        if (exception.httpStatus === 400)
+        if (exception.status === 400)
           throw new CommandError('unusableEmoji', chunk.lang);
     }
   }
@@ -301,7 +304,7 @@ export namespace Poll {
   function respondLoading(chunk: RequestChunk, query: Query): Promise<Message> {
     return chunk.request.channel.send(
       {
-        content: query.mentions.join(' ') || null,
+        content: query.mentions.join(' ') || undefined,
         embeds: [Locales[chunk.lang].loadings.poll(query.exclusive)],
         files: query.imageURL ? [query.imageURL] : [],
       }
@@ -312,6 +315,8 @@ export namespace Poll {
     const options = { embeds: [Help.getEmbed(chunk.lang)] };
     const channel = chunk.request.channel;
     const response = chunk.response;
+
+    Counter.count('help');
 
     return response ? response.edit(options) : channel.send(options);
   }
@@ -330,6 +335,8 @@ export namespace Poll {
     try {
       const query = parse(chunk, exclusive);
       if (!validatePermissions(chunk, query)) return null;
+
+      Counter.count(exclusive ? 'expoll' : 'poll');
 
       chunk.response ??= await respondLoading(chunk, query);
       await attachSelectors(chunk, query, chunk.response);

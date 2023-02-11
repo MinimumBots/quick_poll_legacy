@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Decrypter = void 0;
+const discord_js_1 = require("discord.js");
 const constants_1 = require("../../constants");
 const utils_1 = require("../utils");
 const ratelimits_1 = __importDefault(require("../allotters/ratelimits"));
@@ -13,8 +14,8 @@ var Decrypter;
 (function (Decrypter) {
     function initialize(bot) {
         bot
-            .on('messageCreate', message => decrypt(message, bot.user.id))
-            .on('messageUpdate', (_, message) => redecrypt(message, bot.user.id));
+            .on('messageCreate', message => { decrypt(message, bot.user.id); })
+            .on('messageUpdate', (_, message) => { redecrypt(message, bot.user.id); });
     }
     Decrypter.initialize = initialize;
     const headers = [];
@@ -40,12 +41,12 @@ var Decrypter;
     }
     function accept(message, botID) {
         return (isMatch(message)
-            && message.channel.type !== 'DM'
+            && !message.channel.isDMBased()
             && hasPermissions(message.channel, botID)
             && isUnderRate(message.author, message.guild));
     }
     function isMatch(message) {
-        return (message.type === 'DEFAULT'
+        return (message.type === discord_js_1.MessageType.Default
             && headers.some(header => message.content.startsWith(header)));
     }
     function hasPermissions(channel, botID) {

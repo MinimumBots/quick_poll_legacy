@@ -5,18 +5,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_cron_1 = __importDefault(require("node-cron"));
 class RateLimits {
+    limit;
+    resetTiming = '0 * * * *';
+    counts = {};
     constructor(limit) {
         this.limit = limit;
-        this.resetTiming = '0 * * * *';
-        this.counts = {};
         node_cron_1.default.schedule(this.resetTiming, () => this.allReset());
     }
     remaining(id) {
         return this.limit - (this.counts[id] ?? 0);
     }
     addition(id) {
-        var _a;
-        (_a = this.counts)[id] ?? (_a[id] = 0);
+        this.counts[id] ??= 0;
         this.counts[id]++;
         return !!this.remaining(id);
     }

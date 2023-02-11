@@ -12,7 +12,7 @@ import { Utils } from '../utils';
 
 export namespace Session {
   export function initialize(bot: Client<true>): void {
-    bot.on('messageReactionAdd', (reaction, user) => validate(reaction, user));
+    bot.on('messageReactionAdd', (reaction, user) => { validate(reaction, user) });
   }
 
   export interface Data {

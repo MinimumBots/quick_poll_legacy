@@ -3,6 +3,7 @@ import {
   Guild,
   GuildTextBasedChannel,
   Message,
+  MessageType,
   PartialMessage,
   Snowflake,
   User
@@ -24,8 +25,8 @@ import Splitter from './splitter';
 export namespace Decrypter {
   export function initialize(bot: Client<true>): void {
     bot
-      .on('messageCreate', message => decrypt(message, bot.user.id))
-      .on('messageUpdate', (_, message) => redecrypt(message, bot.user.id));
+      .on('messageCreate', message => { decrypt(message, bot.user.id) })
+      .on('messageUpdate', (_, message) => { redecrypt(message, bot.user.id) });
   }
 
   const headers: Header[] = [];
@@ -59,7 +60,7 @@ export namespace Decrypter {
   function accept(message: Message, botID: Snowflake): boolean {
     return (
       isMatch(message)
-      && message.channel.type !== 'DM'
+      && !message.channel.isDMBased()
       && hasPermissions(message.channel, botID)
       && isUnderRate(message.author, message.guild)
     );
@@ -67,7 +68,7 @@ export namespace Decrypter {
 
   function isMatch(message: Message): boolean {
     return (
-      message.type === 'DEFAULT'
+      message.type === MessageType.Default
       && headers.some(header => message.content.startsWith(header))
     );
   }

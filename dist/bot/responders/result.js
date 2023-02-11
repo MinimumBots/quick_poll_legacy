@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Result = void 0;
 const discord_js_1 = require("discord.js");
 const constants_1 = require("../../constants");
+const counter_1 = require("../../transactions/counter");
 const allocater_1 = require("../allotters/allocater");
 const locale_1 = require("../templates/locale");
 const error_1 = __importDefault(require("./error"));
@@ -23,6 +24,7 @@ var Result;
         try {
             if (!validate(chunk, isEnd))
                 return null;
+            counter_1.Counter.count(isEnd ? 'endpoll' : 'sumpoll');
             const query = await parse(chunk, isEnd);
             if (query.isEnd)
                 endPoll(chunk, query.poll);
@@ -38,6 +40,7 @@ var Result;
         const options = { embeds: [help_1.Help.getEmbed(chunk.lang)] };
         const channel = chunk.request.channel;
         const response = chunk.response;
+        counter_1.Counter.count('help');
         return response ? response.edit(options) : channel.send(options);
     }
     function respondError(chunk, error) {
@@ -48,14 +51,14 @@ var Result;
     }
     function validate(chunk, isEnd) {
         const channel = chunk.request.channel;
-        if (channel.type === 'DM')
+        if (channel.type === discord_js_1.ChannelType.DM)
             return false;
         if (!isEnd)
             return true;
         const permissions = channel.permissionsFor(chunk.botID);
         if (!permissions)
             return false;
-        const missings = permissions.missing('MANAGE_MESSAGES');
+        const missings = permissions.missing('ManageMessages');
         if (missings.length)
             throw new error_1.default('lackPermissions', chunk.lang, missings);
         return true;
@@ -73,7 +76,7 @@ var Result;
         }
         catch (error) {
             if (error instanceof discord_js_1.DiscordAPIError)
-                if (error.httpStatus === 404)
+                if (error.status === 404)
                     throw new error_1.default('notFoundPoll', chunk.lang);
             throw error;
         }
@@ -96,12 +99,12 @@ var Result;
         return [match[2], match[3]];
     }
     function getChannel(request, channelID) {
-        if (request.channel.type === 'DM')
+        if (request.channel.type === discord_js_1.ChannelType.DM)
             return null;
         if (!channelID)
             return request.channel;
         const channel = request.guild?.channels.cache.get(channelID);
-        if (channel?.isText() || channel?.isThread())
+        if (channel?.isTextBased())
             return channel;
         else
             return null;
@@ -150,12 +153,12 @@ var Result;
     function endPoll(chunk, poll) {
         poll.reactions.removeAll()
             .catch(console.error);
-        const embed = poll.embeds[0];
+        const embed = new discord_js_1.EmbedBuilder(poll.embeds[0].toJSON());
         const template = locale_1.Locales[chunk.lang].successes.endpoll();
         if (template.color)
             embed.setColor(template.color);
         if (template.footer?.text)
-            embed.setFooter(template.footer.text);
+            embed.setFooter({ text: template.footer.text });
         poll.edit({ embeds: [embed] })
             .catch(console.error);
     }
@@ -169,7 +172,7 @@ var Result;
         const tops = choices.map(({ rate }) => !!rate && rate === maxRate);
         const rates = choices.map(({ rate }) => (rate * 100).toFixed(1));
         const options = {
-            content: query.mentions.join(' ') || null,
+            content: query.mentions.join(' ') || undefined,
             embeds: [locale_1.Locales[chunk.lang].successes.graphpoll(query.poll.url, query.author.iconURL, query.author.name, query.question, emojis, texts, counts, tops, rates, graphs)]
         };
         return chunk.response

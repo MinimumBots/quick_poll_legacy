@@ -1,15 +1,57 @@
-import { MessageEmbedOptions, PermissionString } from 'discord.js';
+import { APIEmbed, PermissionsString } from 'discord.js';
 
-export type PermissionNameTemplate = {
-  [Name in PermissionString]: string;
-};
+export type PermissionNameTemplate = Record<PermissionsString, string>;
+
+const foo: Record<PermissionsString, string> = {
+  CreateInstantInvite: '',
+  KickMembers: '',
+  BanMembers: '',
+  Administrator: '',
+  ManageChannels: '',
+  ManageGuild: '',
+  AddReactions: '',
+  ViewAuditLog: '',
+  PrioritySpeaker: '',
+  Stream: '',
+  ViewChannel: '',
+  SendMessages: '',
+  SendTTSMessages: '',
+  ManageMessages: '',
+  EmbedLinks: '',
+  AttachFiles: '',
+  ReadMessageHistory: '',
+  MentionEveryone: '',
+  UseExternalEmojis: '',
+  ViewGuildInsights: '',
+  Connect: '',
+  Speak: '',
+  MuteMembers: '',
+  DeafenMembers: '',
+  MoveMembers: '',
+  UseVAD: '',
+  ChangeNickname: '',
+  ManageNicknames: '',
+  ManageRoles: '',
+  ManageWebhooks: '',
+  ManageEmojisAndStickers: '',
+  UseApplicationCommands: '',
+  RequestToSpeak: '',
+  ManageEvents: '',
+  ManageThreads: '',
+  CreatePublicThreads: '',
+  CreatePrivateThreads: '',
+  UseExternalStickers: '',
+  SendMessagesInThreads: '',
+  UseEmbeddedActivities: '',
+  ModerateMembers: ''
+}
 
 export type LoadingTemplate = {
-  poll(exclusive: boolean): MessageEmbedOptions;
+  poll(exclusive: boolean): APIEmbed;
 };
 
 export type SuccesseTemplate = {
-  help(): MessageEmbedOptions;
+  help(): APIEmbed;
   poll(
     exclusive    : boolean,
     authorIconURL: string,
@@ -20,7 +62,7 @@ export type SuccesseTemplate = {
     imageName    : string | null,
     channelID    : string,
     messageID    : string,
-  ): MessageEmbedOptions;
+  ): APIEmbed;
   graphpoll(
     pollURL      : string,
     authorIconURL: string,
@@ -32,7 +74,7 @@ export type SuccesseTemplate = {
     choiceTops   : boolean[],
     choiceRates  : string[],
     choiceGraphs : string[],
-  ): MessageEmbedOptions;
+  ): APIEmbed;
   listpoll(
     pollURL         : string,
     authorIconURL   : string,
@@ -44,33 +86,33 @@ export type SuccesseTemplate = {
     choiceTops      : boolean[],
     choiceRates     : string[],
     choiceUsersLists: string[],
-  ): MessageEmbedOptions;
-  endpoll(): MessageEmbedOptions;
+  ): APIEmbed;
+  endpoll(): APIEmbed;
 };
 
 export type ErrorTemplate = {
-  unknown()          : MessageEmbedOptions;
-  lackPermissions    (permissions: PermissionString[]): MessageEmbedOptions;
-  lackYourPermissions(permissions: PermissionString[]): MessageEmbedOptions;
-  duplicateChannels(): MessageEmbedOptions;
-  unusableChannel()  : MessageEmbedOptions;
-  unusableRole()     : MessageEmbedOptions;
-  ungivenQuestion()  : MessageEmbedOptions;
-  tooManyOptions()   : MessageEmbedOptions;
-  tooLongQuestion()  : MessageEmbedOptions;
-  tooLongOption()    : MessageEmbedOptions;
-  duplicateEmojis()  : MessageEmbedOptions;
-  unusableEmoji()    : MessageEmbedOptions;
-  ungivenMessageID() : MessageEmbedOptions;
-  notFoundChannel()  : MessageEmbedOptions;
-  notFoundPoll()     : MessageEmbedOptions;
-  missingFormatPoll(): MessageEmbedOptions;
-  unavailableExport(): MessageEmbedOptions;
+  unknown()          : APIEmbed;
+  lackPermissions    (permissions: PermissionsString[]): APIEmbed;
+  lackYourPermissions(permissions: PermissionsString[]): APIEmbed;
+  duplicateChannels(): APIEmbed;
+  unusableChannel()  : APIEmbed;
+  unusableRole()     : APIEmbed;
+  ungivenQuestion()  : APIEmbed;
+  tooManyOptions()   : APIEmbed;
+  tooLongQuestion()  : APIEmbed;
+  tooLongOption()    : APIEmbed;
+  duplicateEmojis()  : APIEmbed;
+  unusableEmoji()    : APIEmbed;
+  ungivenMessageID() : APIEmbed;
+  notFoundChannel()  : APIEmbed;
+  notFoundPoll()     : APIEmbed;
+  missingFormatPoll(): APIEmbed;
+  unavailableExport(): APIEmbed;
 };
 
 export type ReportTemplate = {
   error(
     executedCommand: string,
     traceTexts     : string[],
-  ): MessageEmbedOptions;
+  ): APIEmbed;
 };

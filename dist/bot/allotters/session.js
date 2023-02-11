@@ -6,7 +6,7 @@ const utils_1 = require("../utils");
 var Session;
 (function (Session) {
     function initialize(bot) {
-        bot.on('messageReactionAdd', (reaction, user) => validate(reaction, user));
+        bot.on('messageReactionAdd', (reaction, user) => { validate(reaction, user); });
     }
     Session.initialize = initialize;
     const sessions = new Map;

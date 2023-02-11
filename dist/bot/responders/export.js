@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Export = void 0;
 const discord_js_1 = require("discord.js");
 const constants_1 = require("../../constants");
+const counter_1 = require("../../transactions/counter");
 const allocater_1 = require("../allotters/allocater");
 const error_1 = __importDefault(require("./error"));
 const help_1 = require("./help");
@@ -23,6 +24,7 @@ var Export;
                 throw new error_1.default('unavailableExport', chunk.lang);
             if (!validatePermissions)
                 return null;
+            counter_1.Counter.count('csvpoll');
             const query = await parse(chunk);
             const csv = generateCSV(query);
             return respondCSV(chunk, query, csv);
@@ -35,17 +37,18 @@ var Export;
     }
     function validatePermissions(chunk) {
         const channel = chunk.request.channel;
-        if (channel.type === 'DM')
+        if (channel.type === discord_js_1.ChannelType.DM)
             return false;
         const permissions = channel.permissionsFor(chunk.botID);
         if (!permissions)
             return false;
-        const missings = permissions.missing('ATTACH_FILES');
+        const missings = permissions.missing('AttachFiles');
         if (missings.length)
             throw new error_1.default('lackPermissions', chunk.lang, missings);
         return true;
     }
     function respondHelp(chunk) {
+        counter_1.Counter.count('help');
         return chunk.request.channel.send({ embeds: [help_1.Help.getEmbed(chunk.lang)] });
     }
     function respondError(chunk, error) {
@@ -64,7 +67,7 @@ var Export;
         }
         catch (error) {
             if (error instanceof discord_js_1.DiscordAPIError)
-                if (error.httpStatus === 404)
+                if (error.status === 404)
                     throw new error_1.default('notFoundPoll', chunk.lang);
             throw error;
         }
@@ -84,12 +87,12 @@ var Export;
         return [match[2], match[3]];
     }
     function getChannel(request, channelID) {
-        if (request.channel.type === 'DM')
+        if (request.channel.type === discord_js_1.ChannelType.DM)
             return null;
         if (!channelID)
             return request.channel;
         const channel = request.guild?.channels.cache.get(channelID);
-        if (channel?.isText() || channel?.isThread())
+        if (channel?.isTextBased())
             return channel;
         else
             return null;
@@ -128,7 +131,7 @@ var Export;
                 vote[i] = true;
                 votes.set(user, vote);
             });
-            votes.forEach(vote => vote[i] ?? (vote[i] = false));
+            votes.forEach(vote => vote[i] ??= false);
         });
         return votes;
     }
