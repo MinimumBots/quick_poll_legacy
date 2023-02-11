@@ -11,22 +11,24 @@ const locale_1 = require("../templates/locale");
 const allocater_1 = require("../allotters/allocater");
 const error_1 = __importDefault(require("./error"));
 const help_1 = require("./help");
+const counter_1 = require("../../transactions/counter");
 var Poll;
 (function (Poll) {
     const pollPermissions = [
-        'ADD_REACTIONS', 'READ_MESSAGE_HISTORY'
+        'AddReactions',
+        'ReadMessageHistory',
     ];
     const exclusivePermissions = [
-        'MANAGE_MESSAGES'
+        'ManageMessages',
     ];
     const externalPermissions = [
-        'USE_EXTERNAL_EMOJIS'
+        'UseExternalEmojis'
     ];
     const mentionPermissions = [
-        'MENTION_EVERYONE'
+        'MentionEveryone'
     ];
     const attachImagePermissions = [
-        'ATTACH_FILES'
+        'AttachFiles'
     ];
     function sumRequireAuthoerPermissions(query, permissions) {
         return query.mentions.length && permissions.has(mentionPermissions)
@@ -55,17 +57,17 @@ var Poll;
             throw new error_1.default('lackPermissions', chunk.lang, missingPermissions);
     }
     function getAuthorPermissionsFor(request) {
-        if (request.channel.type === 'DM')
+        if (request.channel.type === discord_js_1.ChannelType.DM)
             return null;
         if (request.webhookId)
-            return new discord_js_1.Permissions(constants_1.POSTULATE_WEBHOOK_PERMISSIONS);
+            return new discord_js_1.PermissionsBitField(constants_1.POSTULATE_WEBHOOK_PERMISSIONS);
         else
             return request.channel.permissionsFor(request.author);
     }
     function validatePermissions(chunk, query) {
         const request = chunk.request;
         const channel = request.channel;
-        if (channel.type === 'DM')
+        if (channel.type === discord_js_1.ChannelType.DM)
             return false;
         const myPermissions = channel.permissionsFor(chunk.botID);
         const authorPermissions = getAuthorPermissionsFor(request);
@@ -103,7 +105,7 @@ var Poll;
                 const length = safePushChoiceEmoji(chunk, emojis, arg);
                 if (texts.length < length - 1)
                     safePushChoiceText(chunk, texts, null);
-                external || (external = !isLocalGuildEmoji(chunk.request.guild, arg));
+                external ||= !isLocalGuildEmoji(chunk.request.guild, arg);
             }
             else {
                 const length = safePushChoiceText(chunk, texts, arg);
@@ -192,13 +194,13 @@ var Poll;
         }
         catch (exception) {
             if (exception instanceof discord_js_1.DiscordAPIError)
-                if (exception.httpStatus === 400)
+                if (exception.status === 400)
                     throw new error_1.default('unusableEmoji', chunk.lang);
         }
     }
     function respondLoading(chunk, query) {
         return chunk.request.channel.send({
-            content: query.mentions.join(' ') || null,
+            content: query.mentions.join(' ') || undefined,
             embeds: [locale_1.Locales[chunk.lang].loadings.poll(query.exclusive)],
             files: query.imageURL ? [query.imageURL] : [],
         });
@@ -207,6 +209,7 @@ var Poll;
         const options = { embeds: [help_1.Help.getEmbed(chunk.lang)] };
         const channel = chunk.request.channel;
         const response = chunk.response;
+        counter_1.Counter.count('help');
         return response ? response.edit(options) : channel.send(options);
     }
     function clearSelectors(response) {
@@ -222,7 +225,8 @@ var Poll;
             const query = parse(chunk, exclusive);
             if (!validatePermissions(chunk, query))
                 return null;
-            chunk.response ?? (chunk.response = await respondLoading(chunk, query));
+            counter_1.Counter.count(exclusive ? 'expoll' : 'poll');
+            chunk.response ??= await respondLoading(chunk, query);
             await attachSelectors(chunk, query, chunk.response);
             return respondPoll(chunk, query, chunk.response);
         }

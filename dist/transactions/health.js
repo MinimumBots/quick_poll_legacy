@@ -63,7 +63,7 @@ var Health;
     function isReceiveStatus(obj) {
         let isRegisterStatuses = true;
         for (const index in obj.statuses)
-            isRegisterStatuses && (isRegisterStatuses = isRegisterStatus(obj.statuses[index]));
+            isRegisterStatuses &&= isRegisterStatus(obj.statuses[index]);
         return (obj
             && typeof obj.ready === 'boolean'
             && typeof obj.completed === 'boolean'

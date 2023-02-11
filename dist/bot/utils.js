@@ -45,11 +45,11 @@ var Utils;
         let type, name;
         switch (count % 2) {
             case 1:
-                type = 'COMPETING';
+                type = discord_js_1.ActivityType.Competing;
                 name = `${totalGuildCount()} サーバー`;
                 break;
             default:
-                type = 'PLAYING';
+                type = discord_js_1.ActivityType.Playing;
                 name = `${constants_1.COMMAND_PREFIX}poll | ${constants_1.COMMAND_PREFIX}expoll`;
                 break;
         }

@@ -9,7 +9,7 @@ const allocater_1 = require("./allotters/allocater");
 const judge_1 = require("./listeners/judge");
 const session_1 = require("./allotters/session");
 const makeCache = discord_js_1.Options.cacheWithLimits({
-    ...discord_js_1.Options.defaultMakeCacheSettings,
+    ...discord_js_1.Options.DefaultMakeCacheSettings,
     MessageManager: {
         maxSize: 200,
         keepOverLimit: judge_1.Judge.adjustCache,
@@ -17,11 +17,20 @@ const makeCache = discord_js_1.Options.cacheWithLimits({
 });
 const bot = new discord_js_1.Client({
     makeCache: makeCache,
-    partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
-    restTimeOffset: 100,
-    retryLimit: 3,
+    partials: [
+        discord_js_1.Partials.User,
+        discord_js_1.Partials.Channel,
+        discord_js_1.Partials.GuildMember,
+        discord_js_1.Partials.Message,
+        discord_js_1.Partials.Reaction,
+        discord_js_1.Partials.ThreadMember,
+        discord_js_1.Partials.GuildScheduledEvent,
+    ],
+    rest: {
+        offset: 100,
+    },
     intents: constants_1.BOT_INTENTS,
-    presence: { status: 'dnd', activities: [{ type: 'PLAYING', name: '再接続' }] },
+    presence: { status: 'dnd', activities: [{ type: discord_js_1.ActivityType.Playing, name: '再接続' }] },
 });
 function initialize(bot) {
     const botId = bot.application.id;

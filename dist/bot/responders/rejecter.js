@@ -16,7 +16,7 @@ var Rejecter;
     }
     Rejecter.issue = issue;
     async function forAPIError(exception, request) {
-        if (exception.httpStatus / 500)
+        if (exception.status / 500)
             return destroy(exception);
         else
             return await forUnknown(exception, request);

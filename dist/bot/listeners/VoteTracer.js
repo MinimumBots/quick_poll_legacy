@@ -3,12 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VoteTracer = void 0;
 const discord_js_1 = require("discord.js");
 class VoteTracer {
-    constructor() {
-        this.trace = new discord_js_1.Collection();
-    }
     static toEmojiId(emoji) {
         return emoji.id ?? emoji.name ?? '';
     }
+    trace = new discord_js_1.Collection();
     get(channelId, messageId, userId) {
         const messages = this.trace.get(channelId);
         const users = messages?.get(messageId);
