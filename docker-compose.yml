@@ -15,3 +15,4 @@ services:
       - SUPPORT_SERVER_URL
       - DONATION_SERVICE_URL
       - DEBUG_MODE
+      - COUNTER_API_HOST_NAME
