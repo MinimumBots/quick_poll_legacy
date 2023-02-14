@@ -14,6 +14,7 @@ import {
   BOT_RATE_LIMIT,
   COMMAND_EDITABLE_TIME,
   MINIMUM_BOT_PERMISSIONS,
+  GUILD_RATE_LIMIT,
 } from '../../constants';
 
 import { Utils } from '../utils';
@@ -77,14 +78,14 @@ export namespace Decrypter {
     return !!(channel.permissionsFor(botID)?.any(MINIMUM_BOT_PERMISSIONS));
   }
 
+  const guildRateLimits = new RateLimits(GUILD_RATE_LIMIT);
   const userRateLimits = new RateLimits(USER_RATE_LIMIT);
   const botRateLimits  = new RateLimits(BOT_RATE_LIMIT);
 
   function isUnderRate(user: User, guild: Guild | null): boolean {
-    if (user.bot)
-      return guild ? botRateLimits.addition(guild.id) : false;
-    else
-      return userRateLimits.addition(user.id);
+    return !!(guild
+      && (user.bot ? botRateLimits.addition(guild.id) : userRateLimits.addition(user.id))
+      && guildRateLimits.addition(guild.id));
   }
 
   function split(content: string): string[] {

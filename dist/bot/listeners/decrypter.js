@@ -52,13 +52,13 @@ var Decrypter;
     function hasPermissions(channel, botID) {
         return !!(channel.permissionsFor(botID)?.any(constants_1.MINIMUM_BOT_PERMISSIONS));
     }
+    const guildRateLimits = new ratelimits_1.default(constants_1.GUILD_RATE_LIMIT);
     const userRateLimits = new ratelimits_1.default(constants_1.USER_RATE_LIMIT);
     const botRateLimits = new ratelimits_1.default(constants_1.BOT_RATE_LIMIT);
     function isUnderRate(user, guild) {
-        if (user.bot)
-            return guild ? botRateLimits.addition(guild.id) : false;
-        else
-            return userRateLimits.addition(user.id);
+        return !!(guild
+            && (user.bot ? botRateLimits.addition(guild.id) : userRateLimits.addition(user.id))
+            && guildRateLimits.addition(guild.id));
     }
     function split(content) {
         const splitter = new splitter_1.default;
