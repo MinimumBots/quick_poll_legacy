@@ -15,7 +15,7 @@ export default class RateLimits {
   addition(id: string): boolean {
     this.counts[id] ??= 0;
     this.counts[id]++;
-    return !!this.remaining(id);
+    return this.remaining(id) >= 0;
   }
 
   reset(id: string): boolean {

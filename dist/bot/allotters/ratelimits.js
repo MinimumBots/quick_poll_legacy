@@ -18,7 +18,7 @@ class RateLimits {
     addition(id) {
         this.counts[id] ??= 0;
         this.counts[id]++;
-        return !!this.remaining(id);
+        return this.remaining(id) >= 0;
     }
     reset(id) {
         return delete this.counts[id];

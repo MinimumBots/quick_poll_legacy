@@ -9,6 +9,8 @@ const constants_1 = require("../constants");
 var Counter;
 (function (Counter) {
     function count(context) {
+        if (!constants_1.COUNTER_API_HOST_NAME)
+            return;
         axios_1.default.get(`http://${constants_1.COUNTER_API_HOST_NAME}/count/${context}`)
             .catch(console.error);
     }
