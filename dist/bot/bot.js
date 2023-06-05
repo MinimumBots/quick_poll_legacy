@@ -55,7 +55,7 @@ function initialize(bot) {
 bot
     .on('ready', bot => initialize(bot))
     .on('shardReady', shardId => console.info(`Shard No.${shardId} is ready.`));
-bot.login(process.env['QUICK_POLL_TOKEN'])
+bot.login(process.env['DISCORD_TOKEN'])
     .catch(console.error);
 ['SIGTERM', 'SIGINT']
     .forEach(signal => process.on(signal, () => {
