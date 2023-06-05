@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = require("discord.js");
 const constants_1 = require("./constants");
 const manager = new discord_js_1.ShardingManager('./dist/bot/bot.js', {
-    token: process.env['QUICK_POLL_TOKEN'],
+    token: process.env['DISCORD_TOKEN'],
     totalShards: constants_1.BOT_TOTAL_SHARDS,
     shardList: constants_1.BOT_SHARD_LIST,
 });

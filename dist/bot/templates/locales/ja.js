@@ -38,6 +38,7 @@ exports.ja = {
         ManageRoles: 'ロールの管理',
         ManageWebhooks: 'ウェブフックの管理',
         ManageEmojisAndStickers: '絵文字・スタンプの管理',
+        ManageGuildExpressions: 'サーバーエクスプレッションの管理',
         UseApplicationCommands: 'アプリコマンドを使う',
         RequestToSpeak: 'スピーカー参加をリクエスト',
         ManageEvents: 'イベントの管理',
@@ -48,6 +49,10 @@ exports.ja = {
         SendMessagesInThreads: 'スレッドでメッセージを送信',
         UseEmbeddedActivities: 'ユーザーアクティビティ',
         ModerateMembers: 'メンバーをタイムアウト',
+        ViewCreatorMonetizationAnalytics: 'クリエイターマネタイズアナリティクスを見る',
+        UseSoundboard: 'サウンドボードを使用',
+        UseExternalSounds: '外部のサウンドの使用',
+        SendVoiceMessages: 'ボイスメッセージを送信',
     },
     loadings: {
         poll: exclusive => ({

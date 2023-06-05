@@ -3,7 +3,7 @@ services:
   bot:
     build: .
     environment:
-      - QUICK_POLL_TOKEN
+      - DISCORD_TOKEN
       - BOT_OWNER_IDS
       - BOT_TOTAL_SHARDS
       - BOT_SHARD_LIST
@@ -16,3 +16,10 @@ services:
       - DONATION_SERVICE_URL
       - DEBUG_MODE
       - COUNTER_API_HOST_NAME
+      - LOG_LEVEL
+      - LOG_FILENAME
+      - SHARD_SPAWN_TIMEOUT
+      - SHARD_RECOVERY_TIMEOUT
+      - REPORT_WEBHOOK_URL
+      - REPORT_STATUS_INTERVAL
+      - REPORT_LOG_LEVEL
