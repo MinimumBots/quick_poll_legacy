@@ -7,4 +7,4 @@ RUN [ "npm", "ci", "--production" ]
 
 COPY . .
 
-CMD [ "node", "dist/index.js" ]
+CMD [ "npm", "start" ]

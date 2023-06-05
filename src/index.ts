@@ -2,7 +2,7 @@ import { ShardingManager } from 'discord.js';
 import { BOT_SHARD_LIST, BOT_TOTAL_SHARDS } from './constants';
 
 const manager = new ShardingManager('./dist/bot/bot.js', {
-  token: process.env['QUICK_POLL_TOKEN'],
+  token: process.env['DISCORD_TOKEN'],
   totalShards: BOT_TOTAL_SHARDS,
   shardList: BOT_SHARD_LIST,
 });

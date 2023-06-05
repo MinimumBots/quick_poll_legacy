@@ -2,50 +2,6 @@ import { APIEmbed, PermissionsString } from 'discord.js';
 
 export type PermissionNameTemplate = Record<PermissionsString, string>;
 
-const foo: Record<PermissionsString, string> = {
-  CreateInstantInvite: '',
-  KickMembers: '',
-  BanMembers: '',
-  Administrator: '',
-  ManageChannels: '',
-  ManageGuild: '',
-  AddReactions: '',
-  ViewAuditLog: '',
-  PrioritySpeaker: '',
-  Stream: '',
-  ViewChannel: '',
-  SendMessages: '',
-  SendTTSMessages: '',
-  ManageMessages: '',
-  EmbedLinks: '',
-  AttachFiles: '',
-  ReadMessageHistory: '',
-  MentionEveryone: '',
-  UseExternalEmojis: '',
-  ViewGuildInsights: '',
-  Connect: '',
-  Speak: '',
-  MuteMembers: '',
-  DeafenMembers: '',
-  MoveMembers: '',
-  UseVAD: '',
-  ChangeNickname: '',
-  ManageNicknames: '',
-  ManageRoles: '',
-  ManageWebhooks: '',
-  ManageEmojisAndStickers: '',
-  UseApplicationCommands: '',
-  RequestToSpeak: '',
-  ManageEvents: '',
-  ManageThreads: '',
-  CreatePublicThreads: '',
-  CreatePrivateThreads: '',
-  UseExternalStickers: '',
-  SendMessagesInThreads: '',
-  UseEmbeddedActivities: '',
-  ModerateMembers: ''
-}
-
 export type LoadingTemplate = {
   poll(exclusive: boolean): APIEmbed;
 };
