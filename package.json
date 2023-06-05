@@ -4,7 +4,7 @@
   "description": "The simple and versatile polling bot for Discord.",
   "main": "index.js",
   "scripts": {
-    "start": "sharding ./dist/index.js",
+    "start": "sharding ./dist/bot/bot.js",
     "dev": "ts-node -r dotenv/config src/bot/bot.ts",
     "build": "run-s clean compile",
     "compile": "tsc",
