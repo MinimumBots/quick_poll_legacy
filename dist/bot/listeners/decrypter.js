@@ -71,4 +71,4 @@ var Decrypter;
         }
         return splitter.pushChunk();
     }
-})(Decrypter = exports.Decrypter || (exports.Decrypter = {}));
+})(Decrypter || (exports.Decrypter = Decrypter = {}));

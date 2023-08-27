@@ -46,4 +46,4 @@ var Rejecter;
             stack = JSON.stringify(exception, null, 2);
         return utils_1.Utils.partingText(stack, 1024, '', '');
     }
-})(Rejecter = exports.Rejecter || (exports.Rejecter = {}));
+})(Rejecter || (exports.Rejecter = Rejecter = {}));

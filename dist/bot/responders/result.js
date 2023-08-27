@@ -179,4 +179,4 @@ var Result;
             ? chunk.response.edit(options)
             : chunk.request.channel.send(options);
     }
-})(Result = exports.Result || (exports.Result = {}));
+})(Result || (exports.Result = Result = {}));

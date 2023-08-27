@@ -15,4 +15,4 @@ var Counter;
             .catch(console.error);
     }
     Counter.count = count;
-})(Counter = exports.Counter || (exports.Counter = {}));
+})(Counter || (exports.Counter = Counter = {}));

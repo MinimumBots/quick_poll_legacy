@@ -80,4 +80,4 @@ var Health;
             && typeof obj.userCount === 'number'
             && typeof obj.lastUpdateTimestamp === 'number');
     }
-})(Health = exports.Health || (exports.Health = {}));
+})(Health || (exports.Health = Health = {}));

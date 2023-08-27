@@ -131,7 +131,7 @@ export namespace Poll {
     '🇳', '🇴', '🇵', '🇶', '🇷', '🇸', '🇹', '🇺', '🇻', '🇼', '🇽', '🇾', '🇿',
   ];
   const twemojiRegex
-    = require('twemoji-parser/dist/lib/regex.js').default as RegExp;
+    = require('@twemoji/parser/dist/lib/regex.js').default as RegExp;
   const emojiRegex
     = new RegExp(`^(${twemojiRegex.toString().slice(1, -2)}|<a?:.+?:\\d+>)$`);
 

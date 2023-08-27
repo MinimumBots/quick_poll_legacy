@@ -63,5 +63,5 @@ var Allocater;
         else if (!session)
             session_1.Session.create(request, response);
     }
-})(Allocater = exports.Allocater || (exports.Allocater = {}));
+})(Allocater || (exports.Allocater = Allocater = {}));
 ;

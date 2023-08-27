@@ -55,4 +55,4 @@ var Session;
             .catch(() => undefined);
         utils_1.Utils.removeMessageCache(data.request);
     }
-})(Session = exports.Session || (exports.Session = {}));
+})(Session || (exports.Session = Session = {}));

@@ -136,4 +136,4 @@ var Judge;
             .filter(reaction => !reaction.me && reaction.emoji.identifier !== excludeEmoji.identifier)
             .map(reaction => reaction.remove()));
     }
-})(Judge = exports.Judge || (exports.Judge = {}));
+})(Judge || (exports.Judge = Judge = {}));

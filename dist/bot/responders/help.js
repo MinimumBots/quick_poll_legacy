@@ -23,4 +23,4 @@ var Help;
         return locale_1.Locales[lang].successes.help();
     }
     Help.getEmbed = getEmbed;
-})(Help = exports.Help || (exports.Help = {}));
+})(Help || (exports.Help = Help = {}));

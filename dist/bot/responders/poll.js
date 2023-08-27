@@ -85,7 +85,7 @@ var Poll;
         '🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮', '🇯', '🇰', '🇱', '🇲',
         '🇳', '🇴', '🇵', '🇶', '🇷', '🇸', '🇹', '🇺', '🇻', '🇼', '🇽', '🇾', '🇿',
     ];
-    const twemojiRegex = require('twemoji-parser/dist/lib/regex.js').default;
+    const twemojiRegex = require('@twemoji/parser/dist/lib/regex.js').default;
     const emojiRegex = new RegExp(`^(${twemojiRegex.toString().slice(1, -2)}|<a?:.+?:\\d+>)$`);
     function safePushChoiceEmoji(chunk, emojis, newEmoji) {
         if (emojis.includes(newEmoji))
@@ -241,4 +241,4 @@ var Poll;
         allocater_1.Allocater.entryResponder(`${constants_1.COMMAND_PREFIX}expoll`, chunk => respond(chunk, true));
     }
     Poll.initialize = initialize;
-})(Poll = exports.Poll || (exports.Poll = {}));
+})(Poll || (exports.Poll = Poll = {}));

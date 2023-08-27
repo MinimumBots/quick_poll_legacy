@@ -149,4 +149,4 @@ var Export;
     function respondCSV(chunk, query, csv) {
         return chunk.request.channel.send({ files: [{ attachment: csv, name: `${query.poll.id}.csv` }] });
     }
-})(Export = exports.Export || (exports.Export = {}));
+})(Export || (exports.Export = Export = {}));

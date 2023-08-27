@@ -56,4 +56,4 @@ var Utils;
         bot.user?.setPresence({ status: 'online', activities: [{ type, name }] });
     }
     Utils.updatePresence = updatePresence;
-})(Utils = exports.Utils || (exports.Utils = {}));
+})(Utils || (exports.Utils = Utils = {}));
