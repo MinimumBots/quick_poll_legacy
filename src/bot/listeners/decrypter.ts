@@ -58,16 +58,16 @@ export namespace Decrypter {
       .catch(() => undefined);
   }
 
-  function accept(message: Message, botID: Snowflake): boolean {
+  function accept(message: Message, botID: Snowflake): message is Message<true> {
     return (
-      isMatch(message)
-      && !message.channel.isDMBased()
+      message.inGuild()
+      && isMatch(message)
       && hasPermissions(message.channel, botID)
       && isUnderRate(message.author, message.guild)
     );
   }
 
-  function isMatch(message: Message): boolean {
+  function isMatch(message: Message<true>): boolean {
     return (
       message.type === MessageType.Default
       && headers.some(header => message.content.startsWith(header))

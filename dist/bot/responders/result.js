@@ -50,12 +50,9 @@ var Result;
         return response ? response.edit(options) : channel.send(options);
     }
     function validate(chunk, isEnd) {
-        const channel = chunk.request.channel;
-        if (channel.type === discord_js_1.ChannelType.DM)
-            return false;
         if (!isEnd)
             return true;
-        const permissions = channel.permissionsFor(chunk.botID);
+        const permissions = chunk.request.channel.permissionsFor(chunk.botID);
         if (!permissions)
             return false;
         const missings = permissions.missing('ManageMessages');
@@ -99,8 +96,6 @@ var Result;
         return [match[2], match[3]];
     }
     function getChannel(request, channelID) {
-        if (request.channel.type === discord_js_1.ChannelType.DM)
-            return null;
         if (!channelID)
             return request.channel;
         const channel = request.guild?.channels.cache.get(channelID);

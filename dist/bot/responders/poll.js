@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Poll = void 0;
-const path_1 = require("path");
+const path_1 = __importDefault(require("path"));
 const discord_js_1 = require("discord.js");
 const constants_1 = require("../../constants");
 const locale_1 = require("../templates/locale");
@@ -57,8 +57,6 @@ var Poll;
             throw new error_1.default('lackPermissions', chunk.lang, missingPermissions);
     }
     function getAuthorPermissionsFor(request) {
-        if (request.channel.type === discord_js_1.ChannelType.DM)
-            return null;
         if (request.webhookId)
             return new discord_js_1.PermissionsBitField(constants_1.POSTULATE_WEBHOOK_PERMISSIONS);
         else
@@ -67,8 +65,6 @@ var Poll;
     function validatePermissions(chunk, query) {
         const request = chunk.request;
         const channel = request.channel;
-        if (channel.type === discord_js_1.ChannelType.DM)
-            return false;
         const myPermissions = channel.permissionsFor(chunk.botID);
         const authorPermissions = getAuthorPermissionsFor(request);
         if (!myPermissions || !authorPermissions)
@@ -148,7 +144,9 @@ var Poll;
     }
     const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
     function parseAttachedImage(chunk) {
-        return chunk.request.attachments.find(attachment => imageExtensions.includes((0, path_1.extname)(attachment.url)))?.url ?? null;
+        return chunk.request.attachments
+            .map(attachment => new URL(attachment.url))
+            .find(url => imageExtensions.includes(path_1.default.extname(url.pathname))) ?? null;
     }
     function parseAuthor(chunk) {
         const user = chunk.request.author;
@@ -185,7 +183,7 @@ var Poll;
             return null;
         return await response.edit({
             content: query.mentions.join(' ') || null,
-            embeds: [locale_1.Locales[chunk.lang].successes.poll(query.exclusive, query.author.iconURL, query.author.name, query.question ?? '', selectors, choices.map(choice => choice.text ?? ''), query.imageURL ? (0, path_1.basename)(query.imageURL) : null, response.channelId, response.id)]
+            embeds: [locale_1.Locales[chunk.lang].successes.poll(query.exclusive, query.author.iconURL, query.author.name, query.question ?? '', selectors, choices.map(choice => choice.text ?? ''), query.imageURL ? path_1.default.basename(query.imageURL.pathname) : null, response.channelId, response.id)]
         });
     }
     async function attachSelectors(chunk, query, response) {
@@ -202,7 +200,7 @@ var Poll;
         return chunk.request.channel.send({
             content: query.mentions.join(' ') || undefined,
             embeds: [locale_1.Locales[chunk.lang].loadings.poll(query.exclusive)],
-            files: query.imageURL ? [query.imageURL] : [],
+            files: query.imageURL ? [query.imageURL.href] : [],
         });
     }
     function respondHelp(chunk) {

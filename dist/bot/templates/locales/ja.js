@@ -53,6 +53,10 @@ exports.ja = {
         UseSoundboard: 'サウンドボードを使用',
         UseExternalSounds: '外部のサウンドの使用',
         SendVoiceMessages: 'ボイスメッセージを送信',
+        CreateGuildExpressions: 'エクスプレッションを作成',
+        CreateEvents: 'イベントを作成',
+        SendPolls: '投票の作成',
+        UseExternalApps: '外部のアプリを使用'
     },
     loadings: {
         poll: exclusive => ({
@@ -65,7 +69,8 @@ exports.ja = {
             color: constants_1.COLORS.HELP,
             title: '📊 Quick Pollの使い方',
             url: botDocumentURL,
-            description: 'アンケートを作成し、投票を募ることができるBOTです。\n'
+            description: '# <t:1743433199:D> でサービス終了\n'
+                + 'アンケートを作成し、投票を募ることができるBOTです。\n'
                 + `各コマンドの詳しい使い方は**[こちら](${botDocumentURL})**をご覧ください。`,
             fields: [
                 {
