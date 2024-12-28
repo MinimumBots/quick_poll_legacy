@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:22
 
 WORKDIR /app/quick_poll
 
@@ -7,4 +7,4 @@ RUN [ "npm", "ci", "--omit=dev" ]
 
 COPY . .
 
-CMD [ "npm", "start" ]
+ENTRYPOINT [ "npm", "start" ]
