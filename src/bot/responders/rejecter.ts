@@ -8,8 +8,8 @@ import { Utils } from '../utils';
 
 export namespace Rejecter {
   export async function issue(
-    exception: unknown, request: Message
-  ): Promise<Message | void> {
+    exception: unknown, request: Message<true>
+  ): Promise<Message<true> | void> {
     if (exception instanceof DiscordAPIError)
       return await forAPIError(exception, request);
     else
@@ -17,8 +17,8 @@ export namespace Rejecter {
   }
 
   async function forAPIError(
-    exception: DiscordAPIError, request: Message
-  ): Promise<Message | void> {
+    exception: DiscordAPIError, request: Message<true>
+  ): Promise<Message<true> | void> {
     if (exception.status / 500)
       return destroy(exception);
     else
@@ -26,8 +26,8 @@ export namespace Rejecter {
   }
 
   async function forUnknown(
-    exception: unknown, request: Message
-  ): Promise<Message> {
+    exception: unknown, request: Message<true>
+  ): Promise<Message<true>> {
     const lang = await Preferences.fetchLang(request.author, request.guild);
     const embeds = [Locales[lang].errors.unknown()];
 
@@ -41,7 +41,7 @@ export namespace Rejecter {
     console.error(exception);
   }
 
-  async function report(exception: unknown, request: Message): Promise<void> {
+  async function report(exception: unknown, request: Message<true>): Promise<void> {
     const stacks = renderStacks(exception);
     const embeds = [Locales[DEFAULT_LANG].reports.error(request.content, stacks)];
     const users = await Promise.all(

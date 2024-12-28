@@ -40,8 +40,8 @@ var Decrypter;
             .catch(() => undefined);
     }
     function accept(message, botID) {
-        return (isMatch(message)
-            && !message.channel.isDMBased()
+        return (message.inGuild()
+            && isMatch(message)
             && hasPermissions(message.channel, botID)
             && isUnderRate(message.author, message.guild));
     }

@@ -10,7 +10,7 @@ export namespace Help{
     Allocater.entryResponder(`<@!${bot.user.id}>`, chunk => respond(chunk));
   }
 
-  async function respond(chunk: RequestChunk): Promise<Message | null> {
+  async function respond(chunk: RequestChunk): Promise<Message<true> | null> {
     if (chunk.args.length) return null;
 
     Counter.count('help');

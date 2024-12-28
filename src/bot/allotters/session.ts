@@ -19,8 +19,8 @@ export namespace Session {
     readonly bot     : Client<true>,
     readonly id      : Snowflake,
     readonly user    : User,
-    readonly request : Message,
-    readonly response: Message,
+    readonly request : Message<true>,
+    readonly response: Message<true>,
     readonly timeout : NodeJS.Timeout,
   }
 
@@ -39,7 +39,7 @@ export namespace Session {
     return sessions.get(id) ?? null;
   }
 
-  export function create(request: Message, response: Message): Data {
+  export function create(request: Message<true>, response: Message<true>): Data {
     const id = request.id;
     const data: Data = {
       bot     : request.client,

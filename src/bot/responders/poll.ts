@@ -1,4 +1,4 @@
-import { basename, extname } from 'path';
+import path from 'path';
 import {
   ChannelType,
   DiscordAPIError,
@@ -27,7 +27,7 @@ export namespace Poll {
   interface Query {
     exclusive: boolean,
     author   : Author,
-    imageURL : string | null,
+    imageURL : URL | null,
     mentions : string[],
     question : string | null;
     choices  : Choice[],
@@ -94,10 +94,8 @@ export namespace Poll {
   }
 
   function getAuthorPermissionsFor(
-    request: Message
+    request: Message<true>
   ): Readonly<PermissionsBitField> | null {
-    if (request.channel.type === ChannelType.DM) return null;
-     
     if (request.webhookId)
       return new PermissionsBitField(POSTULATE_WEBHOOK_PERMISSIONS);
     else
@@ -109,7 +107,6 @@ export namespace Poll {
   ): boolean {
     const request = chunk.request;
     const channel = request.channel;
-    if (channel.type === ChannelType.DM) return false;
 
     const myPermissions = channel.permissionsFor(chunk.botID);
     const authorPermissions = getAuthorPermissionsFor(request);
@@ -217,10 +214,10 @@ export namespace Poll {
 
   const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 
-  function parseAttachedImage(chunk: RequestChunk): string | null {
-    return chunk.request.attachments.find(
-      attachment => imageExtensions.includes(extname(attachment.url))
-    )?.url ?? null;
+  function parseAttachedImage(chunk: RequestChunk): URL | null {
+    return chunk.request.attachments
+      .map(attachment => new URL(attachment.url))
+      .find(url => imageExtensions.includes(path.extname(url.pathname))) ?? null;
   }
 
   function parseAuthor(chunk: RequestChunk): Author {
@@ -251,7 +248,7 @@ export namespace Poll {
 
   function respondError(
     chunk: RequestChunk, error: CommandError
-  ): Promise<Message> {
+  ): Promise<Message<true>> {
     const options = { embeds: [error.embed] };
     const channel = chunk.request.channel;
     const response = chunk.response;
@@ -260,8 +257,8 @@ export namespace Poll {
   }
 
   async function respondPoll(
-    chunk: RequestChunk, query: Query, response: Message
-  ): Promise<Message | null> {
+    chunk: RequestChunk, query: Query, response: Message<true>
+  ): Promise<Message<true> | null> {
     const choices = query.choices;
     const selectors: string[] = choices.some(choice => choice.text !== null)
       ? choices.map(choice => choice.emoji) : [];
@@ -278,7 +275,7 @@ export namespace Poll {
           query.question ?? '',
           selectors,
           choices.map(choice => choice.text ?? ''),
-          query.imageURL ? basename(query.imageURL) : null,
+          query.imageURL ? path.basename(query.imageURL.pathname) : null,
           response.channelId,
           response.id,
         )]
@@ -287,7 +284,7 @@ export namespace Poll {
   }
 
   async function attachSelectors(
-    chunk: RequestChunk, query: Query, response: Message
+    chunk: RequestChunk, query: Query, response: Message<true>
   ): Promise<void> {
     try {
       await Promise.all(
@@ -301,17 +298,17 @@ export namespace Poll {
     }
   }
 
-  function respondLoading(chunk: RequestChunk, query: Query): Promise<Message> {
+  function respondLoading(chunk: RequestChunk, query: Query): Promise<Message<true>> {
     return chunk.request.channel.send(
       {
         content: query.mentions.join(' ') || undefined,
         embeds: [Locales[chunk.lang].loadings.poll(query.exclusive)],
-        files: query.imageURL ? [query.imageURL] : [],
+        files: query.imageURL ? [query.imageURL.href] : [],
       }
     );
   }
 
-  function respondHelp(chunk: RequestChunk): Promise<Message> {
+  function respondHelp(chunk: RequestChunk): Promise<Message<true>> {
     const options = { embeds: [Help.getEmbed(chunk.lang)] };
     const channel = chunk.request.channel;
     const response = chunk.response;
@@ -321,14 +318,14 @@ export namespace Poll {
     return response ? response.edit(options) : channel.send(options);
   }
 
-  function clearSelectors(response: Message): void {
+  function clearSelectors(response: Message<true>): void {
     response.reactions.removeAll()
       .catch(() => undefined);
   }
 
   async function respond(
     chunk: RequestChunk, exclusive: boolean
-  ): Promise<Message | null> {
+  ): Promise<Message<true> | null> {
     if (chunk.response) clearSelectors(chunk.response);
     if (!chunk.args.length) return respondHelp(chunk);
 

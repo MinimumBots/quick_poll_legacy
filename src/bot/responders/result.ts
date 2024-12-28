@@ -26,7 +26,7 @@ export namespace Result {
 
   async function respond(
     chunk: RequestChunk, isEnd: boolean
-  ): Promise<Message | null> {
+  ): Promise<Message<true> | null> {
     if (!chunk.args.length) return respondHelp(chunk);
 
     try {
@@ -44,7 +44,7 @@ export namespace Result {
     }
   }
 
-  function respondHelp(chunk: RequestChunk): Promise<Message> {
+  function respondHelp(chunk: RequestChunk): Promise<Message<true>> {
     const options = { embeds: [Help.getEmbed(chunk.lang)] };
     const channel = chunk.request.channel;
     const response = chunk.response;
@@ -56,7 +56,7 @@ export namespace Result {
 
   function respondError(
     chunk: RequestChunk, error: CommandError
-  ): Promise<Message> {
+  ): Promise<Message<true>> {
     const options = { embeds: [error.embed] };
     const channel = chunk.request.channel;
     const response = chunk.response;
@@ -65,12 +65,9 @@ export namespace Result {
   }
 
   function validate(chunk: RequestChunk, isEnd: boolean): boolean {
-    const channel = chunk.request.channel;
-    if (channel.type === ChannelType.DM) return false;
-
     if (!isEnd) return true;
 
-    const permissions = channel.permissionsFor(chunk.botID);
+    const permissions = chunk.request.channel.permissionsFor(chunk.botID);
     if (!permissions) return false;
 
     const missings = permissions.missing('ManageMessages');
@@ -87,7 +84,7 @@ export namespace Result {
   };
 
   interface Query {
-    poll     : Message,
+    poll     : Message<true>,
     isEnd  : boolean,
     author   : Author,
     imageURL : string | null,
@@ -103,7 +100,7 @@ export namespace Result {
     const channel = getChannel(chunk.request, channelID);
     if (!channel) throw new CommandError('notFoundChannel', chunk.lang);
 
-    let poll: Message;
+    let poll: Message<true>;
 
     try {
       poll = await channel.messages.fetch(messageID);
@@ -138,9 +135,8 @@ export namespace Result {
   }
 
   function getChannel(
-    request: Message, channelID: Snowflake | null
+    request: Message<true>, channelID: Snowflake | null
   ): GuildTextBasedChannel | null {
-    if (request.channel.type === ChannelType.DM) return null;
     if (!channelID) return request.channel;
 
     const channel = request.guild?.channels.cache.get(channelID);
@@ -150,7 +146,7 @@ export namespace Result {
       return null;
   }
 
-  function isPoll(chunk: RequestChunk, poll: Message): boolean {
+  function isPoll(chunk: RequestChunk, poll: Message<true>): boolean {
     const embed = poll.embeds[0];
 
     return !!(
@@ -160,7 +156,7 @@ export namespace Result {
     );
   }
 
-  function parseAuthor(chunk: RequestChunk, poll: Message): Author {
+  function parseAuthor(chunk: RequestChunk, poll: Message<true>): Author {
     const author = poll.embeds[0].author;
     if (!author?.iconURL || !author?.name)
       throw new CommandError('missingFormatPoll', chunk.lang);
@@ -168,23 +164,23 @@ export namespace Result {
     return { iconURL: author.iconURL, name: author.name }
   }
 
-  function parseImage(poll: Message): string | null {
+  function parseImage(poll: Message<true>): string | null {
     const attachment = poll.attachments.first();
     return attachment ? attachment.url : null;
   }
 
-  function parseMentions(poll: Message): string[] {
+  function parseMentions(poll: Message<true>): string[] {
     return poll.content.split(' ');
   }
 
-  function parseQuestion(chunk: RequestChunk, poll: Message): string {
+  function parseQuestion(chunk: RequestChunk, poll: Message<true>): string {
     const question = poll.embeds[0].title;
     if (!question) throw new CommandError('missingFormatPoll', chunk.lang);
 
     return question;
   }
 
-  async function parseChoices(poll: Message): Promise<Choice[]> {
+  async function parseChoices(poll: Message<true>): Promise<Choice[]> {
     const reactions = await Promise.all(
       poll.reactions.cache.map(reaction => reaction.fetch())
     );
@@ -211,7 +207,7 @@ export namespace Result {
     ));
   }
 
-  function endPoll(chunk: RequestChunk, poll: Message): void {
+  function endPoll(chunk: RequestChunk, poll: Message<true>): void {
     poll.reactions.removeAll()
       .catch(console.error);
 
@@ -227,7 +223,7 @@ export namespace Result {
 
   function respondResult(
     chunk: RequestChunk, query: Query
-  ): Promise<Message | null> {
+  ): Promise<Message<true> | null> {
     const choices = query.choices;
     const maxRate = choices.reduce(
       (max, { rate }) => max < rate ? rate : max, 0

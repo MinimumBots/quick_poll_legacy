@@ -32,12 +32,12 @@ export namespace Export {
   type Votes = Collection<User, boolean[]>;
 
   interface Query {
-    poll: Message,
+    poll: Message<true>,
     choices: Choice[],
     votes: Votes,
   }
 
-  async function respond(chunk: RequestChunk): Promise<Message | null> {
+  async function respond(chunk: RequestChunk): Promise<Message<true> | null> {
     if (!chunk.args.length) return respondHelp(chunk);
 
     try {
@@ -59,8 +59,6 @@ export namespace Export {
 
   function validatePermissions(chunk: RequestChunk): boolean {
     const channel = chunk.request.channel;
-    if (channel.type === ChannelType.DM) return false;
-
     const permissions = channel.permissionsFor(chunk.botID);
     if (!permissions) return false;
 
@@ -72,7 +70,7 @@ export namespace Export {
     return true;
   }
 
-  function respondHelp(chunk: RequestChunk): Promise<Message> {
+  function respondHelp(chunk: RequestChunk): Promise<Message<true>> {
     Counter.count('help');
 
     return chunk.request.channel.send({ embeds: [Help.getEmbed(chunk.lang)] });
@@ -80,7 +78,7 @@ export namespace Export {
 
   function respondError(
     chunk: RequestChunk, error: CommandError
-  ): Promise<Message> {
+  ): Promise<Message<true>> {
     return chunk.request.channel.send({ embeds: [error.embed] });
   }
 
@@ -91,7 +89,7 @@ export namespace Export {
     const channel = getChannel(chunk.request, channelID);
     if (!channel) throw new CommandError('notFoundChannel', chunk.lang);
 
-    let poll: Message;
+    let poll: Message<true>;
 
     try {
       poll = await channel.messages.fetch(messageID);
@@ -124,9 +122,8 @@ export namespace Export {
   }
 
   function getChannel(
-    request: Message, channelID: Snowflake | null
+    request: Message<true>, channelID: Snowflake | null
   ): GuildTextBasedChannel | null {
-    if (request.channel.type === ChannelType.DM) return null;
     if (!channelID) return request.channel;
 
     const channel = request.guild?.channels.cache.get(channelID);
@@ -136,7 +133,7 @@ export namespace Export {
       return null;
   }
 
-  function isPoll(chunk: RequestChunk, poll: Message): boolean {
+  function isPoll(chunk: RequestChunk, poll: Message<true>): boolean {
     const embed = poll.embeds[0];
 
     return !!(
@@ -146,7 +143,7 @@ export namespace Export {
     );
   }
 
-  async function parseChoices(poll: Message): Promise<Choice[]> {
+  async function parseChoices(poll: Message<true>): Promise<Choice[]> {
     const reactions = await Promise.all(
       poll.reactions.cache.map(reaction => reaction.fetch())
     );
@@ -173,7 +170,7 @@ export namespace Export {
     ));
   }
 
-  async function parseVotes(poll: Message): Promise<Votes> {
+  async function parseVotes(poll: Message<true>): Promise<Votes> {
     const votes: Votes = new Collection;
     const reactions = poll.reactions.cache;
     const reactionsUsers = await Promise.all(
@@ -216,7 +213,7 @@ export namespace Export {
 
   function respondCSV(
     chunk: RequestChunk, query: Query, csv: Buffer
-  ): Promise<Message> {
+  ): Promise<Message<true>> {
     return chunk.request.channel.send(
       { files: [{ attachment: csv, name: `${query.poll.id}.csv` }] }
     );

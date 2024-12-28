@@ -14,10 +14,10 @@ import { Export } from '../responders/export';
 
 export interface RequestChunk {
   botID   : Snowflake,
-  request : Message,
+  request : Message<true>,
   header  : string,
   args    : string[],
-  response: Message | null,
+  response: Message<true> | null,
   lang    : Lang,
 }
 
@@ -31,7 +31,7 @@ export namespace Allocater {
     Export.initialize();
   }
 
-  type Responder = (chunk: RequestChunk) => Promise<Message | null>;
+  type Responder = (chunk: RequestChunk) => Promise<Message<true> | null>;
   type Responders = Collection<Header, Responder>;
   const responders: Responders = new Collection();
 
@@ -45,7 +45,7 @@ export namespace Allocater {
   type CommandArgs = string[];
 
   export function submit(
-    request: Message, header: Header, args: CommandArgs, botID: Snowflake
+    request: Message<true>, header: Header, args: CommandArgs, botID: Snowflake
   ): void {
     const responder = responders.get(header);
     if (responder)
@@ -54,7 +54,7 @@ export namespace Allocater {
   }
 
   async function respond(
-    request: Message, responder: Responder,
+    request: Message<true>, responder: Responder,
     header: string, args: CommandArgs, botID: Snowflake
   ): Promise<void> {
     const session  = Session.get(request.id);
@@ -74,7 +74,7 @@ export namespace Allocater {
     }
   }
 
-  function reject(exception: unknown, request: Message): void {
+  function reject(exception: unknown, request: Message<true>): void {
     if (DEBUG_MODE) console.error(exception);
 
     Rejecter.issue(exception, request)
@@ -83,7 +83,7 @@ export namespace Allocater {
   }
 
   function allocate(
-    request: Message, response: Message | null, session?: Session.Data | null
+    request: Message<true>, response: Message<true> | null, session?: Session.Data | null
   ): void {
     if (!response)
       Utils.removeMessageCache(request);
